@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - HealthGuard America{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3"><i class="bi bi-speedometer2 me-2"></i>Data Dashboard</h1>
+        <p class="text-muted lead">Comprehensive healthcare transparency data for America</p>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.total_files }}</div>
+            <div class="stat-label">Total Files</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.total_size }}</div>
+            <div class="stat-label">Total Data Size</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.hospitals_downloaded }}</div>
+            <div class="stat-label">Hospitals Downloaded</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.coverage }}</div>
+            <div class="stat-label">US Hospital Coverage</div>
+        </div>
+    </div>
+</div>
+
+<!-- Modules Row -->
+<h2 class="mb-3"><i class="bi bi-grid-3x3-gap me-2"></i>Data Modules</h2>
+<div class="row g-4 mb-4">
+    <!-- DrugWatch -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card module-card module-drugwatch h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-danger bg-opacity-10 text-danger me-3">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title mb-0">DrugWatch</h5>
+                        <small class="text-muted">Drug Pricing</small>
+                    </div>
+                </div>
+                <p class="card-text small">{{ inventory.drugwatch.description }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge bg-secondary">{{ inventory.drugwatch.total_files }} files</span>
+                    <span class="text-muted small">{{ inventory.drugwatch.total_size_human }}</span>
+                </div>
+                <a href="/module/drugwatch" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FoodScore -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card module-card module-foodscore h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-success bg-opacity-10 text-success me-3">
+                        <i class="bi bi-basket"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title mb-0">FoodScore</h5>
+                        <small class="text-muted">Food Safety</small>
+                    </div>
+                </div>
+                <p class="card-text small">{{ inventory.foodscore.description }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge bg-secondary">{{ inventory.foodscore.total_files }} files</span>
+                    <span class="text-muted small">{{ inventory.foodscore.total_size_human }}</span>
+                </div>
+                <a href="/module/foodscore" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- RuralAccess -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card module-card module-ruralaccess h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-purple bg-opacity-10 text-purple me-3" style="background-color: rgba(111,66,193,0.1); color: #6f42c1;">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title mb-0">RuralAccess</h5>
+                        <small class="text-muted">Healthcare Deserts</small>
+                    </div>
+                </div>
+                <p class="card-text small">{{ inventory.ruralaccess.description }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge bg-secondary">{{ inventory.ruralaccess.total_files }} files</span>
+                    <span class="text-muted small">{{ inventory.ruralaccess.total_size_human }}</span>
+                </div>
+                <a href="/module/ruralaccess" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PriceVision -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card module-card module-pricevision h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-box bg-warning bg-opacity-10 text-warning me-3">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title mb-0">PriceVision</h5>
+                        <small class="text-muted">Hospital Pricing</small>
+                    </div>
+                </div>
+                <p class="card-text small">{{ inventory.pricevision.description }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge bg-secondary">{{ inventory.pricevision.total_files }} files</span>
+                    <span class="text-muted small">{{ inventory.pricevision.total_size_human }}</span>
+                </div>
+                <a href="/module/pricevision" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-hospital me-2"></i>Hospital Data Access</h5>
+            </div>
+            <div class="card-body">
+                <p>Access machine-readable price transparency files from {{ stats.hospitals_downloaded }} US hospitals.</p>
+                <div class="d-flex gap-2">
+                    <a href="/hospitals" class="btn btn-primary">
+                        <i class="bi bi-list-ul me-1"></i>View All Hospitals
+                    </a>
+                    <a href="/api/hospitals" class="btn btn-outline-secondary">
+                        <i class="bi bi-code-slash me-1"></i>API Access
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-link-45deg me-2"></i>MRF URL Database</h5>
+            </div>
+            <div class="card-body">
+                <p>Browse {{ stats.urls_available }} verified MRF URLs covering {{ (stats.urls_available / stats.cms_hospitals * 100)|round(1) }}% of US hospitals.</p>
+                <div class="d-flex gap-2">
+                    <a href="/urls" class="btn btn-primary">
+                        <i class="bi bi-link me-1"></i>Browse URLs
+                    </a>
+                    <a href="/api/urls" class="btn btn-outline-secondary">
+                        <i class="bi bi-code-slash me-1"></i>API Access
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- API Documentation -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-braces me-2"></i>API Endpoints</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Endpoint</th>
+                                <th>Description</th>
+                                <th>Parameters</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>GET /api/stats</code></td>
+                                <td>Overall statistics</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td><code>GET /api/inventory</code></td>
+                                <td>Full data inventory by module</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td><code>GET /api/hospitals</code></td>
+                                <td>List of hospitals with MRF data</td>
+                                <td><code>?state=TX</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>GET /api/urls</code></td>
+                                <td>MRF URL database</td>
+                                <td><code>?state=CA</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>GET /download/{path}</code></td>
+                                <td>Download data files</td>
+                                <td>File path from inventory</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

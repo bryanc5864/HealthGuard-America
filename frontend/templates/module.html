@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{{ module.name }} - HealthGuard America{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">{{ module.name }}</li>
+    </ol>
+</nav>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-2">
+            {% if module_name == 'drugwatch' %}<i class="bi bi-capsule me-2 text-danger"></i>
+            {% elif module_name == 'foodscore' %}<i class="bi bi-basket me-2 text-success"></i>
+            {% elif module_name == 'ruralaccess' %}<i class="bi bi-geo-alt me-2" style="color: #6f42c1;"></i>
+            {% elif module_name == 'pricevision' %}<i class="bi bi-currency-dollar me-2 text-warning"></i>
+            {% endif %}
+            {{ module.name }}
+        </h1>
+        <p class="text-muted lead">{{ module.description }}</p>
+    </div>
+</div>
+
+<!-- Module Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="stat-value">{{ module.total_files }}</div>
+            <div class="stat-label">Total Files</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="stat-value">{{ module.total_size_human }}</div>
+            <div class="stat-label">Total Size</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="stat-value">
+                {{ module.datasets|selectattr('type', 'equalto', '.csv')|list|length +
+                   module.datasets|selectattr('type', 'equalto', '.json')|list|length }}
+            </div>
+            <div class="stat-label">Data Files</div>
+        </div>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search files...">
+    </div>
+    <div class="col-md-3">
+        <select id="typeFilter" class="form-select">
+            <option value="">All Types</option>
+            <option value=".csv">CSV</option>
+            <option value=".json">JSON</option>
+            <option value=".xlsx">Excel</option>
+            <option value=".txt">Text</option>
+            <option value=".zip">ZIP</option>
+            <option value=".gz">GZIP</option>
+        </select>
+    </div>
+</div>
+
+<!-- Files Table -->
+<div class="table-container">
+    <table class="table table-hover" id="filesTable">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dataset in module.datasets %}
+            <tr data-type="{{ dataset.type }}" data-name="{{ dataset.name|lower }}">
+                <td>
+                    <i class="bi
+                        {% if dataset.type == '.csv' %}bi-file-earmark-spreadsheet text-success
+                        {% elif dataset.type == '.json' %}bi-file-earmark-code text-primary
+                        {% elif dataset.type == '.xlsx' %}bi-file-earmark-excel text-success
+                        {% elif dataset.type == '.zip' or dataset.type == '.gz' %}bi-file-earmark-zip text-warning
+                        {% else %}bi-file-earmark text-secondary
+                        {% endif %} me-2"></i>
+                    {{ dataset.name }}
+                </td>
+                <td>
+                    <span class="badge bg-secondary badge-type">{{ dataset.type }}</span>
+                </td>
+                <td>{{ dataset.size_human }}</td>
+                <td>
+                    <a href="/download/{{ dataset.path }}" class="btn btn-sm btn-outline-primary" title="Download">
+                        <i class="bi bi-download"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if module.datasets|length == 0 %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>No files found in this module.
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('searchInput').addEventListener('input', filterTable);
+document.getElementById('typeFilter').addEventListener('change', filterTable);
+
+function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const type = document.getElementById('typeFilter').value;
+    const rows = document.querySelectorAll('#filesTable tbody tr');
+
+    rows.forEach(row => {
+        const name = row.dataset.name;
+        const fileType = row.dataset.type;
+        const matchesSearch = name.includes(search);
+        const matchesType = !type || fileType === type;
+        row.style.display = matchesSearch && matchesType ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}
