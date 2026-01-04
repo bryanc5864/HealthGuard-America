@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Hospitals - HealthGuard America{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">Hospitals</li>
+    </ol>
+</nav>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-2"><i class="bi bi-hospital me-2"></i>Hospital MRF Data</h1>
+        <p class="text-muted lead">{{ hospitals|length }} hospitals with downloaded price transparency files</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ hospitals|length }}</div>
+            <div class="stat-label">Hospitals</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ states|length }}</div>
+            <div class="stat-label">States</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ ((hospitals|sum(attribute='size')) / 1073741824)|round(1) }} GB</div>
+            <div class="stat-label">Total Size</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ (hospitals|length / 5421 * 100)|round(1) }}%</div>
+            <div class="stat-label">US Coverage</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search hospitals...">
+    </div>
+    <div class="col-md-3">
+        <select id="stateFilter" class="form-select">
+            <option value="">All States</option>
+            {% for state in states %}
+            <option value="{{ state }}">{{ state }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select id="typeFilter" class="form-select">
+            <option value="">All File Types</option>
+            <option value=".csv">CSV</option>
+            <option value=".json">JSON</option>
+            <option value=".xlsx">Excel</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100" onclick="exportTable()">
+            <i class="bi bi-download me-1"></i>Export
+        </button>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-container">
+    <div class="table-responsive">
+        <table class="table table-hover" id="hospitalsTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Hospital Name</th>
+                    <th>State</th>
+                    <th>NPI</th>
+                    <th>File Type</th>
+                    <th>Size</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in hospitals %}
+                <tr data-state="{{ h.state }}" data-type="{{ h.type }}" data-name="{{ h.name|lower }}">
+                    <td>
+                        <strong>{{ h.name }}</strong>
+                        {% if h.city %}<br><small class="text-muted">{{ h.city }}</small>{% endif %}
+                    </td>
+                    <td><span class="badge bg-light text-dark">{{ h.state }}</span></td>
+                    <td><code>{{ h.npi }}</code></td>
+                    <td>
+                        <span class="badge
+                            {% if h.type == '.csv' %}bg-success
+                            {% elif h.type == '.json' %}bg-primary
+                            {% elif h.type == '.xlsx' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            {{ h.type }}
+                        </span>
+                    </td>
+                    <td>{{ h.size_human }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="/download/pricevision/mrfs/{{ h.file }}" class="btn btn-outline-primary" title="Download">
+                                <i class="bi bi-download"></i>
+                            </a>
+                            {% if h.url %}
+                            <a href="{{ h.url }}" target="_blank" class="btn btn-outline-secondary" title="Original URL">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-3 text-muted">
+    <small>Showing <span id="visibleCount">{{ hospitals|length }}</span> of {{ hospitals|length }} hospitals</small>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('searchInput').addEventListener('input', filterTable);
+document.getElementById('stateFilter').addEventListener('change', filterTable);
+document.getElementById('typeFilter').addEventListener('change', filterTable);
+
+function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const state = document.getElementById('stateFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const rows = document.querySelectorAll('#hospitalsTable tbody tr');
+    let visible = 0;
+
+    rows.forEach(row => {
+        const name = row.dataset.name;
+        const rowState = row.dataset.state;
+        const rowType = row.dataset.type;
+
+        const matchesSearch = name.includes(search);
+        const matchesState = !state || rowState === state;
+        const matchesType = !type || rowType === type;
+
+        if (matchesSearch && matchesState && matchesType) {
+            row.style.display = '';
+            visible++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    document.getElementById('visibleCount').textContent = visible;
+}
+
+function exportTable() {
+    const rows = document.querySelectorAll('#hospitalsTable tbody tr:not([style*="display: none"])');
+    let csv = 'Hospital Name,State,NPI,File Type,Size\n';
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const name = cells[0].querySelector('strong').textContent.replace(/,/g, ' ');
+        const state = row.dataset.state;
+        const npi = cells[2].textContent.trim();
+        const type = row.dataset.type;
+        const size = cells[4].textContent.trim();
+        csv += `"${name}",${state},${npi},${type},"${size}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'healthguard_hospitals.csv';
+    a.click();
+}
+</script>
+{% endblock %}

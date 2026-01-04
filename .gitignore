@@ -1,0 +1,42 @@
+# Data files (too large for git)
+data/raw/
+data/processed/
+*.parquet
+*.csv.gz
+
+# Keep data directory structure
+!data/.gitkeep
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.env
+
+# Logs
+*.log
+data_processing.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temp files
+*.tmp
+*.temp
+temp_*.parquet

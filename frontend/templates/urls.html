@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}MRF URLs - HealthGuard America{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">MRF URLs</li>
+    </ol>
+</nav>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-2"><i class="bi bi-link-45deg me-2"></i>MRF URL Database</h1>
+        <p class="text-muted lead">{{ urls|length }} verified machine-readable file URLs</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ urls|length }}</div>
+            <div class="stat-label">Total URLs</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ states|length }}</div>
+            <div class="stat-label">States</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">5,421</div>
+            <div class="stat-label">CMS Hospitals</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ (urls|length / 5421 * 100)|round(1) }}%</div>
+            <div class="stat-label">Coverage</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-md-5">
+        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search hospitals or URLs...">
+    </div>
+    <div class="col-md-3">
+        <select id="stateFilter" class="form-select">
+            <option value="">All States</option>
+            {% for state in states %}
+            <option value="{{ state }}">{{ state }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-primary w-100" onclick="copyAllUrls()">
+            <i class="bi bi-clipboard me-1"></i>Copy URLs
+        </button>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100" onclick="exportTable()">
+            <i class="bi bi-download me-1"></i>Export CSV
+        </button>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-container">
+    <div class="table-responsive">
+        <table class="table table-hover" id="urlsTable">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 30%;">Hospital Name</th>
+                    <th style="width: 8%;">State</th>
+                    <th style="width: 52%;">MRF URL</th>
+                    <th style="width: 10%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in urls %}
+                <tr data-state="{{ u.state }}" data-name="{{ u.hospital_name|lower }}" data-url="{{ u.url|lower }}">
+                    <td>
+                        <strong>{{ u.hospital_name[:50] }}{% if u.hospital_name|length > 50 %}...{% endif %}</strong>
+                        {% if u.npi %}<br><small class="text-muted">NPI: {{ u.npi }}</small>{% endif %}
+                    </td>
+                    <td><span class="badge bg-light text-dark">{{ u.state }}</span></td>
+                    <td>
+                        <div class="text-truncate" style="max-width: 400px;" title="{{ u.url }}">
+                            <a href="{{ u.url }}" target="_blank" class="text-decoration-none small">
+                                {{ u.url[:60] }}{% if u.url|length > 60 %}...{% endif %}
+                            </a>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" onclick="copyUrl('{{ u.url }}')" title="Copy URL">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            <a href="{{ u.url }}" target="_blank" class="btn btn-outline-primary" title="Open URL">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-3 text-muted">
+    <small>Showing <span id="visibleCount">{{ urls|length }}</span> of {{ urls|length }} URLs</small>
+</div>
+
+<!-- Toast for copy notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="copyToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle me-2"></i>Copied to clipboard!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('searchInput').addEventListener('input', filterTable);
+document.getElementById('stateFilter').addEventListener('change', filterTable);
+
+function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const state = document.getElementById('stateFilter').value;
+    const rows = document.querySelectorAll('#urlsTable tbody tr');
+    let visible = 0;
+
+    rows.forEach(row => {
+        const name = row.dataset.name;
+        const url = row.dataset.url;
+        const rowState = row.dataset.state;
+
+        const matchesSearch = name.includes(search) || url.includes(search);
+        const matchesState = !state || rowState === state;
+
+        if (matchesSearch && matchesState) {
+            row.style.display = '';
+            visible++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    document.getElementById('visibleCount').textContent = visible;
+}
+
+function copyUrl(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+        toast.show();
+    });
+}
+
+function copyAllUrls() {
+    const rows = document.querySelectorAll('#urlsTable tbody tr:not([style*="display: none"])');
+    const urls = [];
+    rows.forEach(row => {
+        const link = row.querySelector('a[href]');
+        if (link) urls.push(link.href);
+    });
+
+    navigator.clipboard.writeText(urls.join('\n')).then(() => {
+        const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+        document.querySelector('#copyToast .toast-body').innerHTML =
+            '<i class="bi bi-check-circle me-2"></i>Copied ' + urls.length + ' URLs!';
+        toast.show();
+    });
+}
+
+function exportTable() {
+    const rows = document.querySelectorAll('#urlsTable tbody tr:not([style*="display: none"])');
+    let csv = 'Hospital Name,State,NPI,URL\n';
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const name = cells[0].querySelector('strong').textContent.replace(/,/g, ' ');
+        const state = row.dataset.state;
+        const npiEl = cells[0].querySelector('small');
+        const npi = npiEl ? npiEl.textContent.replace('NPI: ', '') : '';
+        const link = cells[2].querySelector('a');
+        const url = link ? link.href : '';
+        csv += `"${name}",${state},${npi},"${url}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'healthguard_mrf_urls.csv';
+    a.click();
+}
+</script>
+{% endblock %}

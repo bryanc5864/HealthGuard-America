@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "WebSearch",
+      "Bash(taskkill:*)",
+      "Bash(python -c:*)",
+      "Bash(python scripts/process_data.py:*)"
+    ]
+  }
+}
