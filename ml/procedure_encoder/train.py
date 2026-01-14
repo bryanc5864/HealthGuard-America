@@ -4,7 +4,8 @@ Training Script for Procedure Encoder
 Fine-tunes BioClinicalBERT using contrastive learning with
 Multiple Negatives Ranking Loss.
 
-NO SYNTHETIC DATA - Uses only real procedure_training_data.csv
+Data Source: Medicare Provider Utilization (6,405 canonical procedure codes)
+Training uses augmented variations of canonical descriptions.
 
 Usage:
     python -m ml.procedure_encoder.train
@@ -37,6 +38,7 @@ from ml.procedure_encoder.dataset import (
     ProcedureDataset,
     split_data,
     create_canonical_procedures,
+    load_procedure_training_data,
 )
 
 # Configure logging
@@ -72,41 +74,6 @@ class MultipleNegativesRankingLoss(nn.Module):
         return loss
 
 
-def load_procedure_training_data() -> Tuple[List[str], List[str]]:
-    """
-    Load procedure training data from CSV.
-
-    Returns:
-        descriptions: List of procedure names
-        cpt_codes: List of CPT codes
-    """
-    csv_path = Path(__file__).parent.parent.parent / "data" / "raw" / "pricevision" / "procedure_training_data.csv"
-
-    if not csv_path.exists():
-        raise FileNotFoundError(f"Training data not found: {csv_path}")
-
-    logger.info(f"Loading procedure data from {csv_path}")
-
-    df = pd.read_csv(csv_path)
-    logger.info(f"Columns: {df.columns.tolist()}")
-    logger.info(f"Loaded {len(df)} rows")
-
-    # Expected columns: cpt_code, canonical_name, procedure_name
-    descriptions = df["procedure_name"].tolist()
-    cpt_codes = df["cpt_code"].astype(str).tolist()
-
-    # Count unique codes
-    unique_codes = set(cpt_codes)
-    logger.info(f"Unique CPT codes: {len(unique_codes)}")
-
-    # Show distribution
-    code_counts = df["cpt_code"].value_counts()
-    logger.info(f"\nProcedure distribution:")
-    for code, count in code_counts.head(10).items():
-        canonical = df[df["cpt_code"] == code]["canonical_name"].iloc[0]
-        logger.info(f"  {code}: {count} variations ({canonical})")
-
-    return descriptions, cpt_codes
 
 
 def train_epoch(
