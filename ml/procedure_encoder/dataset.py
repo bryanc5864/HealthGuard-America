@@ -170,7 +170,7 @@ class ProcedureDataset(Dataset):
         cpt_codes: List[str],
         tokenizer,
         max_length: int = 128,
-        augmentations_per_code: int = 10,
+        use_augmentation: bool = False,
     ):
         """
         Initialize dataset.
@@ -180,22 +180,34 @@ class ProcedureDataset(Dataset):
             cpt_codes: Corresponding CPT/HCPCS codes
             tokenizer: HuggingFace tokenizer
             max_length: Maximum sequence length
-            augmentations_per_code: Number of augmented versions per code
+            use_augmentation: Whether to augment descriptions (only needed for small datasets)
         """
         self.tokenizer = tokenizer
         self.max_length = max_length
 
-        # Group descriptions by CPT code and augment
+        # Group descriptions by CPT code
         self.code_to_descriptions: Dict[str, List[str]] = defaultdict(list)
 
         for desc, code in zip(descriptions, cpt_codes):
             if desc and code:
-                # Add original and augmented versions
-                augmented = augment_procedure_name(desc, augmentations_per_code)
-                self.code_to_descriptions[code].extend(augmented)
+                self.code_to_descriptions[code].append(desc)
 
-        # All codes are valid now (augmentation ensures multiple descriptions)
-        self.valid_codes = list(self.code_to_descriptions.keys())
+        # Only augment if explicitly requested (for small canonical datasets)
+        if use_augmentation:
+            print("Applying synthetic augmentation to descriptions...")
+            augmented_codes = {}
+            for code, descs in self.code_to_descriptions.items():
+                all_augmented = []
+                for d in descs:
+                    all_augmented.extend(augment_procedure_name(d, 5))
+                augmented_codes[code] = list(set(all_augmented))
+            self.code_to_descriptions = augmented_codes
+
+        # Filter to codes with at least 2 descriptions (needed for positive pairs)
+        self.valid_codes = [
+            code for code, descs in self.code_to_descriptions.items()
+            if len(descs) >= 2
+        ]
 
         # Create list of (code, desc_idx) for sampling
         self.samples = []
@@ -286,31 +298,33 @@ def load_medicare_procedures(data_path: Optional[Path] = None) -> Tuple[List[str
 
 def load_procedure_training_data() -> Tuple[List[str], List[str]]:
     """
-    Load procedure training data - tries Medicare first, falls back to curated CSV.
+    Load procedure training data from hospital MRF natural variations.
+
+    Source: Hospital price transparency files with real procedure name variations.
+    ~360K variations across ~11K CPT codes.
 
     Returns:
         descriptions: List of procedure descriptions
         cpt_codes: Corresponding CPT/HCPCS codes
     """
-    # Try Medicare processed data first
+    # Primary: Hospital MRF natural variations (best for contrastive learning)
+    variations_path = Path(__file__).parent.parent.parent / "data" / "processed" / "pricevision" / "procedure_variations_training.csv"
+
+    if variations_path.exists():
+        df = pd.read_csv(variations_path)
+        print(f"Loaded {len(df):,} natural procedure variations from hospital MRF data")
+        print(f"Unique CPT codes: {df['cpt_code'].nunique():,}")
+        print(f"Average variations per code: {len(df) / df['cpt_code'].nunique():.1f}")
+        return df['description'].tolist(), df['cpt_code'].astype(str).tolist()
+
+    # Fallback: Medicare canonical descriptions (requires augmentation)
     medicare_path = Path(__file__).parent.parent.parent / "data" / "processed" / "pricevision" / "medicare_procedures.csv"
 
     if medicare_path.exists():
+        print("WARNING: Using Medicare canonical data - requires synthetic augmentation")
         return load_medicare_procedures(medicare_path)
 
-    # Fall back to curated training data
-    csv_path = Path(__file__).parent.parent.parent / "data" / "raw" / "pricevision" / "procedure_training_data.csv"
-
-    if not csv_path.exists():
-        raise FileNotFoundError(f"No procedure training data found")
-
-    print(f"Loading from curated data: {csv_path}")
-    df = pd.read_csv(csv_path)
-
-    descriptions = df["procedure_name"].tolist()
-    cpt_codes = df["cpt_code"].astype(str).tolist()
-
-    return descriptions, cpt_codes
+    raise FileNotFoundError("No procedure training data found. Run data extraction first.")
 
 
 def create_canonical_procedures() -> Tuple[List[str], List[str]]:
