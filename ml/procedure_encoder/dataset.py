@@ -1,10 +1,13 @@
 """
 Dataset for Procedure Encoder Training
 
-Loads Medicare Provider Utilization data and creates training pairs
-for contrastive learning:
-- Positive pairs: Procedures with same CPT code
-- Negative pairs: Procedures with different CPT codes (in-batch negatives)
+Uses Medicare Provider Utilization data (canonical descriptions) and creates
+augmented variations for contrastive learning.
+
+Training pairs:
+- Anchor: Canonical or augmented description
+- Positive: Different augmentation of same CPT code
+- Negatives: In-batch descriptions with different CPT codes
 """
 
 import pandas as pd
@@ -14,7 +17,144 @@ from typing import List, Tuple, Dict, Optional
 from torch.utils.data import Dataset, DataLoader
 from collections import defaultdict
 import random
+import re
 
+
+# ============================================================================
+# PROCEDURE NAME AUGMENTATION
+# ============================================================================
+
+# Common medical abbreviations and their expansions
+ABBREVIATIONS = {
+    "without": ["w/o", "wo", "w/out"],
+    "with": ["w/", "w"],
+    "and": ["&", "+"],
+    "magnetic resonance imaging": ["mri", "mr imaging", "mr"],
+    "magnetic resonance": ["mr"],
+    "computed tomography": ["ct", "cat scan", "cat"],
+    "x-ray": ["xray", "x ray", "radiograph"],
+    "electrocardiogram": ["ecg", "ekg"],
+    "electrocardiography": ["ecg", "ekg"],
+    "ultrasound": ["us", "sono", "sonogram"],
+    "examination": ["exam"],
+    "evaluation": ["eval"],
+    "procedure": ["proc"],
+    "management": ["mgmt", "mgt"],
+    "established": ["estab", "est"],
+    "subsequent": ["subseq", "subs"],
+    "initial": ["init"],
+    "complete": ["comp", "compl"],
+    "comprehensive": ["comp", "compr"],
+    "moderate": ["mod"],
+    "hospital": ["hosp"],
+    "emergency": ["emerg", "er", "ed"],
+    "department": ["dept"],
+    "intravenous": ["iv"],
+    "injection": ["inj"],
+    "infusion": ["inf"],
+    "bilateral": ["bilat", "bil"],
+    "unilateral": ["unilat", "uni"],
+    "anterior": ["ant"],
+    "posterior": ["post"],
+    "diagnostic": ["dx", "diag"],
+    "therapeutic": ["tx", "ther"],
+    "minutes": ["min", "mins"],
+    "level": ["lvl", "lv"],
+    "contrast": ["con", "contr"],
+    "contrast material": ["dye", "contrast"],
+}
+
+# Reverse mapping for expansion
+EXPANSIONS = {}
+for full, abbrevs in ABBREVIATIONS.items():
+    for abbrev in abbrevs:
+        if abbrev not in EXPANSIONS:
+            EXPANSIONS[abbrev] = full
+
+
+def augment_procedure_name(description: str, num_augmentations: int = 5) -> List[str]:
+    """
+    Create augmented variations of a procedure description.
+
+    Augmentation strategies:
+    1. Case variations (upper, lower, title)
+    2. Abbreviation substitution
+    3. Word order variations
+    4. Remove optional words
+    5. Add/remove punctuation
+
+    Args:
+        description: Original procedure description
+        num_augmentations: Number of variations to create
+
+    Returns:
+        List of augmented descriptions (including original)
+    """
+    variations = [description]  # Always include original
+    desc_lower = description.lower()
+
+    # Strategy 1: Case variations
+    variations.append(description.upper())
+    variations.append(description.lower())
+    variations.append(description.title())
+
+    # Strategy 2: Abbreviation substitution
+    for full, abbrevs in ABBREVIATIONS.items():
+        if full in desc_lower:
+            for abbrev in abbrevs[:2]:  # Use top 2 abbreviations
+                new_desc = re.sub(re.escape(full), abbrev, desc_lower, flags=re.IGNORECASE)
+                variations.append(new_desc)
+                variations.append(new_desc.upper())
+
+    # Strategy 3: Expand abbreviations
+    words = desc_lower.split()
+    for i, word in enumerate(words):
+        clean_word = re.sub(r'[^\w]', '', word)
+        if clean_word in EXPANSIONS:
+            new_words = words.copy()
+            new_words[i] = EXPANSIONS[clean_word]
+            variations.append(' '.join(new_words))
+
+    # Strategy 4: Remove common filler words
+    filler_patterns = [
+        r'\bper day\b', r'\bper visit\b', r'\beach\b',
+        r'\busing a microscope\b', r'\bif using time\b',
+        r', at least \d+ minutes', r', \d+ minutes or less',
+        r', more than \d+ minutes',
+    ]
+    for pattern in filler_patterns:
+        new_desc = re.sub(pattern, '', description, flags=re.IGNORECASE).strip()
+        if new_desc != description and len(new_desc) > 10:
+            variations.append(new_desc)
+
+    # Strategy 5: Punctuation variations
+    variations.append(description.replace(',', ''))
+    variations.append(description.replace('-', ' '))
+    variations.append(description.replace('/', ' '))
+
+    # Strategy 6: Add common prefixes/suffixes
+    prefixes = ['', 'CPT ', 'HCPCS ', 'Proc: ']
+    for prefix in prefixes[1:]:
+        variations.append(prefix + description)
+
+    # Remove duplicates and empty strings, limit to num_augmentations
+    unique_variations = []
+    seen = set()
+    for v in variations:
+        v_clean = v.strip()
+        v_lower = v_clean.lower()
+        if v_clean and v_lower not in seen and len(v_clean) > 5:
+            seen.add(v_lower)
+            unique_variations.append(v_clean)
+            if len(unique_variations) >= num_augmentations:
+                break
+
+    return unique_variations
+
+
+# ============================================================================
+# DATASET
+# ============================================================================
 
 class ProcedureDataset(Dataset):
     """
@@ -30,6 +170,7 @@ class ProcedureDataset(Dataset):
         cpt_codes: List[str],
         tokenizer,
         max_length: int = 128,
+        augmentations_per_code: int = 10,
     ):
         """
         Initialize dataset.
@@ -39,23 +180,24 @@ class ProcedureDataset(Dataset):
             cpt_codes: Corresponding CPT/HCPCS codes
             tokenizer: HuggingFace tokenizer
             max_length: Maximum sequence length
+            augmentations_per_code: Number of augmented versions per code
         """
         self.tokenizer = tokenizer
         self.max_length = max_length
 
-        # Group descriptions by CPT code
+        # Group descriptions by CPT code and augment
         self.code_to_descriptions: Dict[str, List[str]] = defaultdict(list)
+
         for desc, code in zip(descriptions, cpt_codes):
-            if desc and code:  # Skip empty
-                self.code_to_descriptions[code].append(desc)
+            if desc and code:
+                # Add original and augmented versions
+                augmented = augment_procedure_name(desc, augmentations_per_code)
+                self.code_to_descriptions[code].extend(augmented)
 
-        # Filter to codes with multiple descriptions (needed for positive pairs)
-        self.valid_codes = [
-            code for code, descs in self.code_to_descriptions.items()
-            if len(descs) >= 2
-        ]
+        # All codes are valid now (augmentation ensures multiple descriptions)
+        self.valid_codes = list(self.code_to_descriptions.keys())
 
-        # Create list of (anchor_idx, code) for sampling
+        # Create list of (code, desc_idx) for sampling
         self.samples = []
         for code in self.valid_codes:
             descs = self.code_to_descriptions[code]
@@ -63,6 +205,7 @@ class ProcedureDataset(Dataset):
                 self.samples.append((code, i))
 
         print(f"Created dataset with {len(self.samples)} samples from {len(self.valid_codes)} CPT codes")
+        print(f"Average variations per code: {len(self.samples) / len(self.valid_codes):.1f}")
 
     def __len__(self) -> int:
         return len(self.samples)
@@ -70,8 +213,6 @@ class ProcedureDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict:
         """
         Get a training sample (anchor, positive pair).
-
-        Returns tokenized anchor and positive texts.
         """
         code, anchor_idx = self.samples[idx]
         descriptions = self.code_to_descriptions[code]
@@ -81,8 +222,10 @@ class ProcedureDataset(Dataset):
 
         # Get positive (different description, same code)
         positive_idx = anchor_idx
-        while positive_idx == anchor_idx:
+        attempts = 0
+        while positive_idx == anchor_idx and attempts < 10:
             positive_idx = random.randint(0, len(descriptions) - 1)
+            attempts += 1
         positive_text = descriptions[positive_idx]
 
         # Tokenize
@@ -110,72 +253,79 @@ class ProcedureDataset(Dataset):
         }
 
 
-def load_medicare_provider_data(data_path: Path) -> Tuple[List[str], List[str]]:
+# ============================================================================
+# DATA LOADING
+# ============================================================================
+
+def load_medicare_procedures(data_path: Optional[Path] = None) -> Tuple[List[str], List[str]]:
     """
-    Load procedure descriptions and CPT codes from Medicare Provider Utilization data.
+    Load procedure descriptions from processed Medicare data.
 
     Args:
-        data_path: Path to provider utilization directory
+        data_path: Path to medicare_procedures.csv
 
     Returns:
         descriptions: List of procedure descriptions
         cpt_codes: Corresponding CPT/HCPCS codes
     """
-    # Find the CSV file
-    csv_files = list(data_path.rglob("*.csv"))
-    if not csv_files:
-        raise FileNotFoundError(f"No CSV files found in {data_path}")
+    if data_path is None:
+        data_path = Path(__file__).parent.parent.parent / "data" / "processed" / "pricevision" / "medicare_procedures.csv"
 
-    # Use the largest file (main data file)
-    main_file = max(csv_files, key=lambda x: x.stat().st_size)
-    print(f"Loading data from: {main_file.name}")
+    if not data_path.exists():
+        raise FileNotFoundError(f"Medicare procedures file not found: {data_path}")
 
-    # Read in chunks due to large file size
-    descriptions = []
-    cpt_codes = []
+    df = pd.read_csv(data_path)
 
-    # Column names from Medicare Provider Utilization file
-    desc_col = "HCPCS_Desc"
-    code_col = "HCPCS_Cd"
+    descriptions = df['canonical_description'].tolist()
+    cpt_codes = df['hcpcs_code'].astype(str).tolist()
 
-    chunk_size = 100000
-    for chunk in pd.read_csv(main_file, chunksize=chunk_size, dtype=str, low_memory=False):
-        if desc_col in chunk.columns and code_col in chunk.columns:
-            # Get unique description-code pairs
-            subset = chunk[[code_col, desc_col]].drop_duplicates()
-            descriptions.extend(subset[desc_col].tolist())
-            cpt_codes.extend(subset[code_col].tolist())
+    print(f"Loaded {len(descriptions)} canonical procedures from Medicare data")
 
-    # Deduplicate
-    seen = set()
-    unique_descriptions = []
-    unique_codes = []
+    return descriptions, cpt_codes
 
-    for desc, code in zip(descriptions, cpt_codes):
-        if pd.notna(desc) and pd.notna(code):
-            key = (desc.strip().upper(), code.strip())
-            if key not in seen:
-                seen.add(key)
-                unique_descriptions.append(desc.strip())
-                unique_codes.append(code.strip())
 
-    print(f"Loaded {len(unique_descriptions)} unique procedure descriptions")
-    print(f"Covering {len(set(unique_codes))} unique CPT/HCPCS codes")
+def load_procedure_training_data() -> Tuple[List[str], List[str]]:
+    """
+    Load procedure training data - tries Medicare first, falls back to curated CSV.
 
-    return unique_descriptions, unique_codes
+    Returns:
+        descriptions: List of procedure descriptions
+        cpt_codes: Corresponding CPT/HCPCS codes
+    """
+    # Try Medicare processed data first
+    medicare_path = Path(__file__).parent.parent.parent / "data" / "processed" / "pricevision" / "medicare_procedures.csv"
+
+    if medicare_path.exists():
+        return load_medicare_procedures(medicare_path)
+
+    # Fall back to curated training data
+    csv_path = Path(__file__).parent.parent.parent / "data" / "raw" / "pricevision" / "procedure_training_data.csv"
+
+    if not csv_path.exists():
+        raise FileNotFoundError(f"No procedure training data found")
+
+    print(f"Loading from curated data: {csv_path}")
+    df = pd.read_csv(csv_path)
+
+    descriptions = df["procedure_name"].tolist()
+    cpt_codes = df["cpt_code"].astype(str).tolist()
+
+    return descriptions, cpt_codes
 
 
 def create_canonical_procedures() -> Tuple[List[str], List[str]]:
     """
-    Create canonical procedure descriptions for common CPT codes.
-
-    These are used as reference embeddings for matching.
-
-    Returns:
-        descriptions: Canonical procedure names
-        cpt_codes: CPT codes
+    Get canonical procedure descriptions for embedding index.
+    Uses Medicare data if available.
     """
-    # Common procedures with canonical descriptions
+    # Try Medicare processed data
+    medicare_path = Path(__file__).parent.parent.parent / "data" / "processed" / "pricevision" / "medicare_procedures.csv"
+
+    if medicare_path.exists():
+        df = pd.read_csv(medicare_path)
+        return df['canonical_description'].tolist(), df['hcpcs_code'].astype(str).tolist()
+
+    # Fall back to hardcoded canonical procedures
     canonical = [
         ("70551", "MRI Brain without Contrast"),
         ("70552", "MRI Brain with Contrast"),
@@ -219,9 +369,7 @@ def split_data(
     seed: int = 42,
 ) -> Tuple[Tuple[List[str], List[str]], Tuple[List[str], List[str]]]:
     """
-    Split data into train and validation sets.
-
-    Splits by CPT code to ensure no data leakage.
+    Split data into train and validation sets by CPT code.
     """
     random.seed(seed)
 

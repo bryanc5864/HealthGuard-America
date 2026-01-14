@@ -129,19 +129,23 @@ def load_openfoodfacts_data(
 
 
 def load_processed_data(
-    data_path: Path,
+    data_path: Path = None,
     sample_size: Optional[int] = None,
 ) -> Tuple[List[str], List[int]]:
     """
     Load from processed parquet file.
 
     Args:
-        data_path: Path to processed parquet
+        data_path: Path to processed parquet (defaults to nova_training_full.parquet)
         sample_size: Optional limit
 
     Returns:
         ingredients, labels
     """
+    # Default to full training data
+    if data_path is None:
+        data_path = Path(__file__).parent.parent.parent / "data" / "processed" / "foodscore" / "nova_training_full.parquet"
+
     print(f"Loading processed data from {data_path}...")
 
     df = pd.read_parquet(data_path)
@@ -156,7 +160,14 @@ def load_processed_data(
     if sample_size and len(df) > sample_size:
         df = df.sample(n=sample_size, random_state=42)
 
-    print(f"Loaded {len(df)} products")
+    print(f"Loaded {len(df):,} products")
+
+    # Print class distribution
+    label_counts = df["label"].value_counts().sort_index()
+    print("\nClass distribution:")
+    for i, count in label_counts.items():
+        pct = count / len(df) * 100
+        print(f"  NOVA {i+1}: {count:,} ({pct:.1f}%)")
 
     return df["ingredients_text"].tolist(), df["label"].tolist()
 
