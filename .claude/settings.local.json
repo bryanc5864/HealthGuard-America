@@ -6,7 +6,10 @@
       "WebSearch",
       "Bash(taskkill:*)",
       "Bash(python -c:*)",
-      "Bash(python scripts/process_data.py:*)"
+      "Bash(python scripts/process_data.py:*)",
+      "WebFetch(domain:data.hrsa.gov)",
+      "WebFetch(domain:www.data.va.gov)",
+      "WebFetch(domain:datadashboard.fda.gov)"
     ]
   }
 }
