@@ -5,6 +5,7 @@ Provides singleton services for:
 - ProcedureMatchingService: Match hospital procedures to canonical names
 - NovaClassificationService: Classify foods into NOVA 1-4 groups
 - AdditiveRiskService: Score food additives for health risks
+- ChronicCareMLService: Chronic disease risk prediction and intervention prioritization
 
 Usage:
     from ml.services import get_ml_services
@@ -19,6 +20,9 @@ Usage:
 
     # Additive risk
     risk = services.additive.score_additive("Red 40")
+
+    # ChronicCare analysis
+    analysis = services.chroniccare.analyze_county({"diabetes_prevalence": 12.5, ...})
 """
 
 from typing import Optional
@@ -34,11 +38,12 @@ class MLServices:
     procedure: Optional["ProcedureMatchingService"] = None
     nova: Optional["NovaClassificationService"] = None
     additive: Optional["AdditiveRiskService"] = None
+    chroniccare: Optional["ChronicCareMLService"] = None
 
     @property
     def all_loaded(self) -> bool:
         """Check if all services are loaded."""
-        return all([self.procedure, self.nova, self.additive])
+        return all([self.procedure, self.nova, self.additive, self.chroniccare])
 
     @property
     def loaded_services(self) -> list:
@@ -50,6 +55,8 @@ class MLServices:
             services.append("nova")
         if self.additive:
             services.append("additive")
+        if self.chroniccare:
+            services.append("chroniccare")
         return services
 
 
@@ -61,6 +68,7 @@ def get_ml_services(
     load_procedure: bool = True,
     load_nova: bool = True,
     load_additive: bool = True,
+    load_chroniccare: bool = True,
     device: str = "cpu",
 ) -> MLServices:
     """
@@ -72,6 +80,7 @@ def get_ml_services(
         load_procedure: Whether to load procedure matching service
         load_nova: Whether to load NOVA classification service
         load_additive: Whether to load additive risk service
+        load_chroniccare: Whether to load ChronicCare ML service
         device: Device for inference (cpu/cuda)
 
     Returns:
@@ -108,6 +117,16 @@ def get_ml_services(
             logger.info("Loaded Additive Risk Service")
         except Exception as e:
             logger.warning(f"Could not load Additive Risk Service: {e}")
+
+    # Load ChronicCare service
+    if load_chroniccare and _ml_services.chroniccare is None:
+        try:
+            from ml.chroniccare.inference import ChronicCareMLService
+            _ml_services.chroniccare = ChronicCareMLService(device=device)
+            _ml_services.chroniccare.load()
+            logger.info("Loaded ChronicCare ML Service")
+        except Exception as e:
+            logger.warning(f"Could not load ChronicCare ML Service: {e}")
 
     return _ml_services
 
@@ -259,3 +278,73 @@ def analyze_product(ingredients_text: str) -> dict:
         }
 
     return result
+
+
+# ChronicCare convenience functions
+
+def predict_chronic_risk(features: dict) -> dict:
+    """
+    Predict chronic disease risks for a county.
+
+    Args:
+        features: Dict of county features (food environment, socioeconomic, etc.)
+
+    Returns:
+        Dict with predicted disease prevalences
+    """
+    services = get_ml_services(
+        load_procedure=False, load_nova=False, load_additive=False
+    )
+
+    if services.chroniccare is None or not services.chroniccare.risk_service.is_loaded:
+        return {
+            "error": "ChronicCare risk prediction service not available",
+        }
+
+    return services.chroniccare.risk_service.predict(features)
+
+
+def get_intervention_priority(features: dict) -> dict:
+    """
+    Get MAHA intervention priority for a county.
+
+    Args:
+        features: Dict of county features
+
+    Returns:
+        Dict with priority tier, confidence, and MAHA index
+    """
+    services = get_ml_services(
+        load_procedure=False, load_nova=False, load_additive=False
+    )
+
+    if services.chroniccare is None or not services.chroniccare.prioritization_service.is_loaded:
+        return {
+            "error": "ChronicCare prioritization service not available",
+        }
+
+    return services.chroniccare.prioritization_service.prioritize(features)
+
+
+def analyze_county(features: dict) -> dict:
+    """
+    Full ChronicCare analysis for a county.
+
+    Combines risk prediction and intervention prioritization.
+
+    Args:
+        features: Dict of county features
+
+    Returns:
+        Dict with risk predictions and priority assessment
+    """
+    services = get_ml_services(
+        load_procedure=False, load_nova=False, load_additive=False
+    )
+
+    if services.chroniccare is None:
+        return {
+            "error": "ChronicCare service not available",
+        }
+
+    return services.chroniccare.analyze_county(features)

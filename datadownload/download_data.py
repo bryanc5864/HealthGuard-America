@@ -2,11 +2,12 @@
 """
 HealthGuard America - Data Download Script
 
-This script downloads raw data from public sources for all four modules:
+This script downloads raw data from public sources for all five modules:
 - PriceVision: Hospital price transparency MRF files
 - DrugWatch: Drug pricing data (US, Australia, Canada)
 - FoodScore: OpenFoodFacts product database
 - RuralAccess: HRSA healthcare shortage data
+- ChronicCare: CDC PLACES, CMS Medicare, USDA Food Environment Atlas
 
 Usage:
     python download_data.py --all              # Download all data
@@ -14,6 +15,7 @@ Usage:
     python download_data.py --drugwatch        # Download only DrugWatch
     python download_data.py --foodscore        # Download only FoodScore
     python download_data.py --ruralaccess      # Download only RuralAccess
+    python download_data.py --chroniccare      # Download only ChronicCare
 
 Requirements:
     pip install requests tqdm pandas
@@ -44,7 +46,7 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 DATA_RAW = PROJECT_ROOT / "data" / "raw"
 
 # Ensure directories exist
-for module in ["pricevision", "drugwatch", "foodscore", "ruralaccess"]:
+for module in ["pricevision", "drugwatch", "foodscore", "ruralaccess", "chroniccare"]:
     (DATA_RAW / module).mkdir(parents=True, exist_ok=True)
 
 
@@ -339,6 +341,74 @@ def download_pricevision():
     print("\nPriceVision setup complete!")
 
 
+def download_chroniccare():
+    """Download ChronicCare data from CDC, County Health Rankings, and USDA."""
+    print("\n" + "=" * 60)
+    print("DOWNLOADING CHRONICCARE DATA")
+    print("=" * 60)
+
+    chroniccare_dir = DATA_RAW / "chroniccare"
+    chroniccare_dir.mkdir(parents=True, exist_ok=True)
+
+    # CDC PLACES Data
+    print("\n[1/3] CDC PLACES County Data...")
+    cdc_url = "https://data.cdc.gov/api/views/swc5-untb/rows.csv?accessType=DOWNLOAD"
+    cdc_path = chroniccare_dir / "cdc_places_county_2023.csv"
+
+    if not cdc_path.exists():
+        print("  Downloading from CDC...")
+        if not download_file(cdc_url, cdc_path, "CDC PLACES"):
+            print("  Note: CDC PLACES data available at:")
+            print("  https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb")
+    else:
+        print(f"  Already exists: {cdc_path.name}")
+
+    # County Health Rankings (alternative to CMS which requires JS portal)
+    print("\n[2/3] County Health Rankings Data...")
+    chr_url = "https://www.countyhealthrankings.org/sites/default/files/media/document/analytic_data2024.csv"
+    chr_path = chroniccare_dir / "county_health_rankings_2024.csv"
+
+    if not chr_path.exists():
+        print("  Downloading from County Health Rankings...")
+        if not download_file(chr_url, chr_path, "County Health Rankings"):
+            # Try 2023
+            chr_url_2023 = "https://www.countyhealthrankings.org/sites/default/files/media/document/analytic_data2023.csv"
+            chr_path_2023 = chroniccare_dir / "county_health_rankings_2023.csv"
+            if not download_file(chr_url_2023, chr_path_2023, "County Health Rankings 2023"):
+                print("  Note: County Health Rankings data available at:")
+                print("  https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation")
+    else:
+        print(f"  Already exists: {chr_path.name}")
+
+    # USDA Food Environment Atlas
+    print("\n[3/3] USDA Food Environment Atlas...")
+    usda_url = "https://www.ers.usda.gov/media/5569/food-environment-atlas-data-download.xlsx"
+    usda_path = chroniccare_dir / "food_environment_atlas.xlsx"
+
+    if not usda_path.exists():
+        print("  Downloading from USDA...")
+        if not download_file(usda_url, usda_path, "USDA Food Atlas"):
+            # Try CSV zip
+            usda_csv_url = "https://www.ers.usda.gov/media/5570/food-environment-atlas-csv-files.zip"
+            usda_zip_path = chroniccare_dir / "food_environment_atlas.zip"
+            if download_file(usda_csv_url, usda_zip_path, "USDA Food Atlas CSV"):
+                print("  Extracting zip...")
+                try:
+                    with zipfile.ZipFile(usda_zip_path, 'r') as zf:
+                        zf.extractall(chroniccare_dir)
+                except Exception as e:
+                    print(f"  Error extracting: {e}")
+            else:
+                print("  Note: USDA Food Atlas available at:")
+                print("  https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/")
+    else:
+        print(f"  Already exists: {usda_path.name}")
+
+    print("\nChronicCare download complete!")
+    print("\nTo process this data, run:")
+    print("  python scripts/chroniccare_pipeline.py --process")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='HealthGuard America - Data Download Script',
@@ -355,11 +425,12 @@ Examples:
     parser.add_argument('--drugwatch', action='store_true', help='Download DrugWatch data')
     parser.add_argument('--foodscore', action='store_true', help='Download FoodScore data')
     parser.add_argument('--ruralaccess', action='store_true', help='Download RuralAccess data')
+    parser.add_argument('--chroniccare', action='store_true', help='Download ChronicCare data')
 
     args = parser.parse_args()
 
     # Default to all if no specific option
-    if not any([args.all, args.pricevision, args.drugwatch, args.foodscore, args.ruralaccess]):
+    if not any([args.all, args.pricevision, args.drugwatch, args.foodscore, args.ruralaccess, args.chroniccare]):
         args.all = True
 
     print("=" * 60)
@@ -381,11 +452,15 @@ Examples:
     if args.all or args.pricevision:
         download_pricevision()
 
+    if args.all or args.chroniccare:
+        download_chroniccare()
+
     print("\n" + "=" * 60)
     print("DOWNLOAD COMPLETE")
     print("=" * 60)
-    print(f"\nNext step: Run the data processing script:")
-    print(f"  python scripts/process_data.py --all")
+    print(f"\nNext steps:")
+    print(f"  python scripts/process_data.py --all           # Process all modules")
+    print(f"  python scripts/chroniccare_pipeline.py --all   # Download + process ChronicCare")
 
 
 if __name__ == "__main__":
