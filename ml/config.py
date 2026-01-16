@@ -21,10 +21,10 @@ WEIGHTS_DIR.mkdir(parents=True, exist_ok=True)
 
 @dataclass
 class ProcedureEncoderConfig:
-    """Configuration for BioClinicalBERT procedure encoder."""
+    """Configuration for medical procedure encoder."""
 
-    # Model
-    base_model: str = "emilyalsentzer/Bio_ClinicalBERT"
+    # Model - using sentence-transformers MiniLM (fast, 90MB, good quality)
+    base_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_dim: int = 768
     max_length: int = 128
 
@@ -117,6 +117,45 @@ class AdditiveRiskScorerConfig:
     output_model: Path = WEIGHTS_DIR / "additive_scorer.pt"
 
     # Device - use GPU if available
+    device: str = "cuda"
+
+
+@dataclass
+class AdditiveRiskScorerPlusConfig:
+    """Configuration for FoodScore+ enhanced additive risk scorer."""
+
+    # Text encoder
+    text_model: str = "distilbert-base-uncased"
+    text_dim: int = 128
+    max_length: int = 32
+
+    # Categorical encoder
+    cat_dim: int = 64
+    num_types: int = 6
+    num_fda: int = 2
+    num_eu: int = 3
+
+    # Fusion network
+    hidden_dim: int = 256
+    num_residual_blocks: int = 3
+    dropout: float = 0.2
+
+    # Uncertainty estimation
+    predict_uncertainty: bool = True
+
+    # Training
+    batch_size: int = 16
+    learning_rate: float = 2e-5
+    weight_decay: float = 0.01
+    epochs: int = 50
+    early_stopping_patience: int = 10
+    log_interval: int = 5
+
+    # Data paths
+    training_data: Path = DATA_PROCESSED / "foodscore" / "additive_lookup.parquet"
+    output_model: Path = WEIGHTS_DIR / "additive_scorer_plus.pt"
+
+    # Device
     device: str = "cuda"
 
 
@@ -253,5 +292,6 @@ class InterventionPrioritizerConfig:
 PROCEDURE_ENCODER_CONFIG = ProcedureEncoderConfig()
 NOVA_CLASSIFIER_CONFIG = NovaClassifierConfig()
 ADDITIVE_SCORER_CONFIG = AdditiveRiskScorerConfig()
+ADDITIVE_SCORER_PLUS_CONFIG = AdditiveRiskScorerPlusConfig()
 CHRONIC_RISK_CONFIG = ChronicRiskPredictorConfig()
 INTERVENTION_PRIORITIZER_CONFIG = InterventionPrioritizerConfig()

@@ -28,6 +28,7 @@ echo.
 
 if "%1"=="" goto menu
 if "%1"=="1" goto additive
+if "%1"=="1+" goto additive_plus
 if "%1"=="2" goto nova
 if "%1"=="3" goto procedure
 if "%1"=="all" goto all
@@ -38,20 +39,24 @@ echo ==============================================
 echo Select model to train:
 echo ==============================================
 echo.
-echo   1. Additive Risk Scorer  (~5 min)
+echo   1. Additive Risk Scorer  (~5 min, 42 additives)
+echo   1+ FoodScore+ Scorer     (~15 min, 344 additives, DistilBERT)
 echo   2. NOVA Classifier       (~30-60 min)
 echo   3. Procedure Encoder     (~2-5 hrs)
 echo.
 echo   all - Train all models in sequence
 echo.
-echo Usage: train_models.bat [1^|2^|3^|all]
+echo Usage: train_models.bat [1^|1+^|2^|3^|all]
 echo.
 echo ==============================================
 echo Manual Commands:
 echo ==============================================
 echo.
-echo # 1. Additive Scorer:
-echo python -m ml.additive_scorer.train --epochs 200 --batch-size 8
+echo # 1. Additive Scorer (original, 42 additives):
+echo python -m ml.additive_scorer.train --epochs 200 --batch-size 16
+echo.
+echo # 1+. FoodScore+ (enhanced, 344 additives):
+echo python -m ml.additive_scorer_plus.train --epochs 50 --batch-size 16
 echo.
 echo # 2. NOVA Classifier:
 echo python -m ml.nova_classifier.train --epochs 20 --batch-size 64
@@ -66,9 +71,16 @@ goto end
 
 :additive
 echo ==============================================
-echo Training: Additive Risk Scorer
+echo Training: Additive Risk Scorer (Original)
 echo ==============================================
-python -m ml.additive_scorer.train --epochs 200 --batch-size 8
+python -m ml.additive_scorer.train --epochs 200 --batch-size 16
+goto end
+
+:additive_plus
+echo ==============================================
+echo Training: FoodScore+ Enhanced Scorer
+echo ==============================================
+python -m ml.additive_scorer_plus.train --epochs 50 --batch-size 16
 goto end
 
 :nova

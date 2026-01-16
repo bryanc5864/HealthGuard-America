@@ -1,7 +1,8 @@
 """
 Dataset for Additive Risk Scorer Training
 
-Loads REAL food additive data from additive_risks.csv
+Loads REAL food additive data from processed parquet (125 additives)
+or raw CSV (42 additives) as fallback.
 NO SYNTHETIC DATA.
 """
 
@@ -14,6 +15,7 @@ import torch
 
 
 # Default paths relative to project root
+DEFAULT_PARQUET_PATH = Path(__file__).parent.parent.parent / "data" / "processed" / "foodscore" / "additive_lookup.parquet"
 DEFAULT_CSV_PATH = Path(__file__).parent.parent.parent / "data" / "raw" / "foodscore" / "additive_risks.csv"
 
 
@@ -50,35 +52,43 @@ class AdditiveDataset(Dataset):
         }
 
 
-def load_additive_csv(data_path: Path = None) -> pd.DataFrame:
+def load_additive_data(data_path: Path = None, use_parquet: bool = True) -> pd.DataFrame:
     """
-    Load additive data from the raw CSV file.
+    Load additive data from processed parquet (preferred) or raw CSV.
 
-    CSV Schema:
+    Parquet has 125 additives, CSV has 42.
+
+    Schema:
         - name: Additive name
-        - aliases: Pipe-separated alternative names
         - type: Category (dye, sweetener, preservative, emulsifier, flavor, other)
         - risk_score: Pre-computed risk score (0-100)
         - fda_status: FDA approval status (approved, banned)
         - eu_status: EU status (approved, restricted, banned)
         - is_artificial: Boolean
-        - is_petroleum_based: Boolean
-        - notes: Health concern details
+        - is_petroleum_based: Boolean (CSV only)
 
     Args:
-        data_path: Path to CSV file
+        data_path: Path to data file (auto-detect format)
+        use_parquet: Prefer parquet file if available
 
     Returns:
         DataFrame with additive data
     """
-    data_path = data_path or DEFAULT_CSV_PATH
-
-    if not data_path.exists():
-        raise FileNotFoundError(f"Additive data file not found: {data_path}")
-
-    print(f"Loading additive data from {data_path}...")
-
-    df = pd.read_csv(data_path)
+    # Try parquet first (125 additives)
+    if use_parquet and data_path is None and DEFAULT_PARQUET_PATH is not None and DEFAULT_PARQUET_PATH.exists():
+        data_path = DEFAULT_PARQUET_PATH
+        print(f"Loading additive data from {data_path}...")
+        df = pd.read_parquet(data_path)
+    elif data_path is not None and str(data_path).endswith('.parquet'):
+        print(f"Loading additive data from {data_path}...")
+        df = pd.read_parquet(data_path)
+    else:
+        # Fallback to CSV
+        data_path = data_path or DEFAULT_CSV_PATH
+        if not data_path.exists():
+            raise FileNotFoundError(f"Additive data file not found: {data_path}")
+        print(f"Loading additive data from {data_path}...")
+        df = pd.read_csv(data_path)
 
     print(f"Loaded {len(df)} additives")
     print(f"Columns: {df.columns.tolist()}")
@@ -93,6 +103,12 @@ def load_additive_csv(data_path: Path = None) -> pd.DataFrame:
         print(f"  {additive_type}: {count}")
 
     return df
+
+
+# Alias for backward compatibility
+def load_additive_csv(data_path: Path = None) -> pd.DataFrame:
+    """Backward compatible alias - now loads parquet by default."""
+    return load_additive_data(data_path, use_parquet=True)
 
 
 def prepare_features(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, Dict]:
@@ -138,13 +154,23 @@ def prepare_features(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, Dict]:
         features_list.append((df["eu_status"].str.lower() == cat).astype(float).values)
         feature_names.append(col_name)
 
-    # Binary features
+    # Binary features - handle missing columns gracefully
     if "is_artificial" in df.columns:
-        features_list.append(df["is_artificial"].astype(float).values)
+        features_list.append(df["is_artificial"].fillna(False).astype(float).values)
+        feature_names.append("is_artificial")
+    else:
+        # Default: assume artificial if type is dye/sweetener/preservative
+        is_artificial = df["type"].str.lower().isin(["dye", "sweetener", "preservative"]).astype(float).values
+        features_list.append(is_artificial)
         feature_names.append("is_artificial")
 
     if "is_petroleum_based" in df.columns:
         features_list.append(df["is_petroleum_based"].fillna(False).astype(float).values)
+        feature_names.append("is_petroleum_based")
+    else:
+        # Default: assume petroleum-based if type is dye
+        is_petroleum = (df["type"].str.lower() == "dye").astype(float).values
+        features_list.append(is_petroleum)
         feature_names.append("is_petroleum_based")
 
     # Stack features
