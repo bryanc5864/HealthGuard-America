@@ -142,14 +142,16 @@ def prepare_prioritization_data(
     X = df[available_features].values.astype(np.float32)
     fips = df["fips"].values if "fips" in df.columns else None
 
-    # Generate labels using MAHA index
+    # Generate labels using MAHA index with percentile-based thresholds
     calculator = MAHAIndexCalculator(weights="balanced")
     disease = df.get("chronic_disease_burden_score", pd.Series([50]*len(df))).fillna(50).values
     food = df.get("food_environment_score", pd.Series([50]*len(df))).fillna(50).values
     healthcare = np.clip((df.get("pcp_rate", pd.Series([50]*len(df))).fillna(50).values - 20) / 80 * 100, 0, 100)
     economic = df.get("child_poverty_rate", pd.Series([20]*len(df))).fillna(20).values
 
-    _, labels = calculator.calculate_batch(disease, food, healthcare, economic)
+    # Use fit_thresholds=True to calibrate thresholds from the data
+    _, labels = calculator.calculate_batch(disease, food, healthcare, economic, fit_thresholds=True)
+    logger.info(f"MAHA thresholds: {calculator.thresholds}")
 
     # Filter valid
     valid_mask = np.isnan(X).sum(axis=1) < (len(available_features) * 0.5)

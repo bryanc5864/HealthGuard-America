@@ -1,0 +1,34 @@
+{
+  "type_categories": [
+    "dye",
+    "sweetener",
+    "preservative",
+    "emulsifier",
+    "flavor",
+    "other"
+  ],
+  "fda_categories": [
+    "approved",
+    "banned"
+  ],
+  "eu_categories": [
+    "approved",
+    "restricted",
+    "banned"
+  ],
+  "feature_names": [
+    "type_dye",
+    "type_sweetener",
+    "type_preservative",
+    "type_emulsifier",
+    "type_flavor",
+    "type_other",
+    "fda_approved",
+    "fda_banned",
+    "eu_approved",
+    "eu_restricted",
+    "eu_banned",
+    "is_artificial",
+    "is_petroleum_based"
+  ]
+}

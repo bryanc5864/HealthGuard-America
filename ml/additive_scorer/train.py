@@ -208,12 +208,8 @@ def main(
     # Setup device (GPU)
     device, gpu_info = setup_device(device or config.device)
 
-    # Load data
-    csv_path = Path(__file__).parent.parent.parent / "data" / "raw" / "foodscore" / "additive_risks.csv"
-    if not csv_path.exists():
-        raise FileNotFoundError(f"Required: {csv_path}")
-
-    df = load_additive_csv(csv_path)
+    # Load data - prefer parquet (125 additives) over CSV (42)
+    df = load_additive_csv()  # Now auto-loads parquet if available
     features, labels, feature_info = prepare_features(df)
 
     # Split

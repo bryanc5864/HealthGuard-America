@@ -485,7 +485,7 @@ class MAHAIndexCalculator:
         - Healthcare access (low = more urgent)
         - Economic vulnerability (high = more urgent)
 
-    Score range: 0-100 (higher = more urgent intervention needed)
+    Uses percentile-based thresholds for balanced tier distribution.
     """
 
     # Weight presets for different intervention focuses
@@ -516,12 +516,21 @@ class MAHAIndexCalculator:
         },
     }
 
-    def __init__(self, weights: str = "balanced"):
+    # Default percentile-based thresholds (calibrated from actual data)
+    # These create: ~5% critical, ~15% high, ~30% medium, ~50% low
+    DEFAULT_THRESHOLDS = {
+        "critical": 46.0,  # top 5% (percentile 95)
+        "high": 43.0,      # top 20% (percentile 80)
+        "medium": 39.0,    # top 50% (percentile 50)
+    }
+
+    def __init__(self, weights: str = "balanced", thresholds: Dict[str, float] = None):
         """
         Initialize the calculator.
 
         Args:
             weights: Weight preset name or dict of custom weights
+            thresholds: Custom thresholds dict with keys: critical, high, medium
         """
         if isinstance(weights, str):
             if weights not in self.WEIGHT_PRESETS:
@@ -529,6 +538,23 @@ class MAHAIndexCalculator:
             self.weights = self.WEIGHT_PRESETS[weights]
         else:
             self.weights = weights
+
+        self.thresholds = thresholds or self.DEFAULT_THRESHOLDS.copy()
+
+    def fit_thresholds(self, maha_indices: np.ndarray,
+                       percentiles: Tuple[float, float, float] = (95, 80, 50)) -> None:
+        """
+        Fit thresholds from data using percentiles.
+
+        Args:
+            maha_indices: Array of MAHA index values
+            percentiles: Tuple of (critical, high, medium) percentiles
+        """
+        self.thresholds = {
+            "critical": float(np.percentile(maha_indices, percentiles[0])),
+            "high": float(np.percentile(maha_indices, percentiles[1])),
+            "medium": float(np.percentile(maha_indices, percentiles[2])),
+        }
 
     def calculate(
         self,
@@ -560,12 +586,12 @@ class MAHAIndexCalculator:
 
         maha_index = sum(components.values())
 
-        # Determine priority tier
-        if maha_index >= 75:
+        # Determine priority tier using percentile-based thresholds
+        if maha_index >= self.thresholds["critical"]:
             tier = "critical"
-        elif maha_index >= 55:
+        elif maha_index >= self.thresholds["high"]:
             tier = "high"
-        elif maha_index >= 35:
+        elif maha_index >= self.thresholds["medium"]:
             tier = "medium"
         else:
             tier = "low"
@@ -575,6 +601,7 @@ class MAHAIndexCalculator:
             "priority_tier": tier,
             "components": {k: round(v, 2) for k, v in components.items()},
             "weights_used": self.weights,
+            "thresholds_used": self.thresholds,
         }
 
     def calculate_batch(
@@ -583,9 +610,17 @@ class MAHAIndexCalculator:
         food_environment: np.ndarray,
         healthcare_access: np.ndarray,
         economic_vulnerability: np.ndarray,
+        fit_thresholds: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Calculate MAHA index for multiple counties.
+
+        Args:
+            disease_burden: Array of disease burden scores
+            food_environment: Array of food environment scores
+            healthcare_access: Array of healthcare access scores
+            economic_vulnerability: Array of economic vulnerability scores
+            fit_thresholds: If True, fit thresholds from this data
 
         Returns:
             Tuple of (maha_indices, priority_tiers)
@@ -598,12 +633,15 @@ class MAHAIndexCalculator:
 
         maha_indices = db_score + fe_score + ha_score + ev_score
 
-        # Assign tiers
-        tiers = np.zeros(len(maha_indices), dtype=int)
-        tiers[maha_indices >= 75] = 0  # critical
-        tiers[(maha_indices >= 55) & (maha_indices < 75)] = 1  # high
-        tiers[(maha_indices >= 35) & (maha_indices < 55)] = 2  # medium
-        tiers[maha_indices < 35] = 3  # low
+        # Optionally fit thresholds from this data
+        if fit_thresholds:
+            self.fit_thresholds(maha_indices)
+
+        # Assign tiers using percentile-based thresholds
+        tiers = np.full(len(maha_indices), 3, dtype=int)  # default to low
+        tiers[maha_indices >= self.thresholds["medium"]] = 2   # medium
+        tiers[maha_indices >= self.thresholds["high"]] = 1     # high
+        tiers[maha_indices >= self.thresholds["critical"]] = 0 # critical
 
         return maha_indices, tiers
 
@@ -639,7 +677,7 @@ def compute_feature_importance(
         target_pred.sum().backward(retain_graph=True)
 
         # Gradient magnitude as importance
-        grads = X.grad.abs().mean(dim=0).detach().numpy()
+        grads = X.grad.abs().mean(dim=0).detach().cpu().numpy()
 
         # Normalize to sum to 1
         grads = grads / (grads.sum() + 1e-8)

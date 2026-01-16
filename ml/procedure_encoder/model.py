@@ -43,8 +43,8 @@ class ProcedureEncoder(nn.Module):
         self.pooling = pooling
         self.normalize = normalize
 
-        # Load pre-trained BioClinicalBERT
-        self.encoder = AutoModel.from_pretrained(model_name)
+        # Load pre-trained medical BERT with safetensors
+        self.encoder = AutoModel.from_pretrained(model_name, use_safetensors=True)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         # Embedding dimension (768 for BERT-base)

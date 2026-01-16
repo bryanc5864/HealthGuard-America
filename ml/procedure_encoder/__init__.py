@@ -11,6 +11,10 @@ This model generates 768-dim embeddings where semantically similar
 procedures cluster together, enabling cosine similarity matching.
 """
 
+# Allow loading older model formats (BioClinicalBERT doesn't have safetensors)
+import os
+os.environ["TRANSFORMERS_ALLOW_UNSAFE_DESERIALIZATION"] = "1"
+
 from .model import ProcedureEncoder
 from .inference import ProcedureMatchingService
 

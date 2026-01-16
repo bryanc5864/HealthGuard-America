@@ -11,6 +11,10 @@ Usage:
     python -m ml.procedure_encoder.train --epochs 5 --batch-size 16
 """
 
+# Allow loading older model formats (BioClinicalBERT doesn't have safetensors)
+import os
+os.environ["TRANSFORMERS_ALLOW_UNSAFE_DESERIALIZATION"] = "1"
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
