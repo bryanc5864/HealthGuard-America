@@ -138,7 +138,7 @@
                                 {% for p in high_risk[:5] %}
                                 <tr>
                                     <td><strong>{{ p.get('product_name', 'Unknown')[:40] }}{% if p.get('product_name', '')|length > 40 %}...{% endif %}</strong></td>
-                                    <td>{{ p.get('brands', 'N/A')[:20] }}</td>
+                                    <td>{{ (p.get('brands') or 'N/A')[:20] }}</td>
                                     <td>
                                         {% set nova_group = p.get('nova_group', p.get('nova_groups_tags', 0)) %}
                                         {% if nova_group == 4 or 'en:4' in nova_group|string %}

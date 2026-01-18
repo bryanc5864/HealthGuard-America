@@ -54,7 +54,7 @@
                                 {% endif %}
                             </div>
                             <div class="mb-2">
-                                <small class="text-muted">{{ p.get('brands', 'Unknown brand')[:30] }}</small>
+                                <small class="text-muted">{{ (p.get('brands') or 'Unknown brand')[:30] }}</small>
                             </div>
                             {% set score = p.get('maha_score', 50) | int %}
                             <div class="d-flex align-items-center mb-3">

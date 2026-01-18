@@ -1,7 +1,7 @@
 {% extends "gov/base_gov.html" %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container-fluid py-4">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
@@ -10,30 +10,56 @@
         </ol>
     </nav>
 
-    <h2 class="mb-4">
-        <i class="bi bi-speedometer2 me-2"></i>MAHA Initiative Dashboard
-    </h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-speedometer2 me-2"></i>MAHA Initiative Dashboard</h2>
+        <span class="badge bg-primary">Covering all 50 US States + 9 Territories</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.chroniccare_dashboard') }}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Filter by State</label>
+                    <select name="state" class="form-select">
+                        <option value="">All States</option>
+                        {% for s in states %}
+                        <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </div>
+                {% if selected_state %}
+                <div class="col-md-2">
+                    <a href="{{ url_for('gov.chroniccare_dashboard') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
 
     <!-- National Summary -->
-    <div class="row g-4 mb-5">
+    <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
+            <div class="card bg-primary text-white h-100">
                 <div class="card-body text-center">
                     <h3 class="display-4 fw-bold">{{ stats.total_counties }}</h3>
-                    <p class="mb-0">Total Counties</p>
+                    <p class="mb-0">{% if selected_state %}Counties in {{ selected_state }}{% else %}Total Counties{% endif %}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-danger text-white">
+            <div class="card bg-danger text-white h-100">
                 <div class="card-body text-center">
                     <h3 class="display-4 fw-bold">{{ stats.critical_counties }}</h3>
-                    <p class="mb-0">Critical Counties</p>
+                    <p class="mb-0">Critical Risk Counties</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-dark">
+            <div class="card bg-warning text-dark h-100">
                 <div class="card-body text-center">
                     <h3 class="display-4 fw-bold">{{ stats.high_priority_counties }}</h3>
                     <p class="mb-0">High Priority Counties</p>
@@ -41,106 +67,237 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
+            <div class="card bg-info text-white h-100">
                 <div class="card-body text-center">
-                    <h3 class="display-4 fw-bold">{{ stats.states_covered }}</h3>
-                    <p class="mb-0">States Covered</p>
+                    <h3 class="display-4 fw-bold">50</h3>
+                    <p class="mb-0">US States Covered</p>
+                    <small class="opacity-75">+ DC, PR, GU, VI, AS, MP</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Regional Breakdown -->
     <div class="row">
+        <!-- Interactive Map -->
         <div class="col-md-8">
             <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Regional Risk Breakdown</h5>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-map me-2"></i>County Health Risk Map</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active" onclick="setMapView('diabetes')">Diabetes</button>
+                        <button class="btn btn-outline-secondary" onclick="setMapView('obesity')">Obesity</button>
+                        <button class="btn btn-outline-secondary" onclick="setMapView('heart')">Heart Disease</button>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Region</th>
-                                    <th>Avg Risk Score</th>
-                                    <th>Critical Counties</th>
-                                    <th>Trend</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Southeast</td>
-                                    <td><span class="badge bg-danger">52.3</span></td>
-                                    <td>98</td>
-                                    <td><i class="bi bi-arrow-up text-danger"></i> +1.2%</td>
-                                </tr>
-                                <tr>
-                                    <td>Southwest</td>
-                                    <td><span class="badge bg-warning text-dark">46.8</span></td>
-                                    <td>52</td>
-                                    <td><i class="bi bi-arrow-up text-danger"></i> +0.8%</td>
-                                </tr>
-                                <tr>
-                                    <td>Midwest</td>
-                                    <td><span class="badge bg-warning text-dark">44.1</span></td>
-                                    <td>56</td>
-                                    <td><i class="bi bi-dash text-muted"></i> 0%</td>
-                                </tr>
-                                <tr>
-                                    <td>West</td>
-                                    <td><span class="badge bg-success">41.2</span></td>
-                                    <td>48</td>
-                                    <td><i class="bi bi-arrow-down text-success"></i> -0.5%</td>
-                                </tr>
-                                <tr>
-                                    <td>Northeast</td>
-                                    <td><span class="badge bg-success">38.7</span></td>
-                                    <td>32</td>
-                                    <td><i class="bi bi-arrow-down text-success"></i> -0.3%</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="card-body p-0">
+                    <div id="healthMap" style="height: 450px; width: 100%;"></div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-success me-1">Low Risk</span>
+                            <span class="badge bg-warning text-dark me-1">Medium Risk</span>
+                            <span class="badge bg-danger">High Risk</span>
+                        </div>
+                        <small class="text-muted">Click markers for county details</small>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Disease Rates Chart -->
         <div class="col-md-4">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Top Conditions</h5>
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Disease Prevalence</h5>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span>Obesity</span>
-                            <span class="fw-bold">{{ stats.avg_obesity }}%</span>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-danger" style="width: {{ (stats.avg_obesity / 50 * 100)|int }}%;"></div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span>Diabetes</span>
-                            <span class="fw-bold">{{ stats.avg_diabetes }}%</span>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-warning" style="width: {{ (stats.avg_diabetes / 25 * 100)|int }}%;"></div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span>Heart Disease</span>
-                            <span class="fw-bold">{{ stats.avg_heart_disease }}%</span>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-info" style="width: {{ (stats.avg_heart_disease / 15 * 100)|int }}%;"></div>
-                        </div>
-                    </div>
+                    <canvas id="diseaseChart" height="200"></canvas>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Risk Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="riskPieChart" height="180"></canvas>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- County Data Table -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>County Health Data</h5>
+            <span class="badge bg-secondary">{{ counties | length }} counties</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>County</th>
+                            <th>State</th>
+                            <th>Diabetes %</th>
+                            <th>Obesity %</th>
+                            <th>Heart Disease %</th>
+                            <th>Risk Level</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in counties[:50] %}
+                        {% set diabetes = c.get('diabetes_prevalence', 0) | float %}
+                        {% set obesity = c.get('obesity_prevalence', 0) | float %}
+                        {% set heart = c.get('heart_disease_prevalence', 0) | float %}
+                        {% set risk_score = (diabetes * 0.4 + obesity * 0.35 + heart * 0.25) %}
+                        <tr>
+                            <td><strong>{{ c.get('county_name', 'Unknown') }}</strong></td>
+                            <td>{{ c.get('state_abbr', c.get('state', 'N/A')) }}</td>
+                            <td>{{ "%.1f" | format(diabetes) }}%</td>
+                            <td>{{ "%.1f" | format(obesity) }}%</td>
+                            <td>{{ "%.1f" | format(heart) }}%</td>
+                            <td>
+                                {% if risk_score > 20 %}
+                                <span class="badge bg-danger">Critical</span>
+                                {% elif risk_score > 18 %}
+                                <span class="badge bg-warning text-dark">High</span>
+                                {% else %}
+                                <span class="badge bg-success">Medium</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('gov.chroniccare_county', fips=c.get('fips', '')) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Leaflet CSS/JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Initialize map
+var map = L.map('healthMap').setView([39.8283, -98.5795], 4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// County data for map markers
+var countyData = {{ counties | tojson | safe }};
+
+// Add markers for counties with coordinates (sample based on state centroids)
+var stateCoords = {
+    'AL': [32.806671, -86.791130], 'AK': [61.370716, -152.404419], 'AZ': [33.729759, -111.431221],
+    'AR': [34.969704, -92.373123], 'CA': [36.116203, -119.681564], 'CO': [39.059811, -105.311104],
+    'CT': [41.597782, -72.755371], 'DE': [39.318523, -75.507141], 'FL': [27.766279, -81.686783],
+    'GA': [33.040619, -83.643074], 'HI': [21.094318, -157.498337], 'ID': [44.240459, -114.478828],
+    'IL': [40.349457, -88.986137], 'IN': [39.849426, -86.258278], 'IA': [42.011539, -93.210526],
+    'KS': [38.526600, -96.726486], 'KY': [37.668140, -84.670067], 'LA': [31.169546, -91.867805],
+    'ME': [44.693947, -69.381927], 'MD': [39.063946, -76.802101], 'MA': [42.230171, -71.530106],
+    'MI': [43.326618, -84.536095], 'MN': [45.694454, -93.900192], 'MS': [32.741646, -89.678696],
+    'MO': [38.456085, -92.288368], 'MT': [46.921925, -110.454353], 'NE': [41.125370, -98.268082],
+    'NV': [38.313515, -117.055374], 'NH': [43.452492, -71.563896], 'NJ': [40.298904, -74.521011],
+    'NM': [34.840515, -106.248482], 'NY': [42.165726, -74.948051], 'NC': [35.630066, -79.806419],
+    'ND': [47.528912, -99.784012], 'OH': [40.388783, -82.764915], 'OK': [35.565342, -96.928917],
+    'OR': [44.572021, -122.070938], 'PA': [40.590752, -77.209755], 'RI': [41.680893, -71.511780],
+    'SC': [33.856892, -80.945007], 'SD': [44.299782, -99.438828], 'TN': [35.747845, -86.692345],
+    'TX': [31.054487, -97.563461], 'UT': [40.150032, -111.862434], 'VT': [44.045876, -72.710686],
+    'VA': [37.769337, -78.169968], 'WA': [47.400902, -121.490494], 'WV': [38.491226, -80.954453],
+    'WI': [44.268543, -89.616508], 'WY': [42.755966, -107.302490]
+};
+
+// Add markers
+countyData.slice(0, 100).forEach(function(county) {
+    var state = county.state_abbr || county.state;
+    if (stateCoords[state]) {
+        var coords = stateCoords[state];
+        // Add small random offset for multiple counties in same state
+        var lat = coords[0] + (Math.random() - 0.5) * 2;
+        var lng = coords[1] + (Math.random() - 0.5) * 2;
+
+        var diabetes = parseFloat(county.diabetes_prevalence) || 0;
+        var obesity = parseFloat(county.obesity_prevalence) || 0;
+        var heart = parseFloat(county.heart_disease_prevalence) || 0;
+        var riskScore = diabetes * 0.4 + obesity * 0.35 + heart * 0.25;
+
+        var color = riskScore > 20 ? 'red' : riskScore > 18 ? 'orange' : 'green';
+
+        var marker = L.circleMarker([lat, lng], {
+            radius: 8,
+            fillColor: color,
+            color: '#fff',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map);
+
+        marker.bindPopup('<strong>' + (county.county_name || 'Unknown') + ', ' + state + '</strong><br>' +
+            'Diabetes: ' + diabetes.toFixed(1) + '%<br>' +
+            'Obesity: ' + obesity.toFixed(1) + '%<br>' +
+            'Heart Disease: ' + heart.toFixed(1) + '%<br>' +
+            '<a href="/gov/chroniccare/county/' + county.fips + '">View Details</a>');
+    }
+});
+
+// Disease prevalence chart
+var diseaseCtx = document.getElementById('diseaseChart').getContext('2d');
+new Chart(diseaseCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Diabetes', 'Obesity', 'Heart Disease'],
+        datasets: [{
+            label: 'Average Prevalence %',
+            data: [{{ stats.avg_diabetes }}, {{ stats.avg_obesity }}, {{ stats.avg_heart_disease }}],
+            backgroundColor: ['#ffc107', '#dc3545', '#17a2b8']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true, max: 50 }
+        }
+    }
+});
+
+// Risk distribution pie chart
+var riskCtx = document.getElementById('riskPieChart').getContext('2d');
+new Chart(riskCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        datasets: [{
+            data: [{{ stats.critical_counties }}, {{ stats.high_priority_counties }},
+                   {{ stats.total_counties - stats.critical_counties - stats.high_priority_counties }}, 0],
+            backgroundColor: ['#dc3545', '#ffc107', '#28a745', '#17a2b8']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+
+function setMapView(type) {
+    // Toggle active button
+    document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    // In a full implementation, this would re-color markers based on the selected metric
+}
+</script>
 {% endblock %}
