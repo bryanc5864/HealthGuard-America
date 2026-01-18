@@ -23,39 +23,45 @@
     <!-- Priority Filters -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-3">
-                    <label class="form-label">Priority Level</label>
-                    <select class="form-select">
-                        <option value="">All Priorities</option>
-                        <option value="1">Critical (Priority 1)</option>
-                        <option value="2">High (Priority 2)</option>
-                        <option value="3">Medium (Priority 3)</option>
-                        <option value="4">Low (Priority 4)</option>
-                    </select>
+            <form action="{{ url_for('gov.chroniccare_interventions') }}" method="get">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Priority Level</label>
+                        <select class="form-select" name="priority">
+                            <option value="">All Priorities</option>
+                            <option value="Critical" {% if selected_priority == 'Critical' %}selected{% endif %}>Critical</option>
+                            <option value="High" {% if selected_priority == 'High' %}selected{% endif %}>High</option>
+                            <option value="Medium" {% if selected_priority == 'Medium' %}selected{% endif %}>Medium</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">State</label>
+                        <select class="form-select" name="state">
+                            <option value="">All States (50 + Territories)</option>
+                            {% for state in states %}
+                            <option value="{{ state }}" {% if selected_state == state %}selected{% endif %}>{{ state }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Show</label>
+                        <select class="form-select" name="limit">
+                            <option value="50" {% if selected_limit == 50 %}selected{% endif %}>50 results</option>
+                            <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 results</option>
+                            <option value="200" {% if selected_limit == 200 %}selected{% endif %}>200 results</option>
+                            <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 results</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </div>
+                    {% if selected_state or selected_priority or selected_limit != 50 %}
+                    <div class="col-md-2">
+                        <a href="{{ url_for('gov.chroniccare_interventions') }}" class="btn btn-outline-secondary w-100">Clear</a>
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">Condition</label>
-                    <select class="form-select">
-                        <option value="">All Conditions</option>
-                        <option value="diabetes">Diabetes</option>
-                        <option value="obesity">Obesity</option>
-                        <option value="heart">Heart Disease</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">State</label>
-                    <select class="form-select">
-                        <option value="">All States</option>
-                        {% for state in states %}
-                        <option value="{{ state }}">{{ state }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-primary w-100">Apply Filters</button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 

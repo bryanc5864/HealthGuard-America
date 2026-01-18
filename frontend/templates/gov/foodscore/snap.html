@@ -128,16 +128,16 @@
                     <tbody>
                         {% for p in high_risk[:15] %}
                         <tr>
-                            <td>{{ p.get('product_name', 'Unknown')[:40] }}{% if p.get('product_name', '')|length > 40 %}...{% endif %}</td>
-                            <td><small>{{ p.get('brands', 'N/A')[:20] }}</small></td>
+                            <td>{{ (p.get('product_name') or 'Unknown')[:40] }}{% if (p.get('product_name') or '')|length > 40 %}...{% endif %}</td>
+                            <td><small>{{ (p.get('brands') or 'N/A')[:20] }}</small></td>
                             <td>
-                                {% set nova = p.get('nova_group', '0') | string %}
+                                {% set nova = (p.get('nova_group') or '0') | string %}
                                 {% if nova == '4' or 'en:4' in nova %}
                                 <span class="badge bg-danger">4</span>
                                 {% elif nova == '3' or 'en:3' in nova %}
                                 <span class="badge bg-warning text-dark">3</span>
                                 {% else %}
-                                <span class="badge bg-secondary">{{ nova[:1] }}</span>
+                                <span class="badge bg-secondary">{{ (nova or '?')[:1] }}</span>
                                 {% endif %}
                             </td>
                             <td>

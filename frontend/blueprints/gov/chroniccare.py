@@ -87,11 +87,30 @@ def chroniccare_correlations():
 @gov_required
 def chroniccare_interventions():
     """ML-prioritized intervention targets"""
-    priorities = ChronicCareService.get_intervention_priorities(limit=50)
+    state = request.args.get('state', '')
+    priority = request.args.get('priority', '')
+    limit = int(request.args.get('limit', 50))
+
+    # Get all priorities first (up to the limit requested)
+    priorities = ChronicCareService.get_intervention_priorities(limit=limit * 2)
+
+    # Filter by state if specified
+    if state:
+        priorities = [p for p in priorities if p.get('state') == state]
+
+    # Filter by priority level if specified
+    if priority:
+        priorities = [p for p in priorities if p.get('priority') == priority]
+
+    # Apply limit
+    priorities = priorities[:limit]
+
     stats = ChronicCareService.get_stats()
     states = ChronicCareService.get_states()
     return render_template('gov/chroniccare/interventions.html',
-                          priorities=priorities, stats=stats, states=states)
+                          priorities=priorities, stats=stats, states=states,
+                          selected_state=state, selected_priority=priority,
+                          selected_limit=limit)
 
 
 @gov_bp.route('/chroniccare/county/<fips>')
