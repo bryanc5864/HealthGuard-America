@@ -10,22 +10,68 @@
         </ol>
     </nav>
 
-    <h2 class="mb-4"><i class="bi bi-search me-2"></i>Search Drugs</h2>
+    <h2 class="mb-4">
+        <i class="bi bi-search me-2"></i>
+        {% if query %}Search Results for "{{ query }}"{% else %}Search Drugs{% endif %}
+    </h2>
 
     <div class="card mb-4">
         <div class="card-body">
             <form action="{{ url_for('gov.drugwatch_search') }}" method="get">
                 <div class="input-group">
-                    <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Search drugs...">
+                    <input type="text" class="form-control" name="q" value="{{ query }}"
+                           placeholder="Search by brand or generic name...">
                     <button class="btn btn-danger" type="submit">Search</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Search results will be loaded from the backend API.
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Results ({{ drugs | length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if drugs %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Brand Name</th>
+                            <th>Generic Name</th>
+                            <th>Manufacturer</th>
+                            <th>Total Spending (2023)</th>
+                            <th>Avg Price/Unit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in drugs %}
+                        <tr>
+                            <td><strong>{{ d.get('brand_name', 'N/A') }}</strong></td>
+                            <td>{{ d.get('generic_name', 'N/A') }}</td>
+                            <td>{{ d.get('manufacturer', 'N/A') }}</td>
+                            <td>${{ "{:,.0f}".format(d.get('total_spending_2023', 0) | float) }}</td>
+                            <td>${{ "%.2f" | format(d.get('avg_price_per_unit_2023', 0) | float) }}</td>
+                            <td>
+                                <a href="{{ url_for('gov.drugwatch_drug', drug_id=d.get('brand_name', '')) }}"
+                                   class="btn btn-sm btn-outline-danger">Compare</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">
+                {% if query %}
+                No drugs found for "{{ query }}". Try a different search term.
+                {% else %}
+                Enter a drug name to search.
+                {% endif %}
+            </p>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

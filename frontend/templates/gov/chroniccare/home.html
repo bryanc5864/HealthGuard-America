@@ -59,8 +59,28 @@
 
     <!-- ML Model Status -->
     <div class="card mb-5">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Models Status</h5>
+            <button class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#modelHelp">
+                <i class="bi bi-question-circle me-1"></i>What do these metrics mean?
+            </button>
+        </div>
+        <div class="collapse mb-3" id="modelHelp">
+            <div class="card-body bg-light border-bottom">
+                <h6><i class="bi bi-info-circle me-2"></i>Understanding Model Performance Metrics</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="small mb-2"><strong>MAE (Mean Absolute Error):</strong> Average prediction error in percentage points.
+                        An MAE of 1.76 means predictions are typically within 1.76% of actual chronic disease rates.
+                        <span class="text-success">Lower is better.</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="small mb-2"><strong>Accuracy:</strong> Percentage of correct priority classifications.
+                        93.9% accuracy means the model correctly identifies intervention urgency 94 times out of 100.
+                        <span class="text-success">Higher is better.</span></p>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="row">
@@ -68,11 +88,12 @@
                     <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
                         <div>
                             <strong>Chronic Risk Predictor</strong>
-                            <br><small class="text-muted">Predicts county-level chronic disease risk</small>
+                            <br><small class="text-muted">Predicts county-level chronic disease rates using food environment and demographic data</small>
                         </div>
                         <div class="text-end">
                             <span class="badge bg-success">Active</span>
-                            <br><small>MAE: 1.76</small>
+                            <br><span class="badge bg-info">MAE: 1.76%</span>
+                            <br><small class="text-success">Excellent accuracy</small>
                         </div>
                     </div>
                 </div>
@@ -80,11 +101,12 @@
                     <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
                         <div>
                             <strong>Intervention Prioritizer</strong>
-                            <br><small class="text-muted">Ranks intervention urgency by county</small>
+                            <br><small class="text-muted">Classifies counties by intervention urgency (High/Medium/Low)</small>
                         </div>
                         <div class="text-end">
                             <span class="badge bg-success">Active</span>
-                            <br><small>Accuracy: 93.9%</small>
+                            <br><span class="badge bg-info">93.9% Accurate</span>
+                            <br><small class="text-success">94 of 100 correct</small>
                         </div>
                     </div>
                 </div>

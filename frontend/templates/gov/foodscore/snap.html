@@ -15,114 +15,212 @@
         <span class="badge bg-primary ms-2">Government Only</span>
     </h2>
 
-    <div class="alert alert-warning mb-4">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <strong>Policy Finding:</strong> 73% of SNAP-eligible products are classified as ultra-processed (NOVA 4).
-        Reforming SNAP eligibility to exclude or disincentivize unhealthy options could significantly improve public health outcomes.
-    </div>
-
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card stat-card border-danger">
-                <div class="stat-value text-danger" style="font-size: 2rem;">73%</div>
-                <div class="stat-label">Ultra-Processed (NOVA 4)</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-warning">
-                <div class="stat-value text-warning" style="font-size: 2rem;">15%</div>
-                <div class="stat-label">Processed (NOVA 3)</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">7%</div>
-                <div class="stat-label">Processed Ingredients</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-success">
-                <div class="stat-value text-success" style="font-size: 2rem;">5%</div>
-                <div class="stat-label">Unprocessed (NOVA 1)</div>
-            </div>
-        </div>
-    </div>
-
+    <!-- What is this analysis -->
     <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Average Health Scores by Category</h5>
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>About This Analysis</h5>
         </div>
         <div class="card-body">
+            <p>
+                <strong>SNAP (Supplemental Nutrition Assistance Program)</strong> provides nutrition assistance to
+                low-income individuals and families. This analysis examines the health quality of foods currently
+                eligible for purchase with SNAP benefits.
+            </p>
+            <p class="mb-0">
+                Using the NOVA food classification system and MAHA health scores, we identify opportunities to
+                improve nutritional outcomes for SNAP beneficiaries through policy reform.
+            </p>
+        </div>
+    </div>
+
+    <!-- Key Finding Alert -->
+    {% set nova4_pct = ((nova_dist.get(4, 0) / snap_analysis.total_products * 100) | int) if snap_analysis.total_products > 0 else 0 %}
+    <div class="alert alert-danger mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Key Finding:</strong> {{ nova4_pct }}% of analyzed products are classified as ultra-processed (NOVA 4).
+        These foods are linked to increased risk of obesity, diabetes, and cardiovascular disease.
+    </div>
+
+    <!-- NOVA Distribution Stats -->
+    <div class="row g-4 mb-5">
+        {% set total = snap_analysis.total_products %}
+        {% set n1 = nova_dist.get(1, 0) %}
+        {% set n2 = nova_dist.get(2, 0) %}
+        {% set n3 = nova_dist.get(3, 0) %}
+        {% set n4 = nova_dist.get(4, 0) %}
+        <div class="col-md-3">
+            <div class="card stat-card border-success h-100">
+                <div class="stat-value text-success" style="font-size: 2rem;">{{ "{:,}".format(n1) }}</div>
+                <div class="stat-label">NOVA 1 - Unprocessed</div>
+                <div class="text-muted small">{{ ((n1 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-info h-100">
+                <div class="stat-value text-info" style="font-size: 2rem;">{{ "{:,}".format(n2) }}</div>
+                <div class="stat-label">NOVA 2 - Ingredients</div>
+                <div class="text-muted small">{{ ((n2 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-warning h-100">
+                <div class="stat-value text-warning" style="font-size: 2rem;">{{ "{:,}".format(n3) }}</div>
+                <div class="stat-label">NOVA 3 - Processed</div>
+                <div class="text-muted small">{{ ((n3 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-danger h-100">
+                <div class="stat-value text-danger" style="font-size: 2rem;">{{ "{:,}".format(n4) }}</div>
+                <div class="stat-label">NOVA 4 - Ultra-Processed</div>
+                <div class="text-muted small">{{ ((n4 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ "{:,}".format(snap_analysis.total_products) }}</h3>
+                    <p class="mb-0">Products Analyzed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="{% if snap_analysis.avg_health_score >= 60 %}text-success{% elif snap_analysis.avg_health_score >= 40 %}text-warning{% else %}text-danger{% endif %}">{{ snap_analysis.avg_health_score }}</h3>
+                    <p class="mb-0">Average Health Score</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="text-danger">{{ "{:,}".format(snap_analysis.high_risk_count) }}</h3>
+                    <p class="mb-0">High-Risk Products (Score &lt; 40)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- High Risk Products -->
+    {% if high_risk %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-exclamation-octagon me-2"></i>Lowest Scoring Products</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">These products have the lowest MAHA health scores and may warrant policy attention:</p>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Food Category</th>
-                            <th>Products</th>
-                            <th>Avg Health Score</th>
-                            <th>% Ultra-Processed</th>
-                            <th>Recommendation</th>
+                            <th>Product</th>
+                            <th>Brand</th>
+                            <th>NOVA</th>
+                            <th>Health Score</th>
+                            <th>Additives</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for p in high_risk[:15] %}
                         <tr>
-                            <td>Sugary Beverages</td>
-                            <td>45,000</td>
-                            <td><span class="badge bg-danger">28</span></td>
-                            <td>95%</td>
-                            <td><span class="badge bg-danger">Remove from SNAP</span></td>
+                            <td>{{ p.get('product_name', 'Unknown')[:40] }}{% if p.get('product_name', '')|length > 40 %}...{% endif %}</td>
+                            <td><small>{{ p.get('brands', 'N/A')[:20] }}</small></td>
+                            <td>
+                                {% set nova = p.get('nova_group', '0') | string %}
+                                {% if nova == '4' or 'en:4' in nova %}
+                                <span class="badge bg-danger">4</span>
+                                {% elif nova == '3' or 'en:3' in nova %}
+                                <span class="badge bg-warning text-dark">3</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ nova[:1] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set score = p.get('maha_score', 50) | int %}
+                                <span class="badge {% if score < 30 %}bg-danger{% elif score < 50 %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ score }}</span>
+                            </td>
+                            <td>{{ p.get('flagged_additive_count', p.get('additives_n', 0)) }}</td>
                         </tr>
-                        <tr>
-                            <td>Snack Foods</td>
-                            <td>68,000</td>
-                            <td><span class="badge bg-warning text-dark">42</span></td>
-                            <td>88%</td>
-                            <td><span class="badge bg-warning text-dark">Disincentivize</span></td>
-                        </tr>
-                        <tr>
-                            <td>Fresh Produce</td>
-                            <td>25,000</td>
-                            <td><span class="badge bg-success">92</span></td>
-                            <td>0%</td>
-                            <td><span class="badge bg-success">Incentivize</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    {% endif %}
 
-    <div class="card">
+    <!-- Policy Recommendations -->
+    <div class="card mb-4">
         <div class="card-header">
-            <h5 class="mb-0">Policy Recommendations</h5>
+            <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Policy Recommendations</h5>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4">
-                    <h6 class="text-danger"><i class="bi bi-x-circle me-2"></i>Consider Removing</h6>
-                    <ul>
-                        <li>Sugary sodas and energy drinks</li>
-                        <li>Candy and confectionery</li>
-                        <li>High-sodium snack foods</li>
-                    </ul>
+                    <div class="card border-danger h-100">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0"><i class="bi bi-x-circle me-2"></i>Consider Removing</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li>Sugary sodas and energy drinks</li>
+                                <li>Candy and confectionery</li>
+                                <li>Products with MAHA score &lt; 25</li>
+                                <li>Items with &gt; 10 flagged additives</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-4">
-                    <h6 class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>Consider Limiting</h6>
-                    <ul>
-                        <li>Processed snacks</li>
-                        <li>Frozen prepared meals</li>
-                        <li>Sweetened cereals</li>
-                    </ul>
+                    <div class="card border-warning h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="bi bi-exclamation-circle me-2"></i>Consider Limiting</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li>NOVA 4 ultra-processed foods</li>
+                                <li>High-sodium snack foods</li>
+                                <li>Sweetened breakfast cereals</li>
+                                <li>Frozen prepared meals</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-4">
-                    <h6 class="text-success"><i class="bi bi-check-circle me-2"></i>Incentivize</h6>
-                    <ul>
-                        <li>Fresh fruits and vegetables</li>
-                        <li>Whole grains</li>
-                        <li>Lean proteins</li>
-                    </ul>
+                    <div class="card border-success h-100">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Incentivize</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li>Fresh fruits and vegetables</li>
+                                <li>NOVA 1 unprocessed foods</li>
+                                <li>Whole grains and legumes</li>
+                                <li>Products with MAHA score &gt; 70</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Methodology -->
+    <div class="card bg-light">
+        <div class="card-body">
+            <h6><i class="bi bi-info-circle me-2"></i>Methodology</h6>
+            <p class="small mb-0">
+                This analysis uses the NOVA food classification system (Groups 1-4) and MAHA health scores (0-100)
+                derived from nutritional content, additive presence, and processing level. Products are analyzed
+                from the Open Food Facts database, filtered for US market availability. MAHA scores below 40 are
+                considered high-risk. Policy recommendations are based on public health research linking
+                ultra-processed food consumption to adverse health outcomes.
+            </p>
         </div>
     </div>
 </div>

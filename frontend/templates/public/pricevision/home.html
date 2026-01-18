@@ -15,6 +15,28 @@
         <p class="lead text-muted">Compare hospital procedure prices across facilities</p>
     </div>
 
+    <!-- Stats -->
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-value">{{ stats.total_hospitals | default(0) }}</div>
+                <div class="stat-label">Hospitals</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-value">{{ stats.total_procedures | default(0) }}</div>
+                <div class="stat-label">Procedures</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-value">{{ stats.states_covered | default(0) }}</div>
+                <div class="stat-label">States</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Search Box -->
     <div class="row justify-content-center mb-5">
         <div class="col-md-8">
@@ -33,39 +55,70 @@
                         <a href="{{ url_for('public.pricevision_search', q='MRI') }}" class="badge bg-light text-dark me-1">MRI</a>
                         <a href="{{ url_for('public.pricevision_search', q='CT scan') }}" class="badge bg-light text-dark me-1">CT Scan</a>
                         <a href="{{ url_for('public.pricevision_search', q='colonoscopy') }}" class="badge bg-light text-dark me-1">Colonoscopy</a>
-                        <a href="{{ url_for('public.pricevision_search', q='knee replacement') }}" class="badge bg-light text-dark me-1">Knee Replacement</a>
+                        <a href="{{ url_for('public.pricevision_search', q='knee') }}" class="badge bg-light text-dark me-1">Knee</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Features -->
     <div class="row g-4">
-        <div class="col-md-4">
+        <!-- Recent Hospitals -->
+        <div class="col-md-6">
             <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-search display-4 text-warning mb-3"></i>
-                    <h5>Search Procedures</h5>
-                    <p class="text-muted">Find any medical procedure by name, CPT code, or description.</p>
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-hospital me-2"></i>Sample Hospitals</h5>
+                </div>
+                <div class="card-body">
+                    {% if hospitals %}
+                    <ul class="list-group list-group-flush">
+                        {% for h in hospitals[:5] %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ h.get('Facility Name', h.get('hospital_name', 'Unknown')) }}</strong>
+                                <br><small class="text-muted">{{ h.get('City', h.get('city', '')) }}, {{ h.get('State', h.get('state', '')) }}</small>
+                            </div>
+                            <a href="{{ url_for('public.pricevision_hospital', npi=h.get('Facility ID', '')) }}" class="btn btn-sm btn-outline-warning">View</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No hospital data available yet.</p>
+                    {% endif %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('public.pricevision_search', type='hospital') }}" class="btn btn-outline-warning">Browse All Hospitals</a>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+
+        <!-- Sample Procedures -->
+        <div class="col-md-6">
             <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-bar-chart display-4 text-warning mb-3"></i>
-                    <h5>Compare Prices</h5>
-                    <p class="text-muted">See side-by-side price comparisons across multiple hospitals.</p>
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Sample Procedures</h5>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-piggy-bank display-4 text-warning mb-3"></i>
-                    <h5>Save Money</h5>
-                    <p class="text-muted">Identify cost-effective options and potential savings.</p>
+                <div class="card-body">
+                    {% if procedures %}
+                    <ul class="list-group list-group-flush">
+                        {% for p in procedures[:5] %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ p.get('canonical_description', 'Unknown')[:50] }}...</strong>
+                                    <br><small class="text-muted">Code: {{ p.get('hcpcs_code', 'N/A') }}</small>
+                                </div>
+                                <a href="{{ url_for('public.pricevision_compare', procedure=p.get('hcpcs_code', '')) }}" class="btn btn-sm btn-outline-primary">Compare</a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No procedure data available yet.</p>
+                    {% endif %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('public.pricevision_search') }}" class="btn btn-outline-primary">Browse All Procedures</a>
+                    </div>
                 </div>
             </div>
         </div>

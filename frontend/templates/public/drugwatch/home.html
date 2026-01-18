@@ -49,13 +49,13 @@
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value">3,598</div>
+                <div class="stat-value">{{ stats.total_us_drugs | default(0) }}</div>
                 <div class="stat-label">Drugs Tracked</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value">4</div>
+                <div class="stat-value">{{ stats.countries | length if stats.countries else 4 }}</div>
                 <div class="stat-label">Countries Compared</div>
             </div>
         </div>
@@ -66,6 +66,47 @@
             </div>
         </div>
     </div>
+
+    <!-- Top Expensive Drugs -->
+    {% if top_drugs %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Top Drugs by Medicare Spending</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Drug Name</th>
+                                    <th>Generic Name</th>
+                                    <th>Total Spending</th>
+                                    <th>Beneficiaries</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for drug in top_drugs[:10] %}
+                                <tr>
+                                    <td><strong>{{ drug.get('brand_name', 'N/A') }}</strong></td>
+                                    <td>{{ drug.get('generic_name', 'N/A') }}</td>
+                                    <td>${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
+                                    <td>{{ "{:,.0f}".format(drug.get('total_beneficiaries_2023', 0) | float) }}</td>
+                                    <td>
+                                        <a href="{{ url_for('public.drugwatch_drug', drug_id=drug.get('brand_name', '')) }}" class="btn btn-sm btn-outline-danger">Compare</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Features -->
     <div class="row g-4">
