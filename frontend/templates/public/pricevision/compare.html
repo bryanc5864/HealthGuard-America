@@ -70,32 +70,34 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Hospital</th>
-                            <th>Location</th>
+                            <th>Hospital NPI</th>
+                            <th>Description</th>
+                            <th>Payer</th>
                             <th>Gross Charge</th>
                             <th>Cash Price</th>
-                            <th>Min Negotiated</th>
-                            <th>Max Negotiated</th>
+                            <th>Min Price</th>
+                            <th>Max Price</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for p in prices %}
-                        {% set gross = p.get('gross_charge', p.get('gross_charges', 0)) | float %}
-                        {% set cash = p.get('cash_price', p.get('discounted_cash', gross * 0.6)) | float %}
-                        {% set min_neg = p.get('min_negotiated', p.get('de_identified_min', cash * 0.8)) | float %}
-                        {% set max_neg = p.get('max_negotiated', p.get('de_identified_max', gross * 1.2)) | float %}
+                        {% set gross = p.get('gross_charge', 0) | float %}
+                        {% set cash = p.get('cash_price', 0) | float %}
+                        {% set min_price = p.get('min_price', 0) | float %}
+                        {% set max_price = p.get('max_price', 0) | float %}
                         <tr>
                             <td>
-                                <strong>{{ p.get('hospital_name', p.get('facility_name', 'Hospital'))[:40] }}</strong>
+                                <strong>{{ p.get('hospital_npi', 'Unknown') }}</strong>
                             </td>
-                            <td>{{ p.get('city', '') }}, {{ p.get('state', '') }}</td>
-                            <td>${{ "{:,.0f}".format(gross) }}</td>
-                            <td class="text-success fw-bold">${{ "{:,.0f}".format(cash) }}</td>
-                            <td>${{ "{:,.0f}".format(min_neg) }}</td>
-                            <td>${{ "{:,.0f}".format(max_neg) }}</td>
+                            <td>{{ p.get('description', '')[:50] }}{% if p.get('description', '')|length > 50 %}...{% endif %}</td>
+                            <td><span class="badge bg-secondary">{{ p.get('payer_name', 'N/A') }}</span></td>
+                            <td>${{ "{:,.0f}".format(gross) if gross else 'N/A' }}</td>
+                            <td class="text-success fw-bold">${{ "{:,.0f}".format(cash) if cash else 'N/A' }}</td>
+                            <td>${{ "{:,.0f}".format(min_price) if min_price else 'N/A' }}</td>
+                            <td>${{ "{:,.0f}".format(max_price) if max_price else 'N/A' }}</td>
                             <td>
-                                {% if loop.first %}
+                                {% if loop.first and cash %}
                                 <span class="badge bg-success">Best Cash Price</span>
                                 {% endif %}
                             </td>
@@ -107,14 +109,14 @@
 
             <!-- Price Statistics -->
             {% if prices | length > 1 %}
-            {% set all_cash = prices | map(attribute='cash_price') | list %}
-            {% set min_price = prices | map(attribute='cash_price') | min %}
-            {% set max_price = prices | map(attribute='cash_price') | max %}
+            {% set cash_prices = prices | selectattr('cash_price') | map(attribute='cash_price') | select('number') | list %}
+            {% set lowest_cash = cash_prices | min if cash_prices else 0 %}
+            {% set highest_cash = cash_prices | max if cash_prices else 0 %}
             <div class="row mt-4">
                 <div class="col-md-4">
                     <div class="card bg-success text-white">
                         <div class="card-body text-center">
-                            <h4>${{ "{:,.0f}".format(min_price | default(0) | float) }}</h4>
+                            <h4>${{ "{:,.0f}".format(lowest_cash | float) }}</h4>
                             <small>Lowest Cash Price</small>
                         </div>
                     </div>
@@ -122,7 +124,7 @@
                 <div class="col-md-4">
                     <div class="card bg-danger text-white">
                         <div class="card-body text-center">
-                            <h4>${{ "{:,.0f}".format(max_price | default(0) | float) }}</h4>
+                            <h4>${{ "{:,.0f}".format(highest_cash | float) }}</h4>
                             <small>Highest Cash Price</small>
                         </div>
                     </div>
@@ -130,7 +132,7 @@
                 <div class="col-md-4">
                     <div class="card bg-primary text-white">
                         <div class="card-body text-center">
-                            <h4>${{ "{:,.0f}".format((max_price | default(0) | float) - (min_price | default(0) | float)) }}</h4>
+                            <h4>${{ "{:,.0f}".format((highest_cash | float) - (lowest_cash | float)) }}</h4>
                             <small>Potential Savings</small>
                         </div>
                     </div>

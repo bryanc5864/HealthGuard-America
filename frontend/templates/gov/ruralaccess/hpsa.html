@@ -15,9 +15,119 @@
         <small class="text-muted">ID: {{ hpsa_id }}</small>
     </h2>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        HPSA data for ID {{ hpsa_id }} will be loaded from the backend API.
+    {% if not hpsa %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        HPSA data for ID {{ hpsa_id }} not found.
     </div>
+    {% else %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Designation Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ hpsa.hpsa_name or 'N/A' }}</p>
+                    <p><strong>Designation Type:</strong> {{ hpsa.designation_type or 'N/A' }}</p>
+                    <p><strong>Discipline:</strong> {{ hpsa.discipline or 'N/A' }}</p>
+                    <p><strong>Status:</strong>
+                        <span class="badge {% if hpsa.status == 'Designated' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            {{ hpsa.status or 'N/A' }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">HPSA Score</h5>
+                </div>
+                <div class="card-body">
+                    <div class="display-4 mb-3 {% if hpsa.hpsa_score >= 20 %}text-danger{% elif hpsa.hpsa_score >= 15 %}text-warning{% else %}text-success{% endif %}">
+                        {{ hpsa.hpsa_score if hpsa.hpsa_score is not none else 'N/A' }}
+                    </div>
+                    {% if hpsa.hpsa_score is not none %}
+                    <div class="progress mb-2">
+                        <div class="progress-bar {% if hpsa.hpsa_score >= 20 %}bg-danger{% elif hpsa.hpsa_score >= 15 %}bg-warning{% else %}bg-success{% endif %}"
+                             role="progressbar"
+                             style="width: {{ (hpsa.hpsa_score / 25 * 100)|int }}%"
+                             aria-valuenow="{{ hpsa.hpsa_score }}"
+                             aria-valuemin="0"
+                             aria-valuemax="25">
+                        </div>
+                    </div>
+                    <small class="text-muted">Score scale: 0 (no shortage) to 25 (critical shortage)</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Location</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>State:</strong> {{ hpsa.state or 'N/A' }}</p>
+                    <p><strong>County:</strong> {{ hpsa.county or 'N/A' }}</p>
+                    <p><strong>County FIPS:</strong>
+                        {% if hpsa.county_fips %}
+                        <a href="{{ url_for('gov.ruralaccess_county', fips=hpsa.county_fips) }}">{{ hpsa.county_fips }}</a>
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </p>
+                    <p><strong>Rural Status:</strong> {{ hpsa.rural_status or 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Demographics</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Population:</strong> {{ "{:,.0f}".format(hpsa.population) if hpsa.population else 'N/A' }}</p>
+                    <p><strong>Poverty Rate:</strong> {{ "%.1f%%"|format(hpsa.poverty_rate * 100) if hpsa.poverty_rate else 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if hpsa.latitude and hpsa.longitude %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Map Location</h5>
+        </div>
+        <div class="card-body p-0">
+            <div id="hpsa-map" style="height: 300px;"></div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
 </div>
+
+{% block extra_css %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block extra_js %}
+{% if hpsa and hpsa.latitude and hpsa.longitude %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    var map = L.map('hpsa-map').setView([{{ hpsa.latitude }}, {{ hpsa.longitude }}], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([{{ hpsa.latitude }}, {{ hpsa.longitude }}]).addTo(map)
+        .bindPopup('{{ hpsa.hpsa_name|e }}')
+        .openPopup();
+</script>
+{% endif %}
+{% endblock %}
 {% endblock %}

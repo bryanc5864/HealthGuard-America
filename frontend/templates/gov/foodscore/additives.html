@@ -93,21 +93,21 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>E-Number</th>
                             <th>Name</th>
-                            <th>Function</th>
+                            <th>Type</th>
                             <th>Risk Score</th>
-                            <th>Concerns</th>
+                            <th>FDA Status</th>
+                            <th>EU Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for a in high_risk[:20] %}
                         <tr>
-                            <td><span class="badge bg-secondary">{{ a.get('e_number', a.get('code', 'N/A')) }}</span></td>
-                            <td><strong>{{ a.get('name', a.get('additive_name', 'Unknown')) }}</strong></td>
-                            <td>{{ a.get('function', a.get('category', 'N/A')) }}</td>
-                            <td><span class="badge bg-danger">{{ a.get('risk_score', a.get('score', 'N/A')) }}</span></td>
-                            <td><small>{{ a.get('concerns', a.get('health_effects', 'See research'))[:50] }}</small></td>
+                            <td><strong>{{ a.get('name', 'Unknown') }}</strong>{% if a.get('is_artificial') %} <span class="badge bg-warning text-dark">Artificial</span>{% endif %}</td>
+                            <td>{{ a.get('type', 'N/A') }}</td>
+                            <td><span class="badge bg-danger">{{ a.get('risk_score', 'N/A') }}</span></td>
+                            <td><small>{{ a.get('fda_status', 'N/A') }}</small></td>
+                            <td><small class="{% if a.get('eu_status') == 'banned' %}text-danger{% elif a.get('eu_status') == 'restricted' %}text-warning{% endif %}">{{ a.get('eu_status', 'N/A') }}</small></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -128,19 +128,21 @@
                 <table class="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th>E-Number</th>
                             <th>Name</th>
-                            <th>Category</th>
+                            <th>Type</th>
+                            <th>FDA Status</th>
+                            <th>EU Status</th>
                             <th>Risk</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for a in additives %}
-                        {% set score = a.get('risk_score', a.get('score', 50)) | float %}
+                        {% set score = a.get('risk_score', 50) | float %}
                         <tr>
-                            <td><span class="badge bg-secondary">{{ a.get('e_number', a.get('code', 'N/A')) }}</span></td>
-                            <td>{{ a.get('name', a.get('additive_name', 'Unknown')) }}</td>
-                            <td><small>{{ a.get('function', a.get('category', 'N/A')) }}</small></td>
+                            <td>{{ a.get('name', 'Unknown') }}{% if a.get('is_artificial') %} <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Artificial</span>{% endif %}</td>
+                            <td><small>{{ a.get('type', 'N/A') }}</small></td>
+                            <td><small>{{ a.get('fda_status', 'N/A') }}</small></td>
+                            <td><small class="{% if a.get('eu_status') == 'banned' %}text-danger fw-bold{% elif a.get('eu_status') == 'restricted' %}text-warning{% endif %}">{{ a.get('eu_status', 'N/A') }}</small></td>
                             <td>
                                 {% if score >= 70 %}
                                 <span class="badge bg-danger">{{ score | int }}</span>

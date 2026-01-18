@@ -50,22 +50,17 @@ class RuralAccessService:
     def get_counties(cls, state=None, limit=100):
         """Get county-level data"""
         if 'counties' not in cls._cache:
+            # Use county_shortage_summary as primary source (has proper columns)
             county_file = DATA_DIR / 'processed/ruralaccess/county_shortage_summary.parquet'
             if county_file.exists():
                 df = pd.read_parquet(county_file)
                 cls._cache['counties'] = df.to_dict('records')
             else:
-                # Try population file
-                pop_file = DATA_DIR / 'processed/ruralaccess/county_population.parquet'
-                if pop_file.exists():
-                    df = pd.read_parquet(pop_file)
-                    cls._cache['counties'] = df.to_dict('records')
-                else:
-                    cls._cache['counties'] = []
+                cls._cache['counties'] = []
 
         counties = cls._cache['counties']
         if state:
-            counties = [c for c in counties if c.get('state', c.get('state_name', '')) == state]
+            counties = [c for c in counties if c.get('state', '') == state]
         return counties[:limit]
 
     @classmethod
@@ -73,7 +68,7 @@ class RuralAccessService:
         """Get single county by FIPS code"""
         counties = cls.get_counties(limit=5000)
         for c in counties:
-            if str(c.get('fips', c.get('county_fips', ''))) == str(fips):
+            if str(c.get('county_fips', '')) == str(fips):
                 return c
         return None
 
@@ -142,18 +137,22 @@ class RuralAccessService:
 
     @classmethod
     def get_shortage_map_data(cls):
-        """Get data formatted for map visualization"""
-        counties = cls.get_counties(limit=5000)
+        """Get data formatted for map visualization using HPSA locations"""
+        # Use HPSA data since it has lat/long coordinates
+        hpsas = cls.get_hpsa_designations(limit=5000)
         map_data = []
-        for c in counties:
-            if c.get('latitude') and c.get('longitude'):
+        for h in hpsas:
+            if h.get('latitude') and h.get('longitude'):
                 map_data.append({
-                    'fips': c.get('fips', c.get('county_fips')),
-                    'name': c.get('county_name', c.get('name')),
-                    'state': c.get('state'),
-                    'lat': c.get('latitude'),
-                    'lng': c.get('longitude'),
-                    'shortage_score': c.get('shortage_score', c.get('hpsa_score', 0)),
-                    'population': c.get('population', 0)
+                    'hpsa_id': h.get('hpsa_id'),
+                    'name': h.get('hpsa_name'),
+                    'state': h.get('state'),
+                    'county': h.get('county'),
+                    'county_fips': h.get('county_fips'),
+                    'lat': h.get('latitude'),
+                    'lng': h.get('longitude'),
+                    'shortage_score': h.get('hpsa_score', 0),
+                    'population': h.get('population', 0),
+                    'discipline': h.get('discipline')
                 })
         return map_data

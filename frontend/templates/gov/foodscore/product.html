@@ -6,15 +6,181 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
             <li class="breadcrumb-item"><a href="{{ url_for('gov.foodscore_home') }}">FoodScore</a></li>
-            <li class="breadcrumb-item active">Product</li>
+            <li class="breadcrumb-item active">Product Details</li>
         </ol>
     </nav>
 
-    <h2 class="mb-4"><i class="bi bi-box-seam me-2"></i>Product Details</h2>
+    {% if product %}
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Product Image Placeholder -->
+            <div class="card mb-4">
+                <div class="card-body text-center p-5">
+                    <i class="bi bi-box-seam display-1 text-muted"></i>
+                    <p class="text-muted mt-2">{{ product.get('product_name', 'Product')[:30] }}</p>
+                </div>
+            </div>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Product data for barcode {{ barcode }} will be loaded from the backend API.
+            <!-- Health Score -->
+            {% set score = product.get('maha_score', 50) | int %}
+            {% set nova = product.get('nova_group', '0') | string %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">MAHA Health Score</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="display-1 fw-bold {% if score >= 70 %}text-success{% elif score >= 40 %}text-warning{% else %}text-danger{% endif %}">{{ score }}</div>
+                    <p class="text-muted">out of 100</p>
+                    <div class="progress mb-3" style="height: 12px;">
+                        <div class="progress-bar {% if score >= 70 %}bg-success{% elif score >= 40 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ score }}%;"></div>
+                    </div>
+                    {% if nova == '4' or 'en:4' in nova %}
+                    <span class="badge bg-danger">NOVA Group 4 - Ultra-Processed</span>
+                    {% elif nova == '3' or 'en:3' in nova %}
+                    <span class="badge bg-warning text-dark">NOVA Group 3 - Processed</span>
+                    {% elif nova == '2' or 'en:2' in nova %}
+                    <span class="badge bg-info">NOVA Group 2 - Culinary Ingredients</span>
+                    {% elif nova == '1' or 'en:1' in nova %}
+                    <span class="badge bg-success">NOVA Group 1 - Unprocessed</span>
+                    {% else %}
+                    <span class="badge bg-secondary">NOVA Unknown</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Nutri-Score -->
+            {% set nutriscore = product.get('nutriscore_grade', 'unknown') %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Nutri-Score</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center gap-1 mb-2">
+                        <span class="badge fs-5 {% if nutriscore == 'a' %}bg-success{% else %}bg-secondary{% endif %}">A</span>
+                        <span class="badge fs-5 {% if nutriscore == 'b' %}bg-success{% else %}bg-secondary{% endif %}">B</span>
+                        <span class="badge fs-5 {% if nutriscore == 'c' %}bg-warning{% else %}bg-secondary{% endif %}">C</span>
+                        <span class="badge fs-5 {% if nutriscore == 'd' %}bg-warning{% else %}bg-secondary{% endif %}">D</span>
+                        <span class="badge fs-5 {% if nutriscore == 'e' %}bg-danger{% else %}bg-secondary{% endif %}">E</span>
+                    </div>
+                    <small class="text-muted">Current: {{ nutriscore | upper if nutriscore else 'N/A' }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Product Information</h5>
+                </div>
+                <div class="card-body">
+                    <h3>{{ product.get('product_name', 'Unknown Product') }}</h3>
+                    <p class="text-muted">Barcode: {{ barcode }}</p>
+                    <p><strong>Brand:</strong> {{ product.get('brands', 'Unknown') }}</p>
+                    <p><strong>Category:</strong> {{ product.get('categories_en', product.get('categories', 'N/A'))[:60] }}</p>
+                    {% if product.get('ingredients_text') %}
+                    <p><strong>Ingredients:</strong> <small>{{ product.get('ingredients_text')[:300] }}{% if product.get('ingredients_text')|length > 300 %}...{% endif %}</small></p>
+                    {% endif %}
+                    {% if product.get('allergens') %}
+                    <p><strong>Allergens:</strong> <span class="badge bg-danger">{{ product.get('allergens') }}</span></p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Additives -->
+            {% set additive_count = product.get('additives_n', product.get('flagged_additive_count', 0)) | int %}
+            {% set additive_tags = product.get('additives_tags', '') %}
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Additives</h5>
+                    {% if additive_count > 3 %}
+                    <span class="badge bg-danger">{{ additive_count }} detected</span>
+                    {% elif additive_count > 0 %}
+                    <span class="badge bg-warning text-dark">{{ additive_count }} detected</span>
+                    {% else %}
+                    <span class="badge bg-success">None detected</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if additive_tags %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for additive in additive_tags.split(',')[:10] %}
+                        {% set add_name = additive.replace('en:', '').strip() %}
+                        {% if add_name %}
+                        <span class="badge bg-secondary">{{ add_name }}</span>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No additive information available for this product.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Nutrition -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Nutrition Facts (per 100g)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Calories:</strong> {{ product.get('energy-kcal_100g', 'N/A') }} kcal</p>
+                            <p><strong>Fat:</strong> {{ product.get('fat_100g', 'N/A') }}g</p>
+                            <p><strong>Saturated Fat:</strong> {{ product.get('saturated-fat_100g', 'N/A') }}g</p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Sugars:</strong> {{ product.get('sugars_100g', 'N/A') }}g</p>
+                            <p><strong>Sodium:</strong> {{ product.get('sodium_100g', 'N/A') }}g</p>
+                            <p><strong>Additives:</strong> {{ product.get('additives_n', product.get('flagged_additive_count', 'N/A')) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Insights -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Health Insights</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        {% if score >= 70 %}
+                        <li class="text-success">This product has a high health score - a good choice!</li>
+                        {% elif score >= 40 %}
+                        <li class="text-warning">This product has a moderate health score - consume in moderation.</li>
+                        {% else %}
+                        <li class="text-danger">This product has a low health score - consider healthier alternatives.</li>
+                        {% endif %}
+
+                        {% if nova == '4' or 'en:4' in nova %}
+                        <li class="text-danger">Ultra-processed food (NOVA 4) - linked to increased health risks.</li>
+                        {% elif nova == '1' or 'en:1' in nova %}
+                        <li class="text-success">Unprocessed or minimally processed (NOVA 1) - healthiest category.</li>
+                        {% endif %}
+
+                        {% if additive_count > 5 %}
+                        <li class="text-warning">Contains {{ additive_count }} additives - check for any you may want to avoid.</li>
+                        {% endif %}
+
+                        {% set sugars = product.get('sugars_100g', 0) | float %}
+                        {% if sugars > 15 %}
+                        <li class="text-warning">High sugar content ({{ sugars }}g per 100g).</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
+
+    {% else %}
+    <!-- Product not found -->
+    <div class="alert alert-warning">
+        <h5><i class="bi bi-exclamation-triangle me-2"></i>Product Not Found</h5>
+        <p class="mb-0">No product found with barcode "{{ barcode }}". This product may not be in our database.</p>
+    </div>
+    <a href="{{ url_for('gov.foodscore_search') }}" class="btn btn-success">
+        <i class="bi bi-search me-1"></i>Search Products
+    </a>
+    {% endif %}
 </div>
 {% endblock %}

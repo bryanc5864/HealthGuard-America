@@ -58,66 +58,80 @@
     <div class="row g-4 mb-5">
         <div class="col-md-3">
             <div class="card stat-card border-danger">
-                <div class="stat-value text-danger">7,200+</div>
+                <div class="stat-value text-danger">{{ "{:,}".format(stats.total_hpsas) if stats.total_hpsas else '0' }}</div>
                 <div class="stat-label">HPSA Designations</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value">83M</div>
-                <div class="stat-label">People in Shortage Areas</div>
+                <div class="stat-value">{{ "{:,}".format(stats.total_counties) if stats.total_counties else '0' }}</div>
+                <div class="stat-label">Counties with Shortages</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value">17,000+</div>
-                <div class="stat-label">Provider Deficit</div>
+                <div class="stat-value">{{ "{:,}".format(stats.total_fqhcs) if stats.total_fqhcs else '0' }}</div>
+                <div class="stat-label">Health Centers (FQHCs)</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value">46%</div>
-                <div class="stat-label">Rural Counties Designated</div>
+                <div class="stat-value">{{ stats.states_covered if stats.states_covered else '0' }}</div>
+                <div class="stat-label">States Covered</div>
             </div>
         </div>
     </div>
 
     <!-- HPSA Types -->
     <h4 class="mb-3">HPSA Designation Types</h4>
-    <div class="row g-4">
+    <div class="row g-4 mb-5">
+        {% for discipline, count in stats.by_discipline.items() %}
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <i class="bi bi-heart-pulse me-2"></i>Primary Care
+                <div class="card-header {% if 'Primary' in discipline %}bg-primary{% elif 'Dental' in discipline %}bg-purple{% else %}bg-info{% endif %} text-white">
+                    <i class="bi {% if 'Primary' in discipline %}bi-heart-pulse{% elif 'Dental' in discipline %}bi-emoji-smile{% else %}bi-brain{% endif %} me-2"></i>{{ discipline }}
                 </div>
                 <div class="card-body">
-                    <p>Areas with physician shortages for primary care services.</p>
-                    <p class="mb-0"><strong>Designated Areas:</strong> 4,200+</p>
+                    <p class="mb-0"><strong>Designated Areas:</strong> {{ "{:,}".format(count) }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header" style="background: #6f42c1; color: white;">
-                    <i class="bi bi-emoji-smile me-2"></i>Dental Health
-                </div>
-                <div class="card-body">
-                    <p>Areas with dentist shortages for oral health services.</p>
-                    <p class="mb-0"><strong>Designated Areas:</strong> 2,100+</p>
-                </div>
-            </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">No HPSA discipline data available.</div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
-                    <i class="bi bi-brain me-2"></i>Mental Health
-                </div>
-                <div class="card-body">
-                    <p>Areas with psychiatrist/psychologist shortages.</p>
-                    <p class="mb-0"><strong>Designated Areas:</strong> 5,800+</p>
-                </div>
-            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Recent Hospital Closures -->
+    {% if closures %}
+    <h4 class="mb-3">Recent Rural Hospital Closures</h4>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Hospital</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>County</th>
+                        <th>Closure Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for closure in closures %}
+                    <tr>
+                        <td>{{ closure.Hospital }}</td>
+                        <td>{{ closure.City }}</td>
+                        <td>{{ closure.State }}</td>
+                        <td>{{ closure['County/district'] }}</td>
+                        <td>{{ closure['Closure Month'] }} {{ closure['Closure Year'].year if closure['Closure Year'] else '' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -6,15 +6,73 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
             <li class="breadcrumb-item"><a href="{{ url_for('gov.pricevision_home') }}">PriceVision</a></li>
-            <li class="breadcrumb-item active">Hospital</li>
+            <li class="breadcrumb-item active">Hospital Details</li>
         </ol>
     </nav>
 
-    <h2 class="mb-4"><i class="bi bi-hospital me-2"></i>Hospital Details (NPI: {{ npi }})</h2>
+    <h2 class="mb-4">
+        <i class="bi bi-hospital me-2"></i>{{ hospital.get('Facility Name', 'Hospital ' + npi) }}
+    </h2>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Hospital data will be loaded from the backend API.
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Hospital Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Facility ID:</strong> {{ npi }}</p>
+                    <p><strong>Location:</strong> {{ hospital.get('City/Town', 'N/A') }}, {{ hospital.get('State', 'N/A') }}</p>
+                    <p><strong>Address:</strong> {{ hospital.get('Address', 'N/A') }}</p>
+                    <p><strong>Phone:</strong> {{ hospital.get('Telephone Number', 'N/A') }}</p>
+                    <p><strong>Type:</strong> {{ hospital.get('Hospital Type', 'N/A') }}</p>
+                    <p><strong>Ownership:</strong> {{ hospital.get('Hospital Ownership', 'N/A') }}</p>
+                    <p><strong>Emergency Services:</strong> {{ hospital.get('Emergency Services', 'N/A') }}</p>
+                    <p><strong>Overall Rating:</strong> {{ hospital.get('Hospital overall rating', 'N/A') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Procedure Prices</h5>
+                    <span class="badge bg-secondary">{{ prices | length }} procedures</span>
+                </div>
+                <div class="card-body">
+                    {% if prices %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Code</th>
+                                    <th>Payer</th>
+                                    <th>Gross Charge</th>
+                                    <th>Cash Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in prices %}
+                                <tr>
+                                    <td>{{ p.get('description', 'N/A')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}</td>
+                                    <td><span class="badge bg-primary">{{ p.get('procedure_code', 'N/A') }}</span></td>
+                                    <td>{{ p.get('payer_name', 'N/A') }}</td>
+                                    <td>${{ "{:,.0f}".format(p.get('gross_charge', 0) | float) if p.get('gross_charge') else 'N/A' }}</td>
+                                    <td class="text-success">${{ "{:,.0f}".format(p.get('cash_price', 0) | float) if p.get('cash_price') else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        No price data available for this hospital.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

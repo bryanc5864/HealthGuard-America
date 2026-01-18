@@ -138,7 +138,7 @@
                                 <span class="badge bg-secondary">{{ p.get('country', 'International') }}</span>
                                 {% endif %}
                             </td>
-                            <td>${{ "%.2f" | format(p.get('price', p.get('unit_price', 0)) | float) }}</td>
+                            <td>${{ "%.2f" | format(p.get('price', p.get('price_per_unit_usd', 0)) | float) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

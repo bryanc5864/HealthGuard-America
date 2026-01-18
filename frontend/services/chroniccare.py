@@ -32,7 +32,7 @@ class ChronicCareService:
 
         counties = cls._cache['county_health']
         if state:
-            counties = [c for c in counties if c.get('state', c.get('State', '')) == state]
+            counties = [c for c in counties if c.get('state_abbr', c.get('state', c.get('State', ''))) == state]
         return counties[:limit]
 
     @classmethod
@@ -40,7 +40,7 @@ class ChronicCareService:
         """Get single county by FIPS"""
         counties = cls.get_county_health(limit=5000)
         for c in counties:
-            if str(c.get('fips', c.get('FIPS', c.get('CountyFIPS', '')))) == str(fips):
+            if str(c.get('fips', c.get('FIPS', ''))) == str(fips):
                 return c
         return None
 
@@ -84,16 +84,16 @@ class ChronicCareService:
         # Calculate correlation data points
         correlations = []
         for c in counties:
-            diabetes = c.get('diabetes_prevalence', c.get('DIABETES', c.get('Diabetes_CrudePrev', 0)))
-            obesity = c.get('obesity_prevalence', c.get('OBESITY', c.get('Obesity_CrudePrev', 0)))
-            fast_food = c.get('fast_food_restaurants', c.get('FFRPTH16', 0))
-            food_insecurity = c.get('food_insecurity', c.get('FOODINSEC_15_17', 0))
+            diabetes = c.get('diabetes_prevalence', 0)
+            obesity = c.get('obesity_prevalence', 0)
+            fast_food = c.get('fast_food_restaurants_per_1000', c.get('FFRPTH16', 0))
+            food_insecurity = c.get('food_insecurity_rate', 0)
 
             if diabetes and obesity:
                 correlations.append({
-                    'fips': c.get('fips', c.get('FIPS', '')),
-                    'county': c.get('county', c.get('County', '')),
-                    'state': c.get('state', c.get('State', '')),
+                    'fips': c.get('fips', ''),
+                    'county': c.get('county_name', ''),
+                    'state': c.get('state_abbr', ''),
                     'diabetes': float(diabetes) if diabetes else 0,
                     'obesity': float(obesity) if obesity else 0,
                     'fast_food': float(fast_food) if fast_food else 0,
@@ -110,23 +110,23 @@ class ChronicCareService:
         # Score counties by chronic disease burden
         scored = []
         for c in counties:
-            diabetes = float(c.get('diabetes_prevalence', c.get('DIABETES', c.get('Diabetes_CrudePrev', 0))) or 0)
-            obesity = float(c.get('obesity_prevalence', c.get('OBESITY', c.get('Obesity_CrudePrev', 0))) or 0)
-            heart = float(c.get('heart_disease', c.get('CHD', c.get('CHD_CrudePrev', 0))) or 0)
+            diabetes = float(c.get('diabetes_prevalence', 0) or 0)
+            obesity = float(c.get('obesity_prevalence', 0) or 0)
+            heart = float(c.get('heart_disease_prevalence', 0) or 0)
 
             # Simple composite score
             risk_score = (diabetes * 0.4 + obesity * 0.35 + heart * 0.25) if (diabetes or obesity or heart) else 0
 
             if risk_score > 0:
                 scored.append({
-                    'fips': c.get('fips', c.get('FIPS', '')),
-                    'county': c.get('county', c.get('County', '')),
-                    'state': c.get('state', c.get('State', '')),
+                    'fips': c.get('fips', ''),
+                    'county': c.get('county_name', ''),
+                    'state': c.get('state_abbr', ''),
                     'risk_score': round(risk_score, 2),
                     'diabetes': diabetes,
                     'obesity': obesity,
                     'heart_disease': heart,
-                    'priority': 'Critical' if risk_score > 15 else 'High' if risk_score > 12 else 'Medium'
+                    'priority': 'Critical' if risk_score > 20 else 'High' if risk_score > 18 else 'Medium'
                 })
 
         # Sort by risk score descending
@@ -139,7 +139,7 @@ class ChronicCareService:
         counties = cls.get_county_health(limit=5000)
         states = set()
         for c in counties:
-            state = c.get('state', c.get('State', ''))
+            state = c.get('state_abbr', c.get('state', ''))
             if state and len(str(state)) == 2:
                 states.add(state)
         return sorted(states)
@@ -151,8 +151,9 @@ class ChronicCareService:
         priorities = cls.get_intervention_priorities(limit=5000)
 
         # Calculate averages
-        diabetes_vals = [float(c.get('diabetes_prevalence', c.get('DIABETES', 0)) or 0) for c in counties if c.get('diabetes_prevalence', c.get('DIABETES'))]
-        obesity_vals = [float(c.get('obesity_prevalence', c.get('OBESITY', 0)) or 0) for c in counties if c.get('obesity_prevalence', c.get('OBESITY'))]
+        diabetes_vals = [float(c.get('diabetes_prevalence', 0) or 0) for c in counties if c.get('diabetes_prevalence')]
+        obesity_vals = [float(c.get('obesity_prevalence', 0) or 0) for c in counties if c.get('obesity_prevalence')]
+        heart_vals = [float(c.get('heart_disease_prevalence', 0) or 0) for c in counties if c.get('heart_disease_prevalence')]
 
         critical_count = len([p for p in priorities if p.get('priority') == 'Critical'])
         high_count = len([p for p in priorities if p.get('priority') == 'High'])
@@ -161,6 +162,7 @@ class ChronicCareService:
             'total_counties': len(counties),
             'avg_diabetes': round(sum(diabetes_vals) / len(diabetes_vals), 1) if diabetes_vals else 0,
             'avg_obesity': round(sum(obesity_vals) / len(obesity_vals), 1) if obesity_vals else 0,
+            'avg_heart_disease': round(sum(heart_vals) / len(heart_vals), 1) if heart_vals else 0,
             'critical_counties': critical_count,
             'high_priority_counties': high_count,
             'states_covered': len(cls.get_states())

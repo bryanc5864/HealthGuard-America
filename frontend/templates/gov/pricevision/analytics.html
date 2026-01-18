@@ -52,13 +52,93 @@
 
     <div class="card">
         <div class="card-header">
-            <h5 class="mb-0">Compliance by State</h5>
+            <h5 class="mb-0">Hospitals by State</h5>
         </div>
         <div class="card-body">
+            {% if state_stats %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Total Hospitals</th>
+                            <th>With MRF Data</th>
+                            <th>Compliance Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for state, data in state_stats.items() | sort %}
+                        {% set rate = (data.compliant / data.total * 100) if data.total > 0 else 0 %}
+                        <tr>
+                            <td><strong>{{ state }}</strong></td>
+                            <td>{{ data.total }}</td>
+                            <td>{{ data.compliant }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {% if rate >= 75 %}bg-success{% elif rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                                         role="progressbar" style="width: {{ rate }}%;">
+                                        {{ "{:.0f}".format(rate) }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
             <div class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>
-                State-by-state compliance data will be loaded from the backend API.
+                No state-by-state data available.
             </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Hospital List -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">All Hospitals ({{ hospitals | length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if hospitals %}
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>Facility Name</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Type</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in hospitals[:50] %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('gov.pricevision_hospital', npi=h.get('Facility ID', '')) }}">
+                                    {{ h.get('Facility Name', 'Unknown') }}
+                                </a>
+                            </td>
+                            <td>{{ h.get('City/Town', '') }}</td>
+                            <td>{{ h.get('State', '') }}</td>
+                            <td><span class="badge bg-secondary">{{ h.get('Hospital Type', 'N/A')[:25] }}{% if h.get('Hospital Type', '')|length > 25 %}...{% endif %}</span></td>
+                            <td>{{ h.get('Hospital overall rating', 'N/A') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if hospitals | length > 50 %}
+            <p class="text-muted text-center mt-2">Showing 50 of {{ hospitals | length }} hospitals</p>
+            {% endif %}
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                No hospital data available.
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

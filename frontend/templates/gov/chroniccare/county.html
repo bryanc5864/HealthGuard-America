@@ -10,14 +10,152 @@
         </ol>
     </nav>
 
+    {% if county %}
     <h2 class="mb-4">
-        <i class="bi bi-geo-alt me-2"></i>County Chronic Disease Profile
+        <i class="bi bi-geo-alt me-2"></i>{{ county.county_name }}, {{ county.state_abbr }}
         <small class="text-muted">FIPS: {{ fips }}</small>
     </h2>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Chronic disease data for FIPS {{ fips }} will be loaded from the backend API.
+    <!-- County Health Metrics -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <h3 class="text-danger">{{ county.obesity_prevalence|default(0)|round(1) }}%</h3>
+                    <p class="mb-0">Obesity Prevalence</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">{{ county.diabetes_prevalence|default(0)|round(1) }}%</h3>
+                    <p class="mb-0">Diabetes Prevalence</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h3 class="text-info">{{ county.heart_disease_prevalence|default(0)|round(1) }}%</h3>
+                    <p class="mb-0">Heart Disease</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>{{ county.chronic_disease_burden_score|default(0)|round(1) }}</h3>
+                    <p class="mb-0">Burden Score</p>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Additional Metrics -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Health Indicators</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td>Smoking Prevalence</td>
+                                <td class="text-end">{{ county.smoking_prevalence|default('N/A') }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Physical Inactivity</td>
+                                <td class="text-end">{{ county.physical_inactivity_prevalence|default('N/A') }}%</td>
+                            </tr>
+                            <tr>
+                                <td>COPD Prevalence</td>
+                                <td class="text-end">{{ county.copd_prevalence|default('N/A') }}%</td>
+                            </tr>
+                            <tr>
+                                <td>High Blood Pressure</td>
+                                <td class="text-end">{{ county.high_bp_prevalence|default('N/A') }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Depression</td>
+                                <td class="text-end">{{ county.depression_prevalence|default('N/A') }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Food Environment</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td>Food Insecurity Rate</td>
+                                <td class="text-end">{{ county.food_insecurity_rate|default('N/A') }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Food Environment Index</td>
+                                <td class="text-end">{{ county.food_environment_index|default('N/A') }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fast Food Restaurants (per 1000)</td>
+                                <td class="text-end">{{ county.fast_food_restaurants_per_1000|default('N/A') }}</td>
+                            </tr>
+                            <tr>
+                                <td>Grocery Stores (per 1000)</td>
+                                <td class="text-end">{{ county.grocery_stores_per_1000|default('N/A') }}</td>
+                            </tr>
+                            <tr>
+                                <td>Limited Food Access</td>
+                                <td class="text-end">{{ county.pct_limited_food_access|default('N/A') }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intervention Priority -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">MAHA Intervention Status</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <strong>Priority Tier:</strong>
+                    {% if county.maha_intervention_tier == 'critical' %}
+                    <span class="badge bg-danger">Critical</span>
+                    {% elif county.maha_intervention_tier == 'high' %}
+                    <span class="badge bg-warning text-dark">High</span>
+                    {% elif county.maha_intervention_tier == 'medium' %}
+                    <span class="badge bg-info">Medium</span>
+                    {% else %}
+                    <span class="badge bg-success">Low</span>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <strong>Priority Score:</strong> {{ county.maha_priority_score|default(0)|round(2) }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Health Burden Score:</strong> {{ county.health_burden_score|default(0)|round(2) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        No data found for FIPS code: {{ fips }}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
