@@ -29,10 +29,45 @@ def chroniccare_dashboard():
     state = request.args.get('state', '')
     stats = ChronicCareService.get_stats()
     trends = ChronicCareService.get_national_trends()
+
+    # Get counties - filtered by state if specified
     counties = ChronicCareService.get_county_health(
-        state=state if state else None, limit=100
+        state=state if state else None, limit=500
     )
     states = ChronicCareService.get_states()
+
+    # Calculate filtered stats if state is selected
+    if state and counties:
+        # Recalculate stats for filtered data
+        import pandas as pd
+        df = pd.DataFrame(counties)
+        diabetes_vals = pd.to_numeric(df.get('diabetes_prevalence', pd.Series()), errors='coerce').dropna()
+        obesity_vals = pd.to_numeric(df.get('obesity_prevalence', pd.Series()), errors='coerce').dropna()
+        heart_vals = pd.to_numeric(df.get('heart_disease_prevalence', pd.Series()), errors='coerce').dropna()
+
+        # Calculate risk scores for filtered counties
+        critical = 0
+        high = 0
+        for c in counties:
+            d = float(c.get('diabetes_prevalence', 0) or 0)
+            o = float(c.get('obesity_prevalence', 0) or 0)
+            h = float(c.get('heart_disease_prevalence', 0) or 0)
+            score = d * 0.4 + o * 0.35 + h * 0.25
+            if score > 20:
+                critical += 1
+            elif score > 18:
+                high += 1
+
+        stats = {
+            'total_counties': len(counties),
+            'avg_diabetes': round(diabetes_vals.mean(), 1) if len(diabetes_vals) > 0 else 0,
+            'avg_obesity': round(obesity_vals.mean(), 1) if len(obesity_vals) > 0 else 0,
+            'avg_heart_disease': round(heart_vals.mean(), 1) if len(heart_vals) > 0 else 0,
+            'critical_counties': critical,
+            'high_priority_counties': high,
+            'states_covered': 1
+        }
+
     return render_template('gov/chroniccare/dashboard.html',
                           stats=stats, trends=trends, counties=counties,
                           states=states, selected_state=state)

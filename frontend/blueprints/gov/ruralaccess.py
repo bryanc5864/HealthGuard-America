@@ -28,10 +28,13 @@ def ruralaccess_map():
     state = request.args.get('state', '')
     discipline = request.args.get('discipline', '')
 
+    # Fetch more data when filtered, less when showing all
+    limit = 2000 if (state or discipline) else 500
+
     hpsas = RuralAccessService.get_hpsa_designations(
         state=state if state else None,
         discipline=discipline if discipline else None,
-        limit=500
+        limit=limit
     )
     map_data = RuralAccessService.get_shortage_map_data()
     states = RuralAccessService.get_states()

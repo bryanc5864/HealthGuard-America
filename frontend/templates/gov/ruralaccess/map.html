@@ -46,39 +46,37 @@
                     <h5 class="mb-0">Filters</h5>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">HPSA Type</label>
-                        <select class="form-select" id="disciplineFilter">
-                            <option value="">All Types</option>
-                            <option value="Primary Care" {% if selected_discipline == 'Primary Care' %}selected{% endif %}>Primary Care</option>
-                            <option value="Dental Health" {% if selected_discipline == 'Dental Health' %}selected{% endif %}>Dental Health</option>
-                            <option value="Mental Health" {% if selected_discipline == 'Mental Health' %}selected{% endif %}>Mental Health</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">State/Territory</label>
-                        <select class="form-select" id="stateFilter">
-                            <option value="">All 50 States + Territories</option>
-                            <optgroup label="US States (50)">
-                            {% for state in states if state not in ['AS', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI'] %}
-                            <option value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}</option>
-                            {% endfor %}
-                            </optgroup>
-                            <optgroup label="Territories & Jurisdictions (9)">
-                            {% for state in states if state in ['AS', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI'] %}
-                            <option value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}{% if state == 'DC' %} (District of Columbia){% elif state == 'PR' %} (Puerto Rico){% elif state == 'GU' %} (Guam){% elif state == 'VI' %} (U.S. Virgin Islands){% elif state == 'AS' %} (American Samoa){% elif state == 'MP' %} (N. Mariana Islands){% elif state == 'FM' %} (Micronesia){% elif state == 'MH' %} (Marshall Islands){% elif state == 'PW' %} (Palau){% endif %}</option>
-                            {% endfor %}
-                            </optgroup>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">HPSA Score Range</label>
-                        <div class="d-flex gap-2">
-                            <input type="number" class="form-control" placeholder="Min" min="0" max="25">
-                            <input type="number" class="form-control" placeholder="Max" min="0" max="25">
+                    <form action="{{ url_for('gov.ruralaccess_map') }}" method="get">
+                        <div class="mb-3">
+                            <label class="form-label">HPSA Type</label>
+                            <select class="form-select" name="discipline" id="disciplineFilter">
+                                <option value="">All Types</option>
+                                <option value="Primary Care" {% if selected_discipline == 'Primary Care' %}selected{% endif %}>Primary Care</option>
+                                <option value="Dental Health" {% if selected_discipline == 'Dental Health' %}selected{% endif %}>Dental Health</option>
+                                <option value="Mental Health" {% if selected_discipline == 'Mental Health' %}selected{% endif %}>Mental Health</option>
+                            </select>
                         </div>
-                    </div>
-                    <button class="btn btn-primary w-100">Apply Filters</button>
+                        <div class="mb-3">
+                            <label class="form-label">State/Territory</label>
+                            <select class="form-select" name="state" id="stateFilter">
+                                <option value="">All 50 States + Territories</option>
+                                <optgroup label="US States (50)">
+                                {% for state in states if state not in ['AS', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI'] %}
+                                <option value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}</option>
+                                {% endfor %}
+                                </optgroup>
+                                <optgroup label="Territories & Jurisdictions (9)">
+                                {% for state in states if state in ['AS', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI'] %}
+                                <option value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}{% if state == 'DC' %} (District of Columbia){% elif state == 'PR' %} (Puerto Rico){% elif state == 'GU' %} (Guam){% elif state == 'VI' %} (U.S. Virgin Islands){% elif state == 'AS' %} (American Samoa){% elif state == 'MP' %} (N. Mariana Islands){% elif state == 'FM' %} (Micronesia){% elif state == 'MH' %} (Marshall Islands){% elif state == 'PW' %} (Palau){% endif %}</option>
+                                {% endfor %}
+                                </optgroup>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        {% if selected_state or selected_discipline %}
+                        <a href="{{ url_for('gov.ruralaccess_map') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                        {% endif %}
+                    </form>
                 </div>
             </div>
 
@@ -164,15 +162,6 @@
         }
     });
 
-    // Filter handling
-    document.querySelector('button.btn-primary').addEventListener('click', function() {
-        var state = document.getElementById('stateFilter').value;
-        var discipline = document.getElementById('disciplineFilter').value;
-        var params = new URLSearchParams();
-        if (state) params.set('state', state);
-        if (discipline) params.set('discipline', discipline);
-        window.location.href = '{{ url_for("gov.ruralaccess_map") }}?' + params.toString();
-    });
 </script>
 {% endblock %}
 {% endblock %}
