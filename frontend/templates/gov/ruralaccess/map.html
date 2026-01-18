@@ -56,12 +56,19 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">State</label>
+                        <label class="form-label">State/Territory</label>
                         <select class="form-select" id="stateFilter">
-                            <option value="">All States</option>
-                            {% for state in states %}
+                            <option value="">All 50 States + Territories</option>
+                            <optgroup label="US States (50)">
+                            {% for state in states if state not in ['AS', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI'] %}
                             <option value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}</option>
                             {% endfor %}
+                            </optgroup>
+                            <optgroup label="Territories & Jurisdictions (9)">
+                            {% for state in states if state in ['AS', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI'] %}
+                            <option value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}{% if state == 'DC' %} (District of Columbia){% elif state == 'PR' %} (Puerto Rico){% elif state == 'GU' %} (Guam){% elif state == 'VI' %} (U.S. Virgin Islands){% elif state == 'AS' %} (American Samoa){% elif state == 'MP' %} (N. Mariana Islands){% elif state == 'FM' %} (Micronesia){% elif state == 'MH' %} (Marshall Islands){% elif state == 'PW' %} (Palau){% endif %}</option>
+                            {% endfor %}
+                            </optgroup>
                         </select>
                     </div>
                     <div class="mb-3">

@@ -76,7 +76,7 @@
                     <h3>{{ product.get('product_name', 'Unknown Product') }}</h3>
                     <p class="text-muted">Barcode: {{ barcode }}</p>
                     <p><strong>Brand:</strong> {{ product.get('brands', 'Unknown') }}</p>
-                    <p><strong>Category:</strong> {{ product.get('categories_en', product.get('categories', 'N/A'))[:60] }}</p>
+                    <p><strong>Category:</strong> {{ (product.get('categories_en') or product.get('categories') or 'N/A')[:60] }}</p>
                     {% if product.get('ingredients_text') %}
                     <p><strong>Ingredients:</strong> <small>{{ product.get('ingredients_text')[:300] }}{% if product.get('ingredients_text')|length > 300 %}...{% endif %}</small></p>
                     {% endif %}
