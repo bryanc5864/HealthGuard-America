@@ -78,3 +78,21 @@ def foodscore_snap():
     return render_template('gov/foodscore/snap.html',
                           stats=stats, snap_analysis=snap_analysis,
                           high_risk=high_risk, nova_dist=nova_dist)
+
+
+@gov_bp.route('/foodscore/additives')
+@gov_required
+def foodscore_additives():
+    """Additive alerts and risk analysis (gov-only)"""
+    search = request.args.get('q', '')
+    additives = FoodScoreService.get_additives(search=search if search else None, limit=200)
+    stats = FoodScoreService.get_stats()
+
+    # Categorize additives by risk level
+    high_risk_additives = [a for a in additives if float(a.get('risk_score', a.get('score', 50))) >= 70]
+    medium_risk = [a for a in additives if 40 <= float(a.get('risk_score', a.get('score', 50))) < 70]
+    low_risk = [a for a in additives if float(a.get('risk_score', a.get('score', 50))) < 40]
+
+    return render_template('gov/foodscore/additives.html',
+                          additives=additives, stats=stats, search=search,
+                          high_risk=high_risk_additives, medium_risk=medium_risk, low_risk=low_risk)

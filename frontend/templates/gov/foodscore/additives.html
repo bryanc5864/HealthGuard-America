@@ -1,0 +1,232 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.foodscore_home') }}">FoodScore</a></li>
+            <li class="breadcrumb-item active">Additive Alerts</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>Food Additive Risk Analysis
+        <span class="badge bg-primary ms-2">Government Only</span>
+    </h2>
+
+    <!-- About -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About Additive Risk Scoring</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                Food additives are substances added to foods during processing. While many are safe, some have been linked
+                to health concerns including hyperactivity in children, allergic reactions, and potential carcinogenic effects.
+            </p>
+            <p class="mb-0">
+                Our ML-powered Additive Scorer (85.71% accuracy) analyzes additives and assigns risk scores based on
+                scientific literature, regulatory status across countries, and known health effects.
+            </p>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.foodscore_additives') }}" method="get">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="{{ search }}"
+                           placeholder="Search additives (e.g., E621, aspartame, BHT)...">
+                    <button class="btn btn-success" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ stats.total_additives }}</h3>
+                    <p class="mb-0">Total Additives Tracked</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body text-center">
+                    <h3>{{ high_risk | length }}</h3>
+                    <p class="mb-0">High Risk (Score 70+)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body text-center">
+                    <h3>{{ medium_risk | length }}</h3>
+                    <p class="mb-0">Medium Risk (40-69)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <h3>{{ low_risk | length }}</h3>
+                    <p class="mb-0">Low Risk (&lt;40)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- High Risk Additives -->
+    {% if high_risk %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-exclamation-octagon me-2"></i>High Risk Additives</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">These additives have been associated with potential health concerns and may warrant policy attention:</p>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>E-Number</th>
+                            <th>Name</th>
+                            <th>Function</th>
+                            <th>Risk Score</th>
+                            <th>Concerns</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in high_risk[:20] %}
+                        <tr>
+                            <td><span class="badge bg-secondary">{{ a.get('e_number', a.get('code', 'N/A')) }}</span></td>
+                            <td><strong>{{ a.get('name', a.get('additive_name', 'Unknown')) }}</strong></td>
+                            <td>{{ a.get('function', a.get('category', 'N/A')) }}</td>
+                            <td><span class="badge bg-danger">{{ a.get('risk_score', a.get('score', 'N/A')) }}</span></td>
+                            <td><small>{{ a.get('concerns', a.get('health_effects', 'See research'))[:50] }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- All Additives -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-list me-2"></i>All Additives ({{ additives | length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if additives %}
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>E-Number</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in additives %}
+                        {% set score = a.get('risk_score', a.get('score', 50)) | float %}
+                        <tr>
+                            <td><span class="badge bg-secondary">{{ a.get('e_number', a.get('code', 'N/A')) }}</span></td>
+                            <td>{{ a.get('name', a.get('additive_name', 'Unknown')) }}</td>
+                            <td><small>{{ a.get('function', a.get('category', 'N/A')) }}</small></td>
+                            <td>
+                                {% if score >= 70 %}
+                                <span class="badge bg-danger">{{ score | int }}</span>
+                                {% elif score >= 40 %}
+                                <span class="badge bg-warning text-dark">{{ score | int }}</span>
+                                {% else %}
+                                <span class="badge bg-success">{{ score | int }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">No additives found{% if search %} matching "{{ search }}"{% endif %}.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Policy Recommendations -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Policy Considerations</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-danger h-100">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0">Consider Banning</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="small mb-0">
+                                <li>Artificial colors (especially Red 40, Yellow 5, Yellow 6)</li>
+                                <li>BHA and BHT preservatives</li>
+                                <li>Brominated vegetable oil (BVO)</li>
+                                <li>Potassium bromate</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">Require Warning Labels</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="small mb-0">
+                                <li>Artificial sweeteners</li>
+                                <li>MSG and related glutamates</li>
+                                <li>Sodium nitrite/nitrate</li>
+                                <li>Carrageenan</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-info h-100">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">Align with EU Standards</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="small mb-0">
+                                <li>EU bans 1,300+ additives allowed in US</li>
+                                <li>Titanium dioxide (E171) - banned in EU 2022</li>
+                                <li>Many artificial colors require warning labels in EU</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Methodology -->
+    <div class="card bg-light">
+        <div class="card-body">
+            <h6><i class="bi bi-info-circle me-2"></i>Risk Scoring Methodology</h6>
+            <p class="small mb-0">
+                Additive risk scores (0-100) are calculated based on: regulatory status across countries, published toxicology studies,
+                known allergenic potential, carcinogenicity classifications (IARC), and reported adverse effects.
+                Scores above 70 indicate additives with documented health concerns. This tool is for policy analysis
+                and should not replace professional medical or regulatory advice.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
