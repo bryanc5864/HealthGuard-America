@@ -45,6 +45,28 @@
                     {% else %}
                     <span class="badge bg-secondary">NOVA Unknown</span>
                     {% endif %}
+
+                    <!-- ML NOVA Confidence Badge -->
+                    {% if product.get('ml_nova_group') %}
+                    <div class="mt-3 pt-3 border-top">
+                        <small class="text-muted d-block mb-2">ML Classification</small>
+                        {% set ml_nova = product.get('ml_nova_group') %}
+                        {% set ml_conf = product.get('ml_nova_confidence', 0) %}
+                        <span class="badge {% if ml_nova == 4 %}bg-danger{% elif ml_nova == 3 %}bg-warning text-dark{% elif ml_nova == 2 %}bg-info{% elif ml_nova == 1 %}bg-success{% else %}bg-secondary{% endif %}">
+                            ML: NOVA {{ ml_nova }}
+                        </span>
+                        <span class="badge {% if ml_conf >= 80 %}bg-success{% elif ml_conf >= 60 %}bg-warning text-dark{% else %}bg-secondary{% endif %} ms-1">
+                            {{ ml_conf }}% confidence
+                        </span>
+
+                        {% if product.get('ml_nova_disagreement') %}
+                        <div class="alert alert-warning mt-2 mb-0 py-1 px-2 small">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            ML predicts NOVA {{ product.get('ml_nova_group') }}, stored value is NOVA {{ product.get('ml_nova_stored') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -116,24 +138,103 @@
                 </div>
             </div>
 
+            <!-- ML Additive Risk Breakdown -->
+            {% if product.get('ml_additive_risks') %}
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Additive Risk Analysis</h5>
+                    {% if product.get('ml_additive_high_risk_count', 0) > 0 %}
+                    <span class="badge bg-danger">{{ product.get('ml_additive_high_risk_count') }} high risk</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <!-- Summary -->
+                    <div class="row mb-3">
+                        <div class="col-4 text-center">
+                            <div class="fw-bold {% if product.get('ml_additive_max_risk', 0) >= 70 %}text-danger{% elif product.get('ml_additive_max_risk', 0) >= 40 %}text-warning{% else %}text-success{% endif %}">
+                                {{ product.get('ml_additive_max_risk', 0) }}
+                            </div>
+                            <small class="text-muted">Max Risk</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="fw-bold">{{ product.get('ml_additive_avg_risk', 0) }}</div>
+                            <small class="text-muted">Avg Risk</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="fw-bold">{{ product.get('ml_additive_risks') | length }}</div>
+                            <small class="text-muted">Analyzed</small>
+                        </div>
+                    </div>
+
+                    <!-- Individual Additive Scores -->
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Additive</th>
+                                    <th>Risk Score</th>
+                                    <th>FDA</th>
+                                    <th>EU</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for add in product.get('ml_additive_risks', [])[:10] %}
+                                <tr>
+                                    <td>
+                                        {{ add.name }}
+                                        {% if add.is_artificial %}
+                                        <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">artificial</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set risk = add.risk_score %}
+                                        <span class="badge {% if risk >= 70 %}bg-danger{% elif risk >= 40 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                            {{ risk }}
+                                        </span>
+                                    </td>
+                                    <td><small>{{ add.fda_status }}</small></td>
+                                    <td><small>{{ add.eu_status }}</small></td>
+                                    <td>
+                                        <span class="badge {% if add.risk_category == 'high' %}bg-danger{% elif add.risk_category == 'moderate' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                            {{ add.risk_category }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Nutrition -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Nutrition Facts (per 100g)</h5>
                 </div>
                 <div class="card-body">
+                    {% set has_nutrition = product.get('energy-kcal_100g') or product.get('fat_100g') or product.get('sugars_100g') %}
+                    {% if has_nutrition %}
                     <div class="row">
                         <div class="col-6">
-                            <p><strong>Calories:</strong> {{ product.get('energy-kcal_100g', 'N/A') }} kcal</p>
-                            <p><strong>Fat:</strong> {{ product.get('fat_100g', 'N/A') }}g</p>
-                            <p><strong>Saturated Fat:</strong> {{ product.get('saturated-fat_100g', 'N/A') }}g</p>
+                            <p><strong>Calories:</strong> {{ product.get('energy-kcal_100g') or 'N/A' }}{% if product.get('energy-kcal_100g') %} kcal{% endif %}</p>
+                            <p><strong>Fat:</strong> {{ product.get('fat_100g') or 'N/A' }}{% if product.get('fat_100g') %}g{% endif %}</p>
+                            <p><strong>Saturated Fat:</strong> {{ product.get('saturated-fat_100g') or 'N/A' }}{% if product.get('saturated-fat_100g') %}g{% endif %}</p>
                         </div>
                         <div class="col-6">
-                            <p><strong>Sugars:</strong> {{ product.get('sugars_100g', 'N/A') }}g</p>
-                            <p><strong>Sodium:</strong> {{ product.get('sodium_100g', 'N/A') }}g</p>
-                            <p><strong>Additives:</strong> {{ product.get('additives_n', product.get('flagged_additive_count', 'N/A')) }}</p>
+                            <p><strong>Sugars:</strong> {{ product.get('sugars_100g') or 'N/A' }}{% if product.get('sugars_100g') %}g{% endif %}</p>
+                            <p><strong>Sodium:</strong> {{ product.get('sodium_100g') or 'N/A' }}{% if product.get('sodium_100g') %}g{% endif %}</p>
+                            <p><strong>Additives:</strong> {{ product.get('additives_n') or product.get('flagged_additive_count') or 'N/A' }}</p>
                         </div>
                     </div>
+                    {% else %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Nutrition data not available for this product.
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 

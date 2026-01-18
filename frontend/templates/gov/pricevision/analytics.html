@@ -15,27 +15,66 @@
         <span class="badge bg-primary ms-2">Government Only</span>
     </h2>
 
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.pricevision_analytics') }}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Filter by State</label>
+                    <select name="state" class="form-select">
+                        <option value="">All States ({{ states | length }})</option>
+                        {% for s in states %}
+                        <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Show</label>
+                    <select name="limit" class="form-select">
+                        <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 hospitals</option>
+                        <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 hospitals</option>
+                        <option value="1000" {% if selected_limit == 1000 %}selected{% endif %}>1000 hospitals</option>
+                        <option value="all" {% if selected_limit == 'all' %}selected{% endif %}>All hospitals</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Apply</button>
+                </div>
+                {% if selected_state or selected_limit != 100 %}
+                <div class="col-md-2">
+                    <a href="{{ url_for('gov.pricevision_analytics') }}" class="btn btn-outline-secondary w-100">Clear</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    {% set total_hospitals_count = state_stats.values() | map(attribute='total') | sum %}
+    {% set compliant_hospitals_count = state_stats.values() | map(attribute='compliant') | sum %}
+    {% set overall_compliance_rate = (compliant_hospitals_count / total_hospitals_count * 100) if total_hospitals_count > 0 else 0 %}
+    {% set non_compliant_count = total_hospitals_count - compliant_hospitals_count %}
+    {% set non_compliant_rate = (non_compliant_count / total_hospitals_count * 100) if total_hospitals_count > 0 else 0 %}
     <div class="row g-4 mb-5">
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body text-center">
-                    <h3 class="display-4">78%</h3>
+                    <h3 class="display-4">{{ "{:.0f}".format(overall_compliance_rate) }}%</h3>
                     <p class="mb-0">MRF Compliance Rate</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-dark">
+            <div class="card bg-primary text-white">
                 <div class="card-body text-center">
-                    <h3 class="display-4">15%</h3>
-                    <p class="mb-0">Partial Compliance</p>
+                    <h3 class="display-4">{{ "{:,}".format(compliant_hospitals_count) }}</h3>
+                    <p class="mb-0">With MRF Data</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body text-center">
-                    <h3 class="display-4">7%</h3>
+                    <h3 class="display-4">{{ "{:.0f}".format(non_compliant_rate) }}%</h3>
                     <p class="mb-0">Non-Compliant</p>
                 </div>
             </div>
@@ -43,7 +82,7 @@
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body text-center">
-                    <h3 class="display-4">5,421</h3>
+                    <h3 class="display-4">{{ "{:,}".format(total_hospitals_count) }}</h3>
                     <p class="mb-0">CMS Registered</p>
                 </div>
             </div>
@@ -95,6 +134,52 @@
         </div>
     </div>
 
+    <!-- ML Suspicious Pricing Gaps -->
+    {% if suspicious_gaps %}
+    <div class="card mt-4 border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Suspicious Pricing Gaps (ML Detected)</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">
+                These hospitals have significant gaps in their pricing data. Missing cash prices may indicate incomplete transparency compliance.
+            </p>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>Facility Name</th>
+                            <th>Total Prices</th>
+                            <th>Missing Cash Prices</th>
+                            <th>Gap Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gap in suspicious_gaps %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('gov.pricevision_hospital', npi=gap.facility_id) }}">
+                                    {{ gap.facility_name }}
+                                </a>
+                            </td>
+                            <td>{{ gap.total_prices }}</td>
+                            <td class="text-danger">{{ gap.missing_cash }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px; min-width: 80px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ gap.gap_ratio }}%;">
+                                        {{ gap.gap_ratio }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Hospital List -->
     <div class="card mt-4">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -111,10 +196,11 @@
                             <th>State</th>
                             <th>Type</th>
                             <th>Rating</th>
+                            <th>Transparency</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for h in hospitals[:50] %}
+                        {% for h in hospitals %}
                         <tr>
                             <td>
                                 <a href="{{ url_for('gov.pricevision_hospital', npi=h.get('Facility ID', '')) }}">
@@ -125,14 +211,23 @@
                             <td>{{ h.get('State', '') }}</td>
                             <td><span class="badge bg-secondary">{{ h.get('Hospital Type', 'N/A')[:25] }}{% if h.get('Hospital Type', '')|length > 25 %}...{% endif %}</span></td>
                             <td>{{ h.get('Hospital overall rating', 'N/A') }}</td>
+                            <td>
+                                {% if h.get('ml_transparency_score') is defined %}
+                                <div class="progress" style="height: 20px; min-width: 60px;">
+                                    <div class="progress-bar {% if h.get('ml_transparency_score', 0) >= 70 %}bg-success{% elif h.get('ml_transparency_score', 0) >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                         role="progressbar" style="width: {{ h.get('ml_transparency_score', 0) }}%;">
+                                        {{ h.get('ml_transparency_score', 0) }}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            {% if hospitals | length > 50 %}
-            <p class="text-muted text-center mt-2">Showing 50 of {{ hospitals | length }} hospitals</p>
-            {% endif %}
             {% else %}
             <div class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>

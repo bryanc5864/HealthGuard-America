@@ -16,8 +16,16 @@
 
     <div class="alert alert-success mb-4">
         <i class="bi bi-cpu me-2"></i>
-        <strong>Intervention Prioritizer Model:</strong> 93.9% accuracy in ranking intervention urgency.
+        <strong>Intervention Prioritizer Model:</strong>
+        {% if ml_available %}
+        <span class="badge bg-success ms-2">Live</span>
+        {{ ml_model_confidence }}% accuracy in ranking intervention urgency.
         Counties are classified into 4 priority levels based on 20 health and socioeconomic features.
+        <br><small class="text-muted">Real-time ML inference active - predictions updated on each request.</small>
+        {% else %}
+        <span class="badge bg-warning text-dark ms-2">Heuristic Mode</span>
+        ML model unavailable. Using heuristic scoring based on disease prevalence rates.
+        {% endif %}
     </div>
 
     <!-- Priority Filters -->
@@ -83,7 +91,8 @@
                             <th>County</th>
                             <th>State</th>
                             <th>Priority</th>
-                            <th>Risk Score</th>
+                            <th>ML Risk Score</th>
+                            <th>ML Confidence</th>
                             <th>Primary Condition</th>
                             <th>Recommended Action</th>
                             <th></th>
@@ -91,43 +100,76 @@
                     </thead>
                     <tbody>
                         {% for p in priorities %}
-                        <tr>
+                        <tr {% if p.priority_changed %}class="table-warning"{% endif %}>
                             <td>{{ loop.index }}</td>
-                            <td>{{ p.county }}</td>
+                            <td>
+                                {{ p.county }}
+                                {% if p.priority_changed %}
+                                <span class="badge bg-warning text-dark ms-1" title="ML priority differs from stored priority">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </span>
+                                {% endif %}
+                            </td>
                             <td>{{ p.state }}</td>
                             <td>
-                                {% if p.priority == 'Critical' %}
+                                {% set display_priority = p.ml_priority_tier if ml_available else p.priority %}
+                                {% if display_priority == 'Critical' %}
                                 <span class="badge bg-danger">Critical</span>
-                                {% elif p.priority == 'High' %}
+                                {% elif display_priority == 'High' %}
                                 <span class="badge bg-warning text-dark">High</span>
-                                {% else %}
+                                {% elif display_priority == 'Medium' %}
                                 <span class="badge bg-info">Medium</span>
+                                {% else %}
+                                <span class="badge bg-success">Low</span>
+                                {% endif %}
+                                {% if p.priority_changed %}
+                                <br><small class="text-muted">(was: {{ p.priority }})</small>
                                 {% endif %}
                             </td>
-                            <td>{{ p.risk_score }}</td>
+                            <td>
+                                <strong>{{ p.ml_risk_score }}</strong>
+                                {% if p.ml_risk_score != p.risk_score %}
+                                <br><small class="text-muted">(orig: {{ p.risk_score }})</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if p.ml_confidence > 0 %}
+                                <div class="progress" style="height: 20px; min-width: 80px;">
+                                    <div class="progress-bar {% if p.ml_confidence >= 90 %}bg-success{% elif p.ml_confidence >= 70 %}bg-info{% else %}bg-warning{% endif %}"
+                                         role="progressbar" style="width: {{ p.ml_confidence }}%">
+                                        {{ p.ml_confidence }}%
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if p.diabetes >= p.obesity and p.diabetes >= p.heart_disease %}
-                                Diabetes
+                                <span class="badge bg-secondary">Diabetes</span>
                                 {% elif p.obesity >= p.diabetes and p.obesity >= p.heart_disease %}
-                                Obesity
+                                <span class="badge bg-secondary">Obesity</span>
                                 {% else %}
-                                Heart Disease
+                                <span class="badge bg-secondary">Heart Disease</span>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if p.priority == 'Critical' %}
-                                Community screening programs
-                                {% elif p.priority == 'High' %}
-                                Healthcare access expansion
+                                {% set action_priority = p.ml_priority_tier if ml_available else p.priority %}
+                                {% if action_priority == 'Critical' %}
+                                <small>Community screening programs</small>
+                                {% elif action_priority == 'High' %}
+                                <small>Healthcare access expansion</small>
+                                {% elif action_priority == 'Medium' %}
+                                <small>Preventive education</small>
                                 {% else %}
-                                Preventive education
+                                <small>Maintenance & monitoring</small>
                                 {% endif %}
                             </td>
                             <td><a href="{{ url_for('gov.chroniccare_county', fips=p.fips) }}" class="btn btn-sm btn-outline-primary">Details</a></td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="8" class="text-center text-muted">No priority data available</td>
+                            <td colspan="9" class="text-center text-muted">No priority data available</td>
                         </tr>
                         {% endfor %}
                     </tbody>

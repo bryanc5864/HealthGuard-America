@@ -58,6 +58,44 @@
     </div>
     {% endif %}
 
+    <!-- ML Price Analysis Summary -->
+    {% if fairness_data %}
+    {% set fair_count = prices | selectattr('ml_price_cluster', 'equalto', 'Fair') | list | length %}
+    {% set discount_count = prices | selectattr('ml_price_cluster', 'equalto', 'Discount') | list | length %}
+    {% set overpriced_count = prices | selectattr('ml_price_cluster', 'equalto', 'Overpriced') | list | length %}
+    {% set outlier_count = prices | selectattr('ml_is_outlier') | list | length %}
+    <div class="card mb-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="bi bi-robot me-2"></i>AI Price Analysis</h6>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <h4 class="text-success">{{ fair_count }}</h4>
+                    <small>Fair Price</small>
+                </div>
+                <div class="col-md-3">
+                    <h4 class="text-info">{{ discount_count }}</h4>
+                    <small>Discount</small>
+                </div>
+                <div class="col-md-3">
+                    <h4 class="text-danger">{{ overpriced_count }}</h4>
+                    <small>Overpriced</small>
+                </div>
+                <div class="col-md-3">
+                    <h4 class="text-warning">{{ outlier_count }}</h4>
+                    <small>Outliers</small>
+                </div>
+            </div>
+            <hr>
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Our AI analyzes price patterns to help you identify fair-priced hospitals. Look for green "Fair Price" or "Best Value" badges.
+            </small>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Price Results -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -76,6 +114,7 @@
                             <th>Cash Price</th>
                             <th>Min Price</th>
                             <th>Max Price</th>
+                            <th>Price Fairness</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -96,8 +135,26 @@
                             <td>${{ "{:,.0f}".format(min_price) if min_price else 'N/A' }}</td>
                             <td>${{ "{:,.0f}".format(max_price) if max_price else 'N/A' }}</td>
                             <td>
-                                {% if loop.first and cash %}
-                                <span class="badge bg-success">Best Price</span>
+                                {% if p.get('ml_price_cluster') %}
+                                    {% if p.get('ml_price_cluster') == 'Fair' %}
+                                    <span class="badge bg-success">Fair Price</span>
+                                    {% elif p.get('ml_price_cluster') == 'Discount' %}
+                                    <span class="badge bg-info">Discount</span>
+                                    {% elif p.get('ml_price_cluster') == 'Overpriced' %}
+                                    <span class="badge bg-danger">Overpriced</span>
+                                    {% endif %}
+                                    {% if p.get('ml_is_outlier') %}
+                                    <br><span class="badge bg-warning text-dark mt-1">Price Outlier</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if p.get('hospital_npi') == best_value_npi and cash %}
+                                <span class="badge bg-success">Best Value</span>
+                                {% elif loop.first and cash %}
+                                <span class="badge bg-primary">Best Price</span>
                                 {% endif %}
                             </td>
                         </tr>

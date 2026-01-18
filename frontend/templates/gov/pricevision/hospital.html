@@ -31,6 +31,70 @@
                     <p><strong>Overall Rating:</strong> {{ hospital.get('Hospital overall rating', 'N/A') }}</p>
                 </div>
             </div>
+
+            <!-- ML Pricing Pattern Analysis -->
+            {% if pricing_analysis %}
+            <div class="card mb-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-robot me-2"></i>ML Pricing Analysis</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Average Markup:</strong>
+                        <span class="badge {% if pricing_analysis.avg_markup > 100 %}bg-danger{% elif pricing_analysis.avg_markup > 50 %}bg-warning text-dark{% else %}bg-success{% endif %} ms-2">
+                            {{ pricing_analysis.avg_markup }}%
+                        </span>
+                        <small class="d-block text-muted">vs. cash price</small>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Pricing Consistency:</strong>
+                        <div class="progress mt-1" style="height: 20px;">
+                            <div class="progress-bar {% if pricing_analysis.pricing_consistency >= 70 %}bg-success{% elif pricing_analysis.pricing_consistency >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                 role="progressbar" style="width: {{ pricing_analysis.pricing_consistency }}%;">
+                                {{ pricing_analysis.pricing_consistency }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">Higher = more consistent pricing</small>
+                    </div>
+                    {% if pricing_analysis.specialties %}
+                    <div class="mb-3">
+                        <strong>Specialties:</strong><br>
+                        {% for specialty in pricing_analysis.specialties %}
+                        <span class="badge bg-secondary me-1 mt-1">{{ specialty }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <strong>Price Range:</strong>
+                        <span class="text-success">${{ "{:,.0f}".format(pricing_analysis.price_range[0]) }}</span> -
+                        <span class="text-danger">${{ "{:,.0f}".format(pricing_analysis.price_range[1]) }}</span>
+                    </div>
+                    <div>
+                        <strong>Avg Cash Price:</strong>
+                        ${{ "{:,.0f}".format(pricing_analysis.avg_cash_price) }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Transparency Score -->
+            {% if transparency_score is defined %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Transparency Score</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="{% if transparency_score >= 70 %}text-success{% elif transparency_score >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                        {{ transparency_score }}/100
+                    </h2>
+                    <div class="progress mb-2" style="height: 10px;">
+                        <div class="progress-bar {% if transparency_score >= 70 %}bg-success{% elif transparency_score >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                             role="progressbar" style="width: {{ transparency_score }}%;"></div>
+                    </div>
+                    <small class="text-muted">Based on data completeness and quality</small>
+                </div>
+            </div>
+            {% endif %}
         </div>
         <div class="col-md-8">
             <div class="card">

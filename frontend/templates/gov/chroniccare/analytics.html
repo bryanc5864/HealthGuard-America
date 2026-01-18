@@ -1,0 +1,373 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
+            <li class="breadcrumb-item active">Analytics</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up me-2"></i>State-by-State Analytics</h2>
+        <span class="badge bg-primary">Government Only</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.chroniccare_analytics') }}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Filter by State</label>
+                    <select name="state" class="form-select">
+                        <option value="">All States ({{ states | length }})</option>
+                        {% for s in states %}
+                        <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">County Limit</label>
+                    <select name="limit" class="form-select">
+                        <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 counties</option>
+                        <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 counties</option>
+                        <option value="1000" {% if selected_limit == 1000 %}selected{% endif %}>1000 counties</option>
+                        <option value="3000" {% if selected_limit == 3000 %}selected{% endif %}>All (~3000)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </div>
+                {% if selected_state or selected_limit != 100 %}
+                <div class="col-md-2">
+                    <a href="{{ url_for('gov.chroniccare_analytics') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- National Summary -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5 fw-bold">{{ overall_stats.total_counties }}</h3>
+                    <p class="mb-0">Total Counties</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5 fw-bold">{{ state_stats | length }}</h3>
+                    <p class="mb-0">States + Territories</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5 fw-bold">{{ overall_stats.avg_diabetes }}%</h3>
+                    <p class="mb-0">Avg Diabetes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5 fw-bold">{{ overall_stats.avg_obesity }}%</h3>
+                    <p class="mb-0">Avg Obesity</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5 fw-bold">{{ overall_stats.avg_heart_disease }}%</h3>
+                    <p class="mb-0">Avg Heart Disease</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5 fw-bold">{{ overall_stats.critical_counties }}</h3>
+                    <p class="mb-0">Critical Counties</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- State Rankings Chart -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>State Disease Burden Rankings</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="stateRankingChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Distribution by State -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Risk Level Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="riskDistributionChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- State Statistics Table -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>State-by-State Statistics</h5>
+            <span class="badge bg-secondary">{{ filtered_state_stats | length }} states</span>
+        </div>
+        <div class="card-body">
+            {% if filtered_state_stats %}
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>State</th>
+                            <th>Counties</th>
+                            <th>Avg Diabetes %</th>
+                            <th>Avg Obesity %</th>
+                            <th>Avg Heart Disease %</th>
+                            <th>Critical</th>
+                            <th>High Risk</th>
+                            <th>Medium</th>
+                            <th>Overall Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for state, data in filtered_state_stats.items() | sort %}
+                        {% set combined_rate = (data.avg_diabetes * 0.4 + data.avg_obesity * 0.35 + data.avg_heart_disease * 0.25) %}
+                        <tr>
+                            <td><strong>{{ state }}</strong></td>
+                            <td>{{ data.total_counties }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px; min-width: 80px;">
+                                    <div class="progress-bar bg-warning" role="progressbar"
+                                         style="width: {{ (data.avg_diabetes / 20 * 100) | int }}%;">
+                                        {{ data.avg_diabetes }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px; min-width: 80px;">
+                                    <div class="progress-bar bg-danger" role="progressbar"
+                                         style="width: {{ (data.avg_obesity / 50 * 100) | int }}%;">
+                                        {{ data.avg_obesity }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px; min-width: 80px;">
+                                    <div class="progress-bar bg-info" role="progressbar"
+                                         style="width: {{ (data.avg_heart_disease / 15 * 100) | int }}%;">
+                                        {{ data.avg_heart_disease }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if data.critical_counties > 0 %}
+                                <span class="badge bg-danger">{{ data.critical_counties }}</span>
+                                {% else %}
+                                <span class="text-muted">0</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if data.high_counties > 0 %}
+                                <span class="badge bg-warning text-dark">{{ data.high_counties }}</span>
+                                {% else %}
+                                <span class="text-muted">0</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ data.medium_counties }}</td>
+                            <td>
+                                {% if combined_rate > 20 %}
+                                <span class="badge bg-danger">Critical</span>
+                                {% elif combined_rate > 18 %}
+                                <span class="badge bg-warning text-dark">High</span>
+                                {% else %}
+                                <span class="badge bg-success">Medium</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                No state-by-state data available.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Key Metrics Comparison -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Key Metrics Comparison</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6>Top 5 States - Diabetes</h6>
+                    <canvas id="diabetesTopChart" height="200"></canvas>
+                </div>
+                <div class="col-md-4">
+                    <h6>Top 5 States - Obesity</h6>
+                    <canvas id="obesityTopChart" height="200"></canvas>
+                </div>
+                <div class="col-md-4">
+                    <h6>Top 5 States - Heart Disease</h6>
+                    <canvas id="heartTopChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// State statistics data
+var stateStats = {{ state_stats | tojson | safe }};
+
+// Convert to arrays for charts
+var stateNames = Object.keys(stateStats).sort();
+var diabetesData = stateNames.map(s => stateStats[s].avg_diabetes);
+var obesityData = stateNames.map(s => stateStats[s].avg_obesity);
+var heartData = stateNames.map(s => stateStats[s].avg_heart_disease);
+
+// State Ranking Chart - show top 15 by combined risk
+var combinedRisk = stateNames.map(s => ({
+    state: s,
+    risk: stateStats[s].avg_diabetes * 0.4 + stateStats[s].avg_obesity * 0.35 + stateStats[s].avg_heart_disease * 0.25
+})).sort((a, b) => b.risk - a.risk).slice(0, 15);
+
+var rankingCtx = document.getElementById('stateRankingChart').getContext('2d');
+new Chart(rankingCtx, {
+    type: 'bar',
+    data: {
+        labels: combinedRisk.map(d => d.state),
+        datasets: [{
+            label: 'Combined Risk Score',
+            data: combinedRisk.map(d => d.risk.toFixed(1)),
+            backgroundColor: combinedRisk.map(d => d.risk > 20 ? '#dc3545' : d.risk > 18 ? '#ffc107' : '#28a745')
+        }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: { beginAtZero: true, max: 30 }
+        }
+    }
+});
+
+// Risk Distribution Chart
+var totalCritical = Object.values(stateStats).reduce((sum, s) => sum + s.critical_counties, 0);
+var totalHigh = Object.values(stateStats).reduce((sum, s) => sum + s.high_counties, 0);
+var totalMedium = Object.values(stateStats).reduce((sum, s) => sum + s.medium_counties, 0);
+
+var riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
+new Chart(riskCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Critical', 'High Risk', 'Medium/Low'],
+        datasets: [{
+            data: [totalCritical, totalHigh, totalMedium],
+            backgroundColor: ['#dc3545', '#ffc107', '#28a745']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+
+// Top 5 States - Diabetes
+var diabetesTop = stateNames.map(s => ({state: s, val: stateStats[s].avg_diabetes}))
+    .sort((a, b) => b.val - a.val).slice(0, 5);
+var diabetesCtx = document.getElementById('diabetesTopChart').getContext('2d');
+new Chart(diabetesCtx, {
+    type: 'bar',
+    data: {
+        labels: diabetesTop.map(d => d.state),
+        datasets: [{
+            label: 'Diabetes %',
+            data: diabetesTop.map(d => d.val),
+            backgroundColor: '#ffc107'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, max: 20 } }
+    }
+});
+
+// Top 5 States - Obesity
+var obesityTop = stateNames.map(s => ({state: s, val: stateStats[s].avg_obesity}))
+    .sort((a, b) => b.val - a.val).slice(0, 5);
+var obesityCtx = document.getElementById('obesityTopChart').getContext('2d');
+new Chart(obesityCtx, {
+    type: 'bar',
+    data: {
+        labels: obesityTop.map(d => d.state),
+        datasets: [{
+            label: 'Obesity %',
+            data: obesityTop.map(d => d.val),
+            backgroundColor: '#dc3545'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, max: 50 } }
+    }
+});
+
+// Top 5 States - Heart Disease
+var heartTop = stateNames.map(s => ({state: s, val: stateStats[s].avg_heart_disease}))
+    .sort((a, b) => b.val - a.val).slice(0, 5);
+var heartCtx = document.getElementById('heartTopChart').getContext('2d');
+new Chart(heartCtx, {
+    type: 'bar',
+    data: {
+        labels: heartTop.map(d => d.state),
+        datasets: [{
+            label: 'Heart Disease %',
+            data: heartTop.map(d => d.val),
+            backgroundColor: '#17a2b8'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, max: 15 } }
+    }
+});
+</script>
+{% endblock %}

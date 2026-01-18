@@ -57,12 +57,24 @@
                                 <small class="text-muted">{{ (p.get('brands') or 'Unknown brand')[:30] }}</small>
                             </div>
                             {% set score = p.get('maha_score', 50) | int %}
-                            <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center mb-2">
                                 <div class="progress flex-grow-1 me-2" style="height: 8px;">
                                     <div class="progress-bar {% if score < 40 %}bg-danger{% elif score < 60 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ score }}%;"></div>
                                 </div>
                                 <span class="fw-bold">{{ score }}</span>
                             </div>
+                            <!-- ML Additive Risk Score -->
+                            {% if p.get('ml_additive_risk_score') %}
+                            {% set ml_risk = p.get('ml_additive_risk_score') %}
+                            <div class="d-flex align-items-center mb-3">
+                                <small class="text-muted me-2">Additive Risk:</small>
+                                <span class="badge {% if ml_risk >= 70 %}bg-danger{% elif ml_risk >= 40 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                    {{ ml_risk }}
+                                </span>
+                            </div>
+                            {% else %}
+                            <div class="mb-3"></div>
+                            {% endif %}
                             <a href="{{ url_for('gov.foodscore_product', barcode=p.get('code', '')) }}"
                                class="btn btn-sm btn-outline-success w-100">View Details</a>
                         </div>

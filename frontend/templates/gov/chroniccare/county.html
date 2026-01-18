@@ -123,7 +123,7 @@
     </div>
 
     <!-- Intervention Priority -->
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header">
             <h5 class="mb-0">MAHA Intervention Status</h5>
         </div>
@@ -150,6 +150,182 @@
             </div>
         </div>
     </div>
+
+    <!-- ML Risk Breakdown -->
+    {% if ml_available and ml_risk_breakdown %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Risk Factor Breakdown</h5>
+            <span class="badge bg-success">ML Model Active</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Top Contributing Risk Factors</h6>
+                    <p class="text-muted small">Factors most responsible for elevated chronic disease risk in this county.</p>
+
+                    {% for factor in ml_risk_breakdown %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>
+                                <strong>{{ factor.name }}</strong>
+                                <span class="badge bg-secondary ms-1">{{ factor.category }}</span>
+                            </span>
+                            <span class="text-muted">{{ factor.value }}{% if 'rate' in factor.name.lower() or 'prevalence' in factor.name.lower() or 'pct' in factor.name.lower() %}%{% endif %}</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar {% if factor.contribution > 10 %}bg-danger{% elif factor.contribution > 5 %}bg-warning{% else %}bg-info{% endif %}"
+                                 role="progressbar" style="width: {{ [factor.contribution * 5, 100]|min }}%"
+                                 title="Contribution: {{ factor.contribution }}%">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if not ml_risk_breakdown %}
+                    <p class="text-muted">No significant risk factors identified above threshold levels.</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <h6>Risk Factor Categories</h6>
+                    <canvas id="riskBreakdownChart" height="200"></canvas>
+                </div>
+            </div>
+
+            {% if ml_priority %}
+            <hr>
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <strong>ML Priority:</strong>
+                    {% set ml_tier = ml_priority.get('priority', 'Unknown') %}
+                    {% if ml_tier == 'Critical' or ml_tier == 'critical' %}
+                    <span class="badge bg-danger">Critical</span>
+                    {% elif ml_tier == 'High' or ml_tier == 'high' %}
+                    <span class="badge bg-warning text-dark">High</span>
+                    {% elif ml_tier == 'Medium' or ml_tier == 'medium' %}
+                    <span class="badge bg-info">Medium</span>
+                    {% else %}
+                    <span class="badge bg-success">Low</span>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <strong>ML Confidence:</strong>
+                    {% set conf = (ml_priority.get('confidence', 0) * 100)|round(1) %}
+                    <span class="badge {% if conf >= 90 %}bg-success{% elif conf >= 70 %}bg-info{% else %}bg-warning{% endif %}">{{ conf }}%</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>MAHA Index:</strong>
+                    {{ ml_priority.get('maha_index', 0)|round(1) }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ML Recommended Interventions -->
+    {% if ml_available and ml_recommended_interventions %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>ML-Recommended Interventions</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">Interventions recommended based on ML analysis of county risk factors. Sorted by estimated impact.</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Target Factor</th>
+                            <th>Recommended Intervention</th>
+                            <th>Estimated Impact</th>
+                            <th>Est. Reduction</th>
+                            <th>Cost Tier</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in ml_recommended_interventions %}
+                        <tr>
+                            <td>
+                                <strong>{{ rec.target_factor }}</strong>
+                                <br><small class="text-muted">Current: {{ rec.current_value }}{% if 'rate' in rec.target_factor.lower() or 'prevalence' in rec.target_factor.lower() %}%{% endif %}</small>
+                            </td>
+                            <td>{{ rec.intervention }}</td>
+                            <td>
+                                {% if rec.impact == 'High' %}
+                                <span class="badge bg-success">High Impact</span>
+                                {% elif rec.impact == 'Medium' %}
+                                <span class="badge bg-info">Medium Impact</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Low Impact</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="text-success">{{ rec.estimated_reduction }}</span>
+                            </td>
+                            <td>
+                                {% if rec.cost_tier == 'High' %}
+                                <span class="badge bg-danger">$$$</span>
+                                {% elif rec.cost_tier == 'Medium' %}
+                                <span class="badge bg-warning text-dark">$$</span>
+                                {% else %}
+                                <span class="badge bg-success">$</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info mt-3 mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Note:</strong> Estimated reductions are based on published intervention effectiveness studies and may vary based on implementation quality and local factors.
+            </div>
+        </div>
+    </div>
+    {% elif not ml_available %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>ML Analysis Unavailable:</strong> The ML risk prediction model is not currently loaded. Risk breakdown and intervention recommendations are not available.
+    </div>
+    {% endif %}
+
+    {% if ml_available and ml_risk_breakdown %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Risk breakdown by category chart
+    var categoryData = {};
+    {% for factor in ml_risk_breakdown %}
+    if (!categoryData['{{ factor.category }}']) {
+        categoryData['{{ factor.category }}'] = 0;
+    }
+    categoryData['{{ factor.category }}'] += {{ factor.contribution }};
+    {% endfor %}
+
+    var categories = Object.keys(categoryData);
+    var contributions = Object.values(categoryData);
+
+    var ctx = document.getElementById('riskBreakdownChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categories,
+            datasets: [{
+                data: contributions,
+                backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745', '#6c757d']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+    </script>
+    {% endif %}
 
     {% else %}
     <div class="alert alert-warning">

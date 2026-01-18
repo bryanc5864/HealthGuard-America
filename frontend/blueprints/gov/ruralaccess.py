@@ -27,21 +27,36 @@ def ruralaccess_map():
     """Interactive healthcare shortage map"""
     state = request.args.get('state', '')
     discipline = request.args.get('discipline', '')
+    limit_param = request.args.get('limit', '500')
 
-    # Fetch more data when filtered, less when showing all
-    limit = 2000 if (state or discipline) else 500
+    # Handle 'all' option for unlimited results
+    if limit_param.lower() == 'all':
+        limit = 0  # 0 means all records
+    else:
+        try:
+            limit = int(limit_param)
+        except ValueError:
+            limit = 500
 
     hpsas = RuralAccessService.get_hpsa_designations(
         state=state if state else None,
         discipline=discipline if discipline else None,
         limit=limit
     )
+
+    # Get total count for display
+    total_hpsas = RuralAccessService.get_total_hpsa_count(
+        state=state if state else None,
+        discipline=discipline if discipline else None
+    )
+
     map_data = RuralAccessService.get_shortage_map_data()
     states = RuralAccessService.get_states()
 
     return render_template('gov/ruralaccess/map.html',
                           hpsas=hpsas, map_data=map_data, states=states,
-                          selected_state=state, selected_discipline=discipline)
+                          selected_state=state, selected_discipline=discipline,
+                          selected_limit=limit_param, total_hpsas=total_hpsas)
 
 
 @gov_bp.route('/ruralaccess/county/<fips>')
@@ -71,26 +86,74 @@ def ruralaccess_hpsa(hpsa_id):
 @gov_bp.route('/api/ruralaccess/hpsas')
 @gov_required
 def api_hpsas():
-    """API: Get HPSA designations"""
+    """API: Get HPSA designations
+
+    Query params:
+        state: Filter by state abbreviation
+        discipline: Filter by discipline type
+        limit: Number of records (100, 500, 1000, or 'all' for unlimited)
+    """
     state = request.args.get('state', '')
     discipline = request.args.get('discipline', '')
-    limit = int(request.args.get('limit', 100))
+    limit_param = request.args.get('limit', '100')
+
+    # Handle 'all' option for unlimited results
+    if limit_param.lower() == 'all':
+        limit = 0  # 0 means all records
+    else:
+        try:
+            limit = int(limit_param)
+        except ValueError:
+            limit = 100
+
     hpsas = RuralAccessService.get_hpsa_designations(
         state=state if state else None,
         discipline=discipline if discipline else None,
         limit=limit
     )
-    return jsonify(hpsas)
+    total = RuralAccessService.get_total_hpsa_count(
+        state=state if state else None,
+        discipline=discipline if discipline else None
+    )
+
+    return jsonify({
+        'data': hpsas,
+        'total': total,
+        'returned': len(hpsas),
+        'limit': limit_param
+    })
 
 
 @gov_bp.route('/api/ruralaccess/counties')
 @gov_required
 def api_counties():
-    """API: Get counties"""
+    """API: Get counties
+
+    Query params:
+        state: Filter by state abbreviation
+        limit: Number of records (100, 500, 1000, or 'all' for unlimited)
+    """
     state = request.args.get('state', '')
-    limit = int(request.args.get('limit', 100))
+    limit_param = request.args.get('limit', '100')
+
+    # Handle 'all' option for unlimited results
+    if limit_param.lower() == 'all':
+        limit = 0  # 0 means all records
+    else:
+        try:
+            limit = int(limit_param)
+        except ValueError:
+            limit = 100
+
     counties = RuralAccessService.get_counties(state=state if state else None, limit=limit)
-    return jsonify(counties)
+    total = RuralAccessService.get_total_counties_count(state=state if state else None)
+
+    return jsonify({
+        'data': counties,
+        'total': total,
+        'returned': len(counties),
+        'limit': limit_param
+    })
 
 
 @gov_bp.route('/api/ruralaccess/map-data')

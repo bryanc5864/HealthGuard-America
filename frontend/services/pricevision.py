@@ -3,11 +3,27 @@ PriceVision Data Service
 Load hospital and procedure pricing data - OPTIMIZED
 """
 import pandas as pd
+import numpy as np
 import pyarrow.parquet as pq
 from pathlib import Path
+from . import VALID_US_STATES
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
+
+
+def clean_nan_records(records):
+    """Replace NaN values with None in list of dicts"""
+    cleaned = []
+    for record in records:
+        clean_record = {}
+        for key, value in record.items():
+            if pd.isna(value):
+                clean_record[key] = None
+            else:
+                clean_record[key] = value
+        cleaned.append(clean_record)
+    return cleaned
 
 
 class PriceVisionService:
@@ -21,7 +37,7 @@ class PriceVisionService:
             proc_file = DATA_DIR / 'processed/pricevision/medicare_procedures.csv'
             if proc_file.exists():
                 df = pd.read_csv(proc_file)
-                cls._cache['procedures'] = df.to_dict('records')
+                cls._cache['procedures'] = clean_nan_records(df.to_dict('records'))
             else:
                 cls._cache['procedures'] = []
 
@@ -39,7 +55,7 @@ class PriceVisionService:
             hosp_file = DATA_DIR / 'raw/pricevision/hospital_general_info.csv'
             if hosp_file.exists():
                 df = pd.read_csv(hosp_file)
-                cls._cache['hospitals'] = df.to_dict('records')
+                cls._cache['hospitals'] = clean_nan_records(df.to_dict('records'))
             else:
                 cls._cache['hospitals'] = []
 
@@ -126,12 +142,13 @@ class PriceVisionService:
             df = df[df['hospital_npi'].astype(str).isin(valid_npis)]
 
             # Add hospital info to results
-            results = df.head(limit).to_dict('records')
+            results = clean_nan_records(df.head(limit).to_dict('records'))
             for r in results:
                 npi = str(r.get('hospital_npi', ''))
-                r['hospital_name'] = hospital_cache[npi]['name']
-                r['hospital_city'] = hospital_cache[npi]['city']
-                r['hospital_state'] = hospital_cache[npi]['state']
+                if npi in hospital_cache:
+                    r['hospital_name'] = hospital_cache[npi]['name']
+                    r['hospital_city'] = hospital_cache[npi]['city']
+                    r['hospital_state'] = hospital_cache[npi]['state']
             return results
         except Exception as e:
             print(f"Error loading prices: {e}")
@@ -139,22 +156,41 @@ class PriceVisionService:
 
     @classmethod
     def get_states(cls):
-        """Get list of states with hospitals"""
+        """Get list of valid US states/territories with hospitals"""
         hospitals = cls.get_hospitals(limit=10000)
         states = set()
         for h in hospitals:
             state = h.get('State', '')
-            if state and len(str(state)) == 2:
+            # Filter to only valid US states/territories (50 states + DC + territories)
+            if state and str(state).upper() in VALID_US_STATES:
                 states.add(state)
         return sorted(states)
+
+    @classmethod
+    def get_hospitals_with_mrf(cls):
+        """Get set of hospital IDs that have MRF/pricing data"""
+        if 'hospitals_with_mrf' not in cls._cache:
+            price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+            if price_file.exists():
+                try:
+                    df = pd.read_parquet(price_file, columns=['hospital_npi'])
+                    cls._cache['hospitals_with_mrf'] = set(df['hospital_npi'].astype(str).unique())
+                except Exception as e:
+                    print(f"Error loading MRF hospital IDs: {e}")
+                    cls._cache['hospitals_with_mrf'] = set()
+            else:
+                cls._cache['hospitals_with_mrf'] = set()
+        return cls._cache['hospitals_with_mrf']
 
     @classmethod
     def get_stats(cls):
         """Get summary statistics"""
         hospitals = cls.get_hospitals(limit=10000)
         procedures = cls.get_procedures(limit=10000)
+        hospitals_with_mrf = cls.get_hospitals_with_mrf()
         return {
             'total_hospitals': len(hospitals),
             'total_procedures': len(procedures),
-            'states_covered': len(cls.get_states())
+            'states_covered': len(cls.get_states()),
+            'hospitals_with_mrf': len(hospitals_with_mrf)
         }

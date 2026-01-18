@@ -4,6 +4,7 @@ Load chronic disease and food environment data - OPTIMIZED
 """
 import pandas as pd
 from pathlib import Path
+from . import VALID_US_STATES
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
@@ -103,14 +104,15 @@ class ChronicCareService:
 
     @classmethod
     def get_correlations(cls):
-        """Get disease-food correlations (cached)"""
+        """Get disease-food correlations (cached) - all counties, no artificial cap"""
         if 'correlations' not in cls._cache:
             df = cls._get_county_health_df()
             if df.empty:
                 cls._cache['correlations'] = []
             else:
                 correlations = []
-                for _, row in df.head(500).iterrows():
+                # Process all counties - no artificial cap
+                for _, row in df.iterrows():
                     diabetes = row.get('diabetes_prevalence', 0)
                     obesity = row.get('obesity_prevalence', 0)
                     fast_food = row.get('fast_food_restaurants_per_1000', row.get('FFRPTH16', 0))
@@ -164,7 +166,7 @@ class ChronicCareService:
 
     @classmethod
     def get_states(cls):
-        """Get list of states (cached)"""
+        """Get list of valid US states/territories (cached)"""
         if 'states' not in cls._cache:
             df = cls._get_county_health_df()
             if df.empty:
@@ -177,7 +179,8 @@ class ChronicCareService:
                         break
                 if state_col:
                     states = df[state_col].dropna().unique()
-                    cls._cache['states'] = sorted([s for s in states if len(str(s)) == 2])
+                    # Filter to only valid US states/territories (50 states + DC + territories)
+                    cls._cache['states'] = sorted([s for s in states if str(s).upper() in VALID_US_STATES])
                 else:
                     cls._cache['states'] = []
         return cls._cache['states']
@@ -217,3 +220,60 @@ class ChronicCareService:
             'trend': 'increasing',
             'year': 2024
         }
+
+    @classmethod
+    def get_state_statistics(cls):
+        """Get state-by-state statistics (cached)"""
+        if 'state_stats' not in cls._cache:
+            df = cls._get_county_health_df()
+            if df.empty:
+                cls._cache['state_stats'] = {}
+            else:
+                state_col = None
+                for col in ['state_abbr', 'state', 'State']:
+                    if col in df.columns:
+                        state_col = col
+                        break
+
+                if not state_col:
+                    cls._cache['state_stats'] = {}
+                else:
+                    state_stats = {}
+                    for state in df[state_col].dropna().unique():
+                        # Only include valid US states/territories
+                        if str(state).upper() not in VALID_US_STATES:
+                            continue
+
+                        state_df = df[df[state_col] == state]
+                        diabetes_vals = pd.to_numeric(state_df.get('diabetes_prevalence', pd.Series()), errors='coerce').dropna()
+                        obesity_vals = pd.to_numeric(state_df.get('obesity_prevalence', pd.Series()), errors='coerce').dropna()
+                        heart_vals = pd.to_numeric(state_df.get('heart_disease_prevalence', pd.Series()), errors='coerce').dropna()
+
+                        # Calculate risk scores for counties in this state
+                        critical = 0
+                        high = 0
+                        medium = 0
+                        for _, row in state_df.iterrows():
+                            d = float(row.get('diabetes_prevalence', 0) or 0)
+                            o = float(row.get('obesity_prevalence', 0) or 0)
+                            h = float(row.get('heart_disease_prevalence', 0) or 0)
+                            score = d * 0.4 + o * 0.35 + h * 0.25
+                            if score > 20:
+                                critical += 1
+                            elif score > 18:
+                                high += 1
+                            else:
+                                medium += 1
+
+                        state_stats[state] = {
+                            'total_counties': len(state_df),
+                            'avg_diabetes': round(diabetes_vals.mean(), 1) if len(diabetes_vals) > 0 else 0,
+                            'avg_obesity': round(obesity_vals.mean(), 1) if len(obesity_vals) > 0 else 0,
+                            'avg_heart_disease': round(heart_vals.mean(), 1) if len(heart_vals) > 0 else 0,
+                            'critical_counties': critical,
+                            'high_counties': high,
+                            'medium_counties': medium
+                        }
+
+                    cls._cache['state_stats'] = dict(sorted(state_stats.items()))
+        return cls._cache['state_stats']

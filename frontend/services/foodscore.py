@@ -3,11 +3,26 @@ FoodScore Data Service
 Load food product and additive data - OPTIMIZED
 """
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import json
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
+
+
+def clean_nan_records(records):
+    """Replace NaN values with None in list of dicts"""
+    cleaned = []
+    for record in records:
+        clean_record = {}
+        for key, value in record.items():
+            if pd.isna(value):
+                clean_record[key] = None
+            else:
+                clean_record[key] = value
+        cleaned.append(clean_record)
+    return cleaned
 
 
 class FoodScoreService:
@@ -32,6 +47,9 @@ class FoodScoreService:
         if df.empty:
             return []
 
+        # Filter out products with null names
+        df = df[df['product_name'].notna() & (df['product_name'] != '')]
+
         # Apply filters using pandas (more efficient than list comprehension)
         if search:
             search_lower = search.lower()
@@ -45,7 +63,7 @@ class FoodScoreService:
             cat_lower = category.lower()
             df = df[df['categories_en'].fillna('').str.lower().str.contains(cat_lower, regex=False)]
 
-        return df.head(limit).to_dict('records')
+        return clean_nan_records(df.head(limit).to_dict('records'))
 
     @classmethod
     def get_product(cls, barcode):
@@ -58,7 +76,12 @@ class FoodScoreService:
         barcode_str = str(barcode)
         matches = df[df['code'].astype(str) == barcode_str]
         if not matches.empty:
-            return matches.iloc[0].to_dict()
+            record = matches.iloc[0].to_dict()
+            # Clean NaN values
+            for key, value in record.items():
+                if pd.isna(value):
+                    record[key] = None
+            return record
         return None
 
     @classmethod
@@ -68,7 +91,7 @@ class FoodScoreService:
             add_file = DATA_DIR / 'raw/foodscore/additive_risks_expanded.csv'
             if add_file.exists():
                 df = pd.read_csv(add_file)
-                cls._cache['additives'] = df.to_dict('records')
+                cls._cache['additives'] = clean_nan_records(df.to_dict('records'))
             else:
                 json_file = DATA_DIR / 'raw/foodscore/additive_risks.json'
                 if json_file.exists():
@@ -138,9 +161,10 @@ class FoodScoreService:
         if df.empty:
             return []
 
-        # Sort by MAHA score ascending (lower = worse)
+        # Filter out products with null names and sort by MAHA score ascending (lower = worse)
+        df = df[df['product_name'].notna() & (df['product_name'] != '')]
         df_sorted = df.dropna(subset=['maha_score']).sort_values('maha_score', ascending=True)
-        return df_sorted.head(limit).to_dict('records')
+        return clean_nan_records(df_sorted.head(limit).to_dict('records'))
 
     @classmethod
     def get_stats(cls):
