@@ -112,8 +112,7 @@ class PriceVisionService:
             # Deduplicate by hospital - keep only the best (lowest) price per hospital
             df = df.drop_duplicates(subset=['hospital_npi'], keep='first')
 
-            # Add hospital info to results
-            results = df.head(limit).to_dict('records')
+            # Build hospital info cache
             hospital_cache = {}
             for h in cls.get_hospitals(limit=10000):
                 hospital_cache[str(h.get('Facility ID', ''))] = {
@@ -121,16 +120,18 @@ class PriceVisionService:
                     'city': h.get('City/Town', ''),
                     'state': h.get('State', '')
                 }
+
+            # Filter to only hospitals with valid info (exclude unknown hospitals)
+            valid_npis = set(hospital_cache.keys())
+            df = df[df['hospital_npi'].astype(str).isin(valid_npis)]
+
+            # Add hospital info to results
+            results = df.head(limit).to_dict('records')
             for r in results:
                 npi = str(r.get('hospital_npi', ''))
-                if npi in hospital_cache:
-                    r['hospital_name'] = hospital_cache[npi]['name']
-                    r['hospital_city'] = hospital_cache[npi]['city']
-                    r['hospital_state'] = hospital_cache[npi]['state']
-                else:
-                    r['hospital_name'] = f"Hospital {npi}"
-                    r['hospital_city'] = ''
-                    r['hospital_state'] = ''
+                r['hospital_name'] = hospital_cache[npi]['name']
+                r['hospital_city'] = hospital_cache[npi]['city']
+                r['hospital_state'] = hospital_cache[npi]['state']
             return results
         except Exception as e:
             print(f"Error loading prices: {e}")
