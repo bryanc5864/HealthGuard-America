@@ -1,6 +1,6 @@
 """
 DrugWatch Data Service
-Load drug pricing data (US and international)
+Load drug pricing data (US and international) - OPTIMIZED
 """
 import pandas as pd
 from pathlib import Path
@@ -11,55 +11,72 @@ DATA_DIR = BASE_DIR / 'data'
 
 class DrugWatchService:
     _cache = {}
+    _df_cache = {}
+
+    @classmethod
+    def _get_us_drugs_df(cls):
+        """Get US drugs DataFrame (cached)"""
+        if 'us_drugs_df' not in cls._df_cache:
+            csv_file = DATA_DIR / 'processed/drugwatch/us_drugs.csv'
+            if csv_file.exists():
+                cls._df_cache['us_drugs_df'] = pd.read_csv(csv_file)
+            else:
+                drug_file = DATA_DIR / 'processed/drugwatch/us_drugs.parquet'
+                if drug_file.exists():
+                    cls._df_cache['us_drugs_df'] = pd.read_parquet(drug_file)
+                else:
+                    cls._df_cache['us_drugs_df'] = pd.DataFrame()
+        return cls._df_cache['us_drugs_df']
 
     @classmethod
     def get_us_drugs(cls, limit=100, search=None):
         """Get US drug list"""
-        if 'us_drugs' not in cls._cache:
-            # Try CSV first (more reliable)
-            csv_file = DATA_DIR / 'processed/drugwatch/us_drugs.csv'
-            if csv_file.exists():
-                df = pd.read_csv(csv_file)
-                cls._cache['us_drugs'] = df.to_dict('records')
-            else:
-                drug_file = DATA_DIR / 'processed/drugwatch/us_drugs.parquet'
-                if drug_file.exists():
-                    df = pd.read_parquet(drug_file)
-                    cls._cache['us_drugs'] = df.to_dict('records')
-                else:
-                    cls._cache['us_drugs'] = []
+        df = cls._get_us_drugs_df()
+        if df.empty:
+            return []
 
-        drugs = cls._cache['us_drugs']
         if search:
-            search = search.lower()
-            drugs = [d for d in drugs if search in str(d.get('brand_name', '')).lower()
-                    or search in str(d.get('generic_name', '')).lower()]
-        return drugs[:limit]
+            search_lower = search.lower()
+            mask = (
+                df['brand_name'].fillna('').str.lower().str.contains(search_lower, regex=False) |
+                df['generic_name'].fillna('').str.lower().str.contains(search_lower, regex=False)
+            )
+            df = df[mask]
+
+        return df.head(limit).to_dict('records')
 
     @classmethod
     def get_drug(cls, drug_id):
         """Get single drug by ID or name"""
-        drugs = cls.get_us_drugs(limit=10000)
+        df = cls._get_us_drugs_df()
+        if df.empty:
+            return None
+
         drug_id_lower = str(drug_id).lower()
-        for d in drugs:
-            if d.get('brand_name', '').lower() == drug_id_lower:
-                return d
-            if d.get('generic_name', '').lower() == drug_id_lower:
-                return d
+
+        # Exact match first
+        exact = df[df['brand_name'].fillna('').str.lower() == drug_id_lower]
+        if not exact.empty:
+            return exact.iloc[0].to_dict()
+
+        exact = df[df['generic_name'].fillna('').str.lower() == drug_id_lower]
+        if not exact.empty:
+            return exact.iloc[0].to_dict()
+
         # Partial match
-        for d in drugs:
-            if drug_id_lower in d.get('brand_name', '').lower():
-                return d
+        partial = df[df['brand_name'].fillna('').str.lower().str.contains(drug_id_lower, regex=False)]
+        if not partial.empty:
+            return partial.iloc[0].to_dict()
+
         return None
 
     @classmethod
     def get_international_prices(cls, country=None):
-        """Get international drug prices"""
+        """Get international drug prices (cached)"""
         cache_key = f'intl_{country}' if country else 'intl_all'
         if cache_key not in cls._cache:
             prices = []
 
-            # Australia
             if not country or country == 'australia':
                 aus_file = DATA_DIR / 'processed/drugwatch/australia_drugs.parquet'
                 if aus_file.exists():
@@ -67,7 +84,6 @@ class DrugWatchService:
                     df['country'] = 'Australia'
                     prices.extend(df.to_dict('records'))
 
-            # Canada
             if not country or country == 'canada':
                 can_file = DATA_DIR / 'processed/drugwatch/canada_drugs.parquet'
                 if can_file.exists():
@@ -82,40 +98,36 @@ class DrugWatchService:
     @classmethod
     def get_nadac_prices(cls, limit=100, search=None):
         """Get NADAC pricing data"""
-        if 'nadac' not in cls._cache:
+        if 'nadac_df' not in cls._df_cache:
             nadac_file = DATA_DIR / 'processed/drugwatch/nadac_prices.parquet'
             if nadac_file.exists():
-                df = pd.read_parquet(nadac_file)
-                cls._cache['nadac'] = df.to_dict('records')
+                cls._df_cache['nadac_df'] = pd.read_parquet(nadac_file)
             else:
-                cls._cache['nadac'] = []
+                cls._df_cache['nadac_df'] = pd.DataFrame()
 
-        prices = cls._cache['nadac']
+        df = cls._df_cache['nadac_df']
+        if df.empty:
+            return []
+
         if search:
-            search = search.lower()
-            prices = [p for p in prices if search in str(p.get('ndc_description', '')).lower()]
-        return prices[:limit]
+            search_lower = search.lower()
+            df = df[df['ndc_description'].fillna('').str.lower().str.contains(search_lower, regex=False)]
+
+        return df.head(limit).to_dict('records')
 
     @classmethod
     def compare_prices(cls, drug_name):
         """Compare US vs international prices for a drug"""
-        us_drugs = cls.get_us_drugs(limit=10000)
+        us_drug = cls.get_drug(drug_name)
         intl_prices = cls.get_international_prices()
 
         drug_name_lower = drug_name.lower()
-
-        us_price = None
-        for d in us_drugs:
-            if drug_name_lower in str(d.get('brand_name', '')).lower():
-                us_price = d
-                break
 
         comparisons = []
         for p in intl_prices:
             drug_match = str(p.get('drug_name', p.get('name', p.get('brand_name', '')))).lower()
             generic_match = str(p.get('generic_name', '')).lower()
             if drug_name_lower in drug_match or drug_name_lower in generic_match:
-                # Normalize price field - Australia uses price_per_unit_usd, Canada has no price
                 normalized = dict(p)
                 if 'price_per_unit_usd' in p:
                     normalized['price'] = p['price_per_unit_usd']
@@ -124,24 +136,31 @@ class DrugWatchService:
                 comparisons.append(normalized)
 
         return {
-            'us': us_price,
+            'us': us_drug,
             'international': comparisons[:10]
         }
 
     @classmethod
     def get_stats(cls):
-        """Get summary statistics"""
-        us_drugs = cls.get_us_drugs(limit=10000)
-        return {
-            'total_us_drugs': len(us_drugs),
-            'countries': ['USA', 'Canada', 'Australia', 'UK'],
-            'total_comparisons': len(cls.get_international_prices())
-        }
+        """Get summary statistics (cached)"""
+        if 'stats' not in cls._cache:
+            df = cls._get_us_drugs_df()
+            intl = cls.get_international_prices()
+            cls._cache['stats'] = {
+                'total_us_drugs': len(df),
+                'countries': ['USA', 'Canada', 'Australia', 'UK'],
+                'total_comparisons': len(intl)
+            }
+        return cls._cache['stats']
 
     @classmethod
     def get_top_expensive(cls, limit=20):
         """Get top expensive drugs by total spending"""
-        drugs = cls.get_us_drugs(limit=10000)
-        # Sort by total_spending_2023 column
-        sorted_drugs = sorted(drugs, key=lambda x: float(x.get('total_spending_2023', 0) or 0), reverse=True)
-        return sorted_drugs[:limit]
+        df = cls._get_us_drugs_df()
+        if df.empty:
+            return []
+
+        df_sorted = df.dropna(subset=['total_spending_2023']).sort_values(
+            'total_spending_2023', ascending=False
+        )
+        return df_sorted.head(limit).to_dict('records')
