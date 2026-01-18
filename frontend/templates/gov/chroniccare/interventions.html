@@ -48,8 +48,9 @@
                         <select class="form-select" name="limit">
                             <option value="50" {% if selected_limit == 50 %}selected{% endif %}>50 results</option>
                             <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 results</option>
-                            <option value="200" {% if selected_limit == 200 %}selected{% endif %}>200 results</option>
                             <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 results</option>
+                            <option value="1000" {% if selected_limit == 1000 %}selected{% endif %}>1000 results</option>
+                            <option value="3000" {% if selected_limit == 3000 %}selected{% endif %}>All (~3000)</option>
                         </select>
                     </div>
                     <div class="col-md-2">

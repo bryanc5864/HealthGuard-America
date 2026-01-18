@@ -19,19 +19,28 @@
     <div class="card mb-4">
         <div class="card-body">
             <form action="{{ url_for('gov.chroniccare_dashboard') }}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">Filter by State</label>
                     <select name="state" class="form-select">
-                        <option value="">All States</option>
+                        <option value="">All States (50 + Territories)</option>
                         {% for s in states %}
                         <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label">Show</label>
+                    <select name="limit" class="form-select">
+                        <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 counties</option>
+                        <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 counties</option>
+                        <option value="1000" {% if selected_limit == 1000 %}selected{% endif %}>1000 counties</option>
+                        <option value="3000" {% if selected_limit == 3000 %}selected{% endif %}>All (~3000)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
                 </div>
-                {% if selected_state %}
+                {% if selected_state or selected_limit != 100 %}
                 <div class="col-md-2">
                     <a href="{{ url_for('gov.chroniccare_dashboard') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
                 </div>
