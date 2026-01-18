@@ -48,20 +48,20 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">HPSA Type</label>
-                        <select class="form-select">
-                            <option value="all">All Types</option>
-                            <option value="primary">Primary Care</option>
-                            <option value="dental">Dental Health</option>
-                            <option value="mental">Mental Health</option>
+                        <select class="form-select" id="disciplineFilter">
+                            <option value="">All Types</option>
+                            <option value="Primary Care" {% if selected_discipline == 'Primary Care' %}selected{% endif %}>Primary Care</option>
+                            <option value="Dental Health" {% if selected_discipline == 'Dental Health' %}selected{% endif %}>Dental Health</option>
+                            <option value="Mental Health" {% if selected_discipline == 'Mental Health' %}selected{% endif %}>Mental Health</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">State</label>
-                        <select class="form-select">
+                        <select class="form-select" id="stateFilter">
                             <option value="">All States</option>
-                            <option value="CA">California</option>
-                            <option value="TX">Texas</option>
-                            <option value="FL">Florida</option>
+                            {% for state in states %}
+                            <option value="{{ state }}" {% if state == selected_state %}selected{% endif %}>{{ state }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="mb-3">
@@ -118,13 +118,54 @@
     var map = L.map('map').setView([39.8283, -98.5795], 4);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Placeholder marker
-    L.marker([39.8283, -98.5795]).addTo(map)
-        .bindPopup('Healthcare shortage data will be loaded from the backend API.')
-        .openPopup();
+    // Color function based on HPSA score
+    function getColor(score) {
+        if (score >= 20) return '#dc3545';  // Critical
+        if (score >= 15) return '#fd7e14';  // High
+        if (score >= 10) return '#ffc107';  // Moderate
+        return '#28a745';  // Low
+    }
+
+    // Load HPSA data from backend
+    var hpsaData = {{ hpsas | tojson | safe }};
+
+    // Add markers for each HPSA
+    hpsaData.forEach(function(hpsa) {
+        if (hpsa.latitude && hpsa.longitude) {
+            var color = getColor(hpsa.hpsa_score || 0);
+            var marker = L.circleMarker([hpsa.latitude, hpsa.longitude], {
+                radius: 6,
+                fillColor: color,
+                color: '#fff',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            marker.bindPopup(
+                '<strong>' + (hpsa.hpsa_name || 'Unknown') + '</strong><br>' +
+                '<b>State:</b> ' + (hpsa.state || 'N/A') + '<br>' +
+                '<b>County:</b> ' + (hpsa.county || 'N/A') + '<br>' +
+                '<b>Discipline:</b> ' + (hpsa.discipline || 'N/A') + '<br>' +
+                '<b>HPSA Score:</b> ' + (hpsa.hpsa_score || 'N/A') + '<br>' +
+                '<b>Status:</b> ' + (hpsa.status || 'N/A') + '<br>' +
+                '<a href="{{ url_for("gov.ruralaccess_hpsa", hpsa_id="__ID__") }}'.replace('__ID__', hpsa.hpsa_id) + '">View Details</a>'
+            );
+        }
+    });
+
+    // Filter handling
+    document.querySelector('button.btn-primary').addEventListener('click', function() {
+        var state = document.getElementById('stateFilter').value;
+        var discipline = document.getElementById('disciplineFilter').value;
+        var params = new URLSearchParams();
+        if (state) params.set('state', state);
+        if (discipline) params.set('discipline', discipline);
+        window.location.href = '{{ url_for("gov.ruralaccess_map") }}?' + params.toString();
+    });
 </script>
 {% endblock %}
 {% endblock %}

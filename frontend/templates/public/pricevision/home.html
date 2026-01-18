@@ -75,8 +75,8 @@
                         {% for h in hospitals[:5] %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                <strong>{{ h.get('Facility Name', h.get('hospital_name', 'Unknown')) }}</strong>
-                                <br><small class="text-muted">{{ h.get('City', h.get('city', '')) }}, {{ h.get('State', h.get('state', '')) }}</small>
+                                <strong>{{ h.get('Facility Name', 'Unknown') }}</strong>
+                                <br><small class="text-muted">{{ h.get('City/Town', '') }}, {{ h.get('State', '') }}</small>
                             </div>
                             <a href="{{ url_for('public.pricevision_hospital', npi=h.get('Facility ID', '')) }}" class="btn btn-sm btn-outline-warning">View</a>
                         </li>

@@ -109,7 +109,7 @@
                         </tr>
                         {% for intl in comparison.international[:5] %}
                         {% set us_price = drug.get('avg_price_per_unit_2023', 1) | float %}
-                        {% set intl_price = intl.get('price', intl.get('unit_price', 0)) | float %}
+                        {% set intl_price = intl.get('price', intl.get('price_per_unit_usd', 0)) | float %}
                         {% set savings = ((us_price - intl_price) / us_price * 100) if us_price > 0 else 0 %}
                         <tr>
                             <td>

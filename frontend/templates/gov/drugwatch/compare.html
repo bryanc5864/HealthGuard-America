@@ -6,15 +6,126 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
             <li class="breadcrumb-item"><a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a></li>
-            <li class="breadcrumb-item active">Compare</li>
+            <li class="breadcrumb-item active">Price Comparison</li>
         </ol>
     </nav>
 
-    <h2 class="mb-4"><i class="bi bi-globe me-2"></i>Price Comparison</h2>
+    <h2 class="mb-4">
+        <i class="bi bi-globe me-2"></i>International Price Comparison
+        {% if drug %}
+        - {{ drug.get('brand_name', drug_id) }}
+        {% endif %}
+    </h2>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Drug comparison data for ID {{ drug_id }} will be loaded from the backend API.
+    {% if drug %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Price by Country</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Drug Name</th>
+                                    <th>Price/Unit (USD)</th>
+                                    <th>vs US</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-danger">
+                                    <td><span class="fi fi-us me-2"></span><strong>United States</strong></td>
+                                    <td>{{ drug.get('brand_name', drug_id) }}</td>
+                                    <td><strong>${{ "%.2f" | format(drug.get('avg_price_per_unit_2023', 0) | float) }}</strong></td>
+                                    <td>-</td>
+                                </tr>
+                                {% if comparison and comparison.international %}
+                                {% for intl in comparison.international[:10] %}
+                                {% set us_price = drug.get('avg_price_per_unit_2023', 1) | float %}
+                                {% set intl_price = intl.get('price', intl.get('price_per_unit_usd', 0)) | float %}
+                                {% set savings = ((us_price - intl_price) / us_price * 100) if us_price > 0 else 0 %}
+                                <tr>
+                                    <td>
+                                        {% if intl.get('country') == 'Canada' %}
+                                        <span class="fi fi-ca me-2"></span>
+                                        {% elif intl.get('country') == 'Australia' %}
+                                        <span class="fi fi-au me-2"></span>
+                                        {% elif intl.get('country') == 'UK' %}
+                                        <span class="fi fi-gb me-2"></span>
+                                        {% endif %}
+                                        {{ intl.get('country', 'International') }}
+                                    </td>
+                                    <td>{{ intl.get('drug_name', intl.get('brand_name', 'N/A')) }}</td>
+                                    <td>${{ "%.2f" | format(intl_price) }}</td>
+                                    <td>
+                                        {% if savings > 0 %}
+                                        <span class="text-success">-{{ "%.0f" | format(savings) }}%</span>
+                                        {% else %}
+                                        <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">
+                                        No international pricing data available for this drug.
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            {% if comparison and comparison.international %}
+            {% set us_price = drug.get('avg_price_per_unit_2023', 0) | float %}
+            {% set lowest_intl = comparison.international[0].get('price', comparison.international[0].get('price_per_unit_usd', us_price)) | float if comparison.international else us_price %}
+            {% set potential_savings = us_price - lowest_intl if us_price > lowest_intl else 0 %}
+            {% set savings_pct = ((us_price - lowest_intl) / us_price * 100) if us_price > 0 and us_price > lowest_intl else 0 %}
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>Potential Savings</h3>
+                    <div class="display-4 fw-bold">${{ "%.2f" | format(potential_savings) }}</div>
+                    <p>per unit vs US price</p>
+                    <hr class="bg-white">
+                    <p class="mb-0">Savings percentage:</p>
+                    <div class="h4">{{ "%.0f" | format(savings_pct) }}%</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h3>No International Data</h3>
+                    <p class="mb-0">International pricing comparison is not available for this drug.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6>Drug Details</h6>
+                    <p class="mb-1"><strong>Brand:</strong> {{ drug.get('brand_name', 'N/A') }}</p>
+                    <p class="mb-1"><strong>Generic:</strong> {{ drug.get('generic_name', 'N/A') }}</p>
+                    <p class="mb-0"><strong>Manufacturer:</strong> {{ drug.get('manufacturer', 'N/A') }}</p>
+                </div>
+            </div>
+        </div>
     </div>
+
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Drug "{{ drug_id }}" not found in database.
+    </div>
+    <a href="{{ url_for('gov.drugwatch_search') }}" class="btn btn-primary">
+        <i class="bi bi-search me-1"></i>Search for a Drug
+    </a>
+    {% endif %}
 </div>
 {% endblock %}

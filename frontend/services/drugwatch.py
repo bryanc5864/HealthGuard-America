@@ -112,8 +112,16 @@ class DrugWatchService:
 
         comparisons = []
         for p in intl_prices:
-            if drug_name_lower in str(p.get('drug_name', p.get('name', p.get('brand_name', '')))).lower():
-                comparisons.append(p)
+            drug_match = str(p.get('drug_name', p.get('name', p.get('brand_name', '')))).lower()
+            generic_match = str(p.get('generic_name', '')).lower()
+            if drug_name_lower in drug_match or drug_name_lower in generic_match:
+                # Normalize price field - Australia uses price_per_unit_usd, Canada has no price
+                normalized = dict(p)
+                if 'price_per_unit_usd' in p:
+                    normalized['price'] = p['price_per_unit_usd']
+                elif 'price_usd' in p:
+                    normalized['price'] = p['price_usd']
+                comparisons.append(normalized)
 
         return {
             'us': us_price,

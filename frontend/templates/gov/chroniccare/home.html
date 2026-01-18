@@ -119,38 +119,38 @@
     <div class="row g-4">
         <div class="col-md-2">
             <div class="card stat-card border-danger">
-                <div class="stat-value text-danger" style="font-size: 1.5rem;">42.4%</div>
+                <div class="stat-value text-danger" style="font-size: 1.5rem;">{{ stats.avg_obesity }}%</div>
                 <div class="stat-label">Obesity Rate</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card border-warning">
-                <div class="stat-value text-warning" style="font-size: 1.5rem;">11.6%</div>
+                <div class="stat-value text-warning" style="font-size: 1.5rem;">{{ stats.avg_diabetes }}%</div>
                 <div class="stat-label">Diabetes</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.5rem;">6.2%</div>
+                <div class="stat-value" style="font-size: 1.5rem;">{{ stats.avg_heart_disease }}%</div>
                 <div class="stat-label">Heart Disease</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.5rem;">234</div>
+                <div class="stat-value" style="font-size: 1.5rem;">{{ stats.critical_counties }}</div>
                 <div class="stat-label">Critical Counties</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.5rem;">42.5M</div>
-                <div class="stat-label">At-Risk Population</div>
+                <div class="stat-value" style="font-size: 1.5rem;">{{ stats.high_priority_counties }}</div>
+                <div class="stat-label">High Priority</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card border-success">
-                <div class="stat-value text-success" style="font-size: 1.5rem;">47</div>
-                <div class="stat-label">Active Initiatives</div>
+                <div class="stat-value text-success" style="font-size: 1.5rem;">{{ stats.states_covered }}</div>
+                <div class="stat-label">States Covered</div>
             </div>
         </div>
     </div>

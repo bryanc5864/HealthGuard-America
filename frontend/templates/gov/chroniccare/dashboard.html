@@ -19,15 +19,15 @@
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body text-center">
-                    <h3 class="display-4 fw-bold">45.2</h3>
-                    <p class="mb-0">National Risk Score</p>
+                    <h3 class="display-4 fw-bold">{{ stats.total_counties }}</h3>
+                    <p class="mb-0">Total Counties</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body text-center">
-                    <h3 class="display-4 fw-bold">234</h3>
+                    <h3 class="display-4 fw-bold">{{ stats.critical_counties }}</h3>
                     <p class="mb-0">Critical Counties</p>
                 </div>
             </div>
@@ -35,7 +35,7 @@
         <div class="col-md-3">
             <div class="card bg-warning text-dark">
                 <div class="card-body text-center">
-                    <h3 class="display-4 fw-bold">892</h3>
+                    <h3 class="display-4 fw-bold">{{ stats.high_priority_counties }}</h3>
                     <p class="mb-0">High Priority Counties</p>
                 </div>
             </div>
@@ -43,8 +43,8 @@
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body text-center">
-                    <h3 class="display-4 fw-bold">12.5M</h3>
-                    <p class="mb-0">Populations Reached</p>
+                    <h3 class="display-4 fw-bold">{{ stats.states_covered }}</h3>
+                    <p class="mb-0">States Covered</p>
                 </div>
             </div>
         </div>
@@ -114,37 +114,28 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between">
                             <span>Obesity</span>
-                            <span class="fw-bold">42.4%</span>
+                            <span class="fw-bold">{{ stats.avg_obesity }}%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-danger" style="width: 85%;"></div>
+                            <div class="progress-bar bg-danger" style="width: {{ (stats.avg_obesity / 50 * 100)|int }}%;"></div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between">
                             <span>Diabetes</span>
-                            <span class="fw-bold">11.6%</span>
+                            <span class="fw-bold">{{ stats.avg_diabetes }}%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-warning" style="width: 46%;"></div>
+                            <div class="progress-bar bg-warning" style="width: {{ (stats.avg_diabetes / 25 * 100)|int }}%;"></div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between">
                             <span>Heart Disease</span>
-                            <span class="fw-bold">6.2%</span>
+                            <span class="fw-bold">{{ stats.avg_heart_disease }}%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-info" style="width: 25%;"></div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span>COPD</span>
-                            <span class="fw-bold">4.5%</span>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-secondary" style="width: 18%;"></div>
+                            <div class="progress-bar bg-info" style="width: {{ (stats.avg_heart_disease / 15 * 100)|int }}%;"></div>
                         </div>
                     </div>
                 </div>

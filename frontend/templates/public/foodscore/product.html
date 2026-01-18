@@ -131,7 +131,7 @@
                         <div class="col-6">
                             <p><strong>Sugars:</strong> {{ product.get('sugars_100g', 'N/A') }}g</p>
                             <p><strong>Sodium:</strong> {{ product.get('sodium_100g', 'N/A') }}g</p>
-                            <p><strong>Fiber:</strong> {{ product.get('fiber_100g', 'N/A') }}g</p>
+                            <p><strong>Additives:</strong> {{ product.get('additives_n', product.get('flagged_additive_count', 'N/A')) }}</p>
                         </div>
                     </div>
                 </div>

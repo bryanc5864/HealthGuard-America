@@ -57,7 +57,7 @@ class PriceVisionService:
         return None
 
     @classmethod
-    def get_prices(cls, hospital_id=None, procedure_code=None, limit=100):
+    def get_prices(cls, hospital_npi=None, procedure_code=None, limit=100):
         """Get price data"""
         if 'prices' not in cls._cache:
             price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
@@ -74,10 +74,10 @@ class PriceVisionService:
                 cls._cache['prices'] = []
 
         prices = cls._cache['prices']
-        if hospital_id:
-            prices = [p for p in prices if str(p.get('npi', p.get('hospital_id', ''))) == str(hospital_id)]
+        if hospital_npi:
+            prices = [p for p in prices if str(p.get('hospital_npi', '')) == str(hospital_npi)]
         if procedure_code:
-            prices = [p for p in prices if str(p.get('code', p.get('hcpcs_code', ''))) == str(procedure_code)]
+            prices = [p for p in prices if str(p.get('procedure_code', '')) == str(procedure_code)]
         return prices[:limit]
 
     @classmethod

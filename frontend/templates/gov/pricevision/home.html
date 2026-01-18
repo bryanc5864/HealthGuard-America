@@ -54,20 +54,20 @@
     <div class="row g-4">
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">1,002</div>
+                <div class="stat-value" style="font-size: 2rem;">{{ "{:,}".format(stats.total_hospitals | default(0)) }}</div>
                 <div class="stat-label">Hospitals</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">30.2M</div>
-                <div class="stat-label">Price Records</div>
+                <div class="stat-value" style="font-size: 2rem;">{{ "{:,}".format(stats.total_procedures | default(0)) }}</div>
+                <div class="stat-label">Procedures</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">~500</div>
-                <div class="stat-label">Payers</div>
+                <div class="stat-value" style="font-size: 2rem;">{{ stats.states_covered | default(0) }}</div>
+                <div class="stat-label">States Covered</div>
             </div>
         </div>
         <div class="col-md-3">
