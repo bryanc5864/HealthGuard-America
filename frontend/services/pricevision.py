@@ -109,6 +109,9 @@ class PriceVisionService:
             if 'cash_price' in df.columns:
                 df = df.sort_values('cash_price', ascending=True, na_position='last')
 
+            # Deduplicate by hospital - keep only the best (lowest) price per hospital
+            df = df.drop_duplicates(subset=['hospital_npi'], keep='first')
+
             # Add hospital info to results
             results = df.head(limit).to_dict('records')
             hospital_cache = {}

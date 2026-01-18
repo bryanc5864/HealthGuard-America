@@ -1,6 +1,6 @@
 """
 FoodScore Data Service
-Load food product and additive data
+Load food product and additive data - OPTIMIZED
 """
 import pandas as pd
 from pathlib import Path
@@ -12,34 +12,53 @@ DATA_DIR = BASE_DIR / 'data'
 
 class FoodScoreService:
     _cache = {}
+    _df_cache = {}  # Cache DataFrames for efficient filtering
+
+    @classmethod
+    def _get_products_df(cls):
+        """Get products DataFrame (cached)"""
+        if 'products_df' not in cls._df_cache:
+            prod_file = DATA_DIR / 'processed/foodscore/us_products_scored.parquet'
+            if prod_file.exists():
+                cls._df_cache['products_df'] = pd.read_parquet(prod_file)
+            else:
+                cls._df_cache['products_df'] = pd.DataFrame()
+        return cls._df_cache['products_df']
 
     @classmethod
     def get_products(cls, limit=100, search=None, category=None):
         """Get food products with health scores"""
-        if 'products' not in cls._cache:
-            prod_file = DATA_DIR / 'processed/foodscore/us_products_scored.parquet'
-            if prod_file.exists():
-                df = pd.read_parquet(prod_file)
-                cls._cache['products'] = df.to_dict('records')
-            else:
-                cls._cache['products'] = []
+        df = cls._get_products_df()
+        if df.empty:
+            return []
 
-        products = cls._cache['products']
+        # Apply filters using pandas (more efficient than list comprehension)
         if search:
-            search = search.lower()
-            products = [p for p in products if search in str(p.get('product_name', '')).lower()
-                       or search in str(p.get('brands', '')).lower()]
+            search_lower = search.lower()
+            mask = (
+                df['product_name'].fillna('').str.lower().str.contains(search_lower, regex=False) |
+                df['brands'].fillna('').str.lower().str.contains(search_lower, regex=False)
+            )
+            df = df[mask]
+
         if category:
-            products = [p for p in products if category.lower() in str(p.get('categories_en', p.get('categories', ''))).lower()]
-        return products[:limit]
+            cat_lower = category.lower()
+            df = df[df['categories_en'].fillna('').str.lower().str.contains(cat_lower, regex=False)]
+
+        return df.head(limit).to_dict('records')
 
     @classmethod
     def get_product(cls, barcode):
         """Get single product by barcode"""
-        products = cls.get_products(limit=100000)
-        for p in products:
-            if str(p.get('code', p.get('barcode', ''))) == str(barcode):
-                return p
+        df = cls._get_products_df()
+        if df.empty:
+            return None
+
+        # Direct lookup is faster
+        barcode_str = str(barcode)
+        matches = df[df['code'].astype(str) == barcode_str]
+        if not matches.empty:
+            return matches.iloc[0].to_dict()
         return None
 
     @classmethod
@@ -51,7 +70,6 @@ class FoodScoreService:
                 df = pd.read_csv(add_file)
                 cls._cache['additives'] = df.to_dict('records')
             else:
-                # Try JSON version
                 json_file = DATA_DIR / 'raw/foodscore/additive_risks.json'
                 if json_file.exists():
                     with open(json_file) as f:
@@ -79,49 +97,64 @@ class FoodScoreService:
 
     @classmethod
     def get_categories(cls):
-        """Get product categories"""
-        products = cls.get_products(limit=10000)
-        categories = set()
-        for p in products:
-            cats = str(p.get('categories_en', p.get('categories', ''))).split(',')
-            for c in cats:
-                c = c.strip()
-                if c and len(c) > 2:
-                    categories.add(c)
-        return sorted(list(categories))[:50]
+        """Get product categories (cached)"""
+        if 'categories' not in cls._cache:
+            df = cls._get_products_df()
+            if df.empty:
+                cls._cache['categories'] = []
+            else:
+                categories = set()
+                for cats in df['categories_en'].dropna().head(10000):
+                    for c in str(cats).split(','):
+                        c = c.strip()
+                        if c and len(c) > 2:
+                            categories.add(c)
+                cls._cache['categories'] = sorted(list(categories))[:50]
+        return cls._cache['categories']
 
     @classmethod
     def get_nova_distribution(cls):
-        """Get NOVA classification distribution"""
-        products = cls.get_products(limit=100000)
-        nova_counts = {1: 0, 2: 0, 3: 0, 4: 0}
-        for p in products:
-            nova = p.get('nova_group', p.get('nova_groups_tags', 0))
-            try:
-                nova = int(str(nova).replace('en:', '').strip()) if nova else 0
-                if nova in nova_counts:
-                    nova_counts[nova] += 1
-            except:
-                pass
-        return nova_counts
+        """Get NOVA classification distribution (cached)"""
+        if 'nova_dist' not in cls._cache:
+            df = cls._get_products_df()
+            if df.empty:
+                cls._cache['nova_dist'] = {1: 0, 2: 0, 3: 0, 4: 0}
+            else:
+                nova_counts = {1: 0, 2: 0, 3: 0, 4: 0}
+                for nova in df['nova_group'].dropna():
+                    try:
+                        nova_int = int(str(nova).replace('en:', '').strip())
+                        if nova_int in nova_counts:
+                            nova_counts[nova_int] += 1
+                    except:
+                        pass
+                cls._cache['nova_dist'] = nova_counts
+        return cls._cache['nova_dist']
 
     @classmethod
     def get_high_risk_products(cls, limit=20):
-        """Get products with highest additive risk"""
-        products = cls.get_products(limit=10000)
-        # Sort by MAHA score (lower is worse)
-        sorted_prods = sorted(products, key=lambda x: float(x.get('maha_score', x.get('health_score', 100)) or 100))
-        return sorted_prods[:limit]
+        """Get products with lowest MAHA scores (highest risk)"""
+        df = cls._get_products_df()
+        if df.empty:
+            return []
+
+        # Sort by MAHA score ascending (lower = worse)
+        df_sorted = df.dropna(subset=['maha_score']).sort_values('maha_score', ascending=True)
+        return df_sorted.head(limit).to_dict('records')
 
     @classmethod
     def get_stats(cls):
-        """Get summary statistics"""
-        products = cls.get_products(limit=100000)
-        additives = cls.get_additives(limit=1000)
-        nova = cls.get_nova_distribution()
-        return {
-            'total_products': len(products),
-            'total_additives': len(additives),
-            'nova_distribution': nova,
-            'categories': len(cls.get_categories())
-        }
+        """Get summary statistics (cached)"""
+        if 'stats' not in cls._cache:
+            df = cls._get_products_df()
+            additives = cls.get_additives(limit=1000)
+            nova = cls.get_nova_distribution()
+            categories = cls.get_categories()
+
+            cls._cache['stats'] = {
+                'total_products': len(df),
+                'total_additives': len(additives),
+                'nova_distribution': nova,
+                'categories': len(categories)
+            }
+        return cls._cache['stats']
