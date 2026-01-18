@@ -1,0 +1,76 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.pricevision_home') }}">PriceVision</a></li>
+            <li class="breadcrumb-item active">Search</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-search me-2"></i>
+        {% if query %}Search Results for "{{ query }}"{% else %}Search Procedures{% endif %}
+    </h2>
+
+    <!-- Search Box -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('public.pricevision_search') }}" method="get">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="{{ query }}"
+                           placeholder="Search procedures...">
+                    <button class="btn btn-warning" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Results</h5>
+        </div>
+        <div class="card-body">
+            {% if query %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Search functionality will be connected to the backend API. Currently showing placeholder results.
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Procedure</th>
+                            <th>CPT Code</th>
+                            <th>Avg Price</th>
+                            <th>Price Range</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ query }} - Example Procedure</td>
+                            <td><span class="badge bg-secondary">70553</span></td>
+                            <td>$1,250</td>
+                            <td>$450 - $3,500</td>
+                            <td>
+                                <a href="{{ url_for('public.pricevision_compare', procedure='70553') }}"
+                                   class="btn btn-sm btn-outline-warning">Compare</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">
+                Enter a search term to find procedures.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

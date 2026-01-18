@@ -1,0 +1,71 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.pricevision_home') }}">PriceVision</a></li>
+            <li class="breadcrumb-item active">Compare Prices</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-bar-chart me-2"></i>Price Comparison
+    </h2>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Price comparison will display hospital prices for procedure: {{ procedure }}
+    </div>
+
+    <!-- Placeholder comparison chart -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Hospital Price Comparison</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Hospital</th>
+                            <th>Location</th>
+                            <th>Cash Price</th>
+                            <th>Insurance Avg</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>General Hospital</td>
+                            <td>Los Angeles, CA</td>
+                            <td class="text-success fw-bold">$850</td>
+                            <td>$1,200</td>
+                            <td><span class="badge bg-success">Best Price</span></td>
+                        </tr>
+                        <tr>
+                            <td>City Medical Center</td>
+                            <td>San Diego, CA</td>
+                            <td>$1,100</td>
+                            <td>$1,450</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Regional Health System</td>
+                            <td>San Francisco, CA</td>
+                            <td>$1,500</td>
+                            <td>$1,800</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-success mt-3">
+                <strong>Potential Savings:</strong> Up to $650 by choosing General Hospital over Regional Health System
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

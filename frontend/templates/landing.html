@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthGuard America</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --public-color: #28a745;
+            --gov-color: #0d6efd;
+        }
+
+        body {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            max-width: 900px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+        }
+
+        .portal-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .portal-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            color: inherit;
+        }
+
+        .portal-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .portal-public .portal-icon {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .portal-gov .portal-icon {
+            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+        }
+
+        .portal-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .portal-description {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+        }
+
+        .portal-modules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .module-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .portal-public .module-badge {
+            background: #e8f5e9;
+            color: #28a745;
+        }
+
+        .portal-gov .module-badge {
+            background: #e3f2fd;
+            color: #0d6efd;
+        }
+
+        .portal-btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .portal-public .portal-btn {
+            background: var(--public-color);
+            color: white;
+        }
+
+        .portal-public:hover .portal-btn {
+            background: #218838;
+        }
+
+        .portal-gov .portal-btn {
+            background: var(--gov-color);
+            color: white;
+        }
+
+        .portal-gov:hover .portal-btn {
+            background: #0b5ed7;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .footer a {
+            color: rgba(255,255,255,0.9);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .portal-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <i class="bi bi-heart-pulse me-3"></i>HealthGuard America
+            </h1>
+            <p class="hero-subtitle">
+                Healthcare Transparency Platform - Empowering informed health decisions through data
+            </p>
+
+            <div class="portal-cards">
+                <!-- Public Portal -->
+                <a href="/public/" class="portal-card portal-public">
+                    <div class="portal-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h2 class="portal-title">Public Portal</h2>
+                    <p class="portal-description">
+                        Free access to healthcare transparency tools. Compare hospital prices,
+                        find affordable drugs, and check food health scores.
+                    </p>
+                    <div class="portal-modules">
+                        <span class="module-badge"><i class="bi bi-currency-dollar me-1"></i>PriceVision</span>
+                        <span class="module-badge"><i class="bi bi-capsule me-1"></i>DrugWatch</span>
+                        <span class="module-badge"><i class="bi bi-basket me-1"></i>FoodScore</span>
+                    </div>
+                    <span class="portal-btn">Enter Public Portal</span>
+                </a>
+
+                <!-- Government Portal -->
+                <a href="/gov/" class="portal-card portal-gov">
+                    <div class="portal-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h2 class="portal-title">Government Portal</h2>
+                    <p class="portal-description">
+                        Full access to all modules including healthcare access mapping
+                        and chronic disease analytics. Requires authentication.
+                    </p>
+                    <div class="portal-modules">
+                        <span class="module-badge"><i class="bi bi-currency-dollar me-1"></i>PriceVision</span>
+                        <span class="module-badge"><i class="bi bi-capsule me-1"></i>DrugWatch</span>
+                        <span class="module-badge"><i class="bi bi-basket me-1"></i>FoodScore</span>
+                        <span class="module-badge"><i class="bi bi-geo-alt me-1"></i>RuralAccess</span>
+                        <span class="module-badge"><i class="bi bi-activity me-1"></i>ChronicCare</span>
+                    </div>
+                    <span class="portal-btn">Enter Government Portal</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Data sourced from CMS, FDA, HRSA, CDC, and public hospital disclosures</p>
+        <p><a href="/dashboard">Data Dashboard</a> | <a href="https://github.com/bryanc5864/PresidentialAIChallenge" target="_blank">GitHub</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

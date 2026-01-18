@@ -1,0 +1,74 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.drugwatch_home') }}">DrugWatch</a></li>
+            <li class="breadcrumb-item active">Price Comparison</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-globe me-2"></i>International Price Comparison
+    </h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Price by Country</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Price/Unit (USD)</th>
+                                    <th>vs US</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-danger">
+                                    <td><span class="fi fi-us me-2"></span>United States</td>
+                                    <td><strong>$12.50</strong></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="fi fi-ca me-2"></span>Canada</td>
+                                    <td>$0.85</td>
+                                    <td><span class="text-success">-93%</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="fi fi-au me-2"></span>Australia</td>
+                                    <td>$0.42</td>
+                                    <td><span class="text-success">-97%</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="fi fi-gb me-2"></span>United Kingdom</td>
+                                    <td>$0.38</td>
+                                    <td><span class="text-success">-97%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>Potential Savings</h3>
+                    <div class="display-4 fw-bold">$11.65</div>
+                    <p>per unit vs US price</p>
+                    <hr class="bg-white">
+                    <p class="mb-0">Annual savings for 30 units/month:</p>
+                    <div class="h4">$4,194</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

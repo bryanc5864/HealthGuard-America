@@ -1,0 +1,97 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="page-header text-center mb-5">
+        <h1><i class="bi bi-people me-2"></i>Public Portal</h1>
+        <p class="lead text-muted">Healthcare transparency tools for everyone</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- PriceVision -->
+        <div class="col-md-4">
+            <div class="card h-100 module-card module-pricevision">
+                <div class="card-body text-center p-4">
+                    <div class="icon-box mx-auto mb-3" style="background: rgba(253, 126, 20, 0.1);">
+                        <i class="bi bi-currency-dollar" style="color: #fd7e14;"></i>
+                    </div>
+                    <h4 class="card-title">PriceVision</h4>
+                    <p class="card-text text-muted">
+                        Compare hospital procedure prices. Find the best value for your healthcare needs.
+                    </p>
+                    <a href="{{ url_for('public.pricevision_home') }}" class="btn btn-outline-warning">
+                        <i class="bi bi-search me-1"></i>Search Prices
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- DrugWatch -->
+        <div class="col-md-4">
+            <div class="card h-100 module-card module-drugwatch">
+                <div class="card-body text-center p-4">
+                    <div class="icon-box mx-auto mb-3" style="background: rgba(220, 53, 69, 0.1);">
+                        <i class="bi bi-capsule" style="color: #dc3545;"></i>
+                    </div>
+                    <h4 class="card-title">DrugWatch</h4>
+                    <p class="card-text text-muted">
+                        Compare drug prices across countries. See how much you could save.
+                    </p>
+                    <a href="{{ url_for('public.drugwatch_home') }}" class="btn btn-outline-danger">
+                        <i class="bi bi-search me-1"></i>Search Drugs
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- FoodScore -->
+        <div class="col-md-4">
+            <div class="card h-100 module-card module-foodscore">
+                <div class="card-body text-center p-4">
+                    <div class="icon-box mx-auto mb-3" style="background: rgba(40, 167, 69, 0.1);">
+                        <i class="bi bi-basket" style="color: #28a745;"></i>
+                    </div>
+                    <h4 class="card-title">FoodScore</h4>
+                    <p class="card-text text-muted">
+                        Check health scores for food products. Make informed choices at the grocery store.
+                    </p>
+                    <a href="{{ url_for('public.foodscore_home') }}" class="btn btn-outline-success">
+                        <i class="bi bi-search me-1"></i>Search Foods
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mt-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">Platform Statistics</h3>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value">1,000+</div>
+                <div class="stat-label">Hospitals</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value">3,500+</div>
+                <div class="stat-label">Drugs Tracked</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value">500K+</div>
+                <div class="stat-label">Food Products</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Countries Compared</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

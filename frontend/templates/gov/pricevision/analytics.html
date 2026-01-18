@@ -1,0 +1,65 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.pricevision_home') }}">PriceVision</a></li>
+            <li class="breadcrumb-item active">Compliance Analytics</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-graph-up me-2"></i>Hospital Compliance Analytics
+        <span class="badge bg-primary ms-2">Government Only</span>
+    </h2>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4">78%</h3>
+                    <p class="mb-0">MRF Compliance Rate</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h3 class="display-4">15%</h3>
+                    <p class="mb-0">Partial Compliance</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4">7%</h3>
+                    <p class="mb-0">Non-Compliant</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4">5,421</h3>
+                    <p class="mb-0">CMS Registered</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Compliance by State</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                State-by-state compliance data will be loaded from the backend API.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

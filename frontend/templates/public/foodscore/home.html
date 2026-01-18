@@ -1,0 +1,133 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item active">FoodScore</li>
+        </ol>
+    </nav>
+
+    <div class="page-header text-center mb-5">
+        <h1><i class="bi bi-basket me-2" style="color: #28a745;"></i>FoodScore</h1>
+        <p class="lead text-muted">Check health scores for food products</p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form action="{{ url_for('public.foodscore_search') }}" method="get">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="q"
+                                   placeholder="Search food products or scan barcode...">
+                            <button class="btn btn-success" type="submit">Search</button>
+                        </div>
+                    </form>
+                    <div class="mt-3 text-center">
+                        <a href="{{ url_for('public.foodscore_scan') }}" class="btn btn-outline-success">
+                            <i class="bi bi-upc-scan me-1"></i>Scan Barcode
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVA Classification -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="text-center mb-4">NOVA Food Processing Classification</h4>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-success">
+                <div class="card-body text-center">
+                    <div class="display-4 text-success mb-2">1</div>
+                    <h6>Unprocessed</h6>
+                    <small class="text-muted">Fresh fruits, vegetables, eggs, meat</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-info">
+                <div class="card-body text-center">
+                    <div class="display-4 text-info mb-2">2</div>
+                    <h6>Processed Ingredients</h6>
+                    <small class="text-muted">Oils, butter, sugar, flour</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-warning">
+                <div class="card-body text-center">
+                    <div class="display-4 text-warning mb-2">3</div>
+                    <h6>Processed Foods</h6>
+                    <small class="text-muted">Canned vegetables, cheese, bread</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-danger">
+                <div class="card-body text-center">
+                    <div class="display-4 text-danger mb-2">4</div>
+                    <h6>Ultra-Processed</h6>
+                    <small class="text-muted">Sodas, chips, instant noodles</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-speedometer2 display-4 text-success mb-3"></i>
+                    <h5>Health Score</h5>
+                    <p class="text-muted">Get a 0-100 health score based on ingredients, additives, and nutrition.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-exclamation-triangle display-4 text-success mb-3"></i>
+                    <h5>Additive Alerts</h5>
+                    <p class="text-muted">Identify potentially harmful additives and their health risks.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-arrow-left-right display-4 text-success mb-3"></i>
+                    <h5>Healthier Alternatives</h5>
+                    <p class="text-muted">Discover better options in the same product category.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body p-4">
+                    <h5><i class="bi bi-info-circle me-2"></i>About FoodScore</h5>
+                    <p>
+                        FoodScore uses machine learning to classify foods by processing level (NOVA classification)
+                        and assess the health risk of food additives. Our models are trained on FDA and EU regulatory data
+                        to help you make informed choices at the grocery store.
+                    </p>
+                    <p class="mb-0">
+                        <strong>Data sources:</strong> Open Food Facts, FDA GRAS Database, EU Food Additives Database
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

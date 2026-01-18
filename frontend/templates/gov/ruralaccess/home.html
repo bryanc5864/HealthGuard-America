@@ -1,0 +1,123 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item active">RuralAccess</li>
+        </ol>
+    </nav>
+
+    <div class="page-header mb-5">
+        <h1><i class="bi bi-geo-alt me-2" style="color: #6f42c1;"></i>RuralAccess</h1>
+        <p class="lead text-muted">Healthcare Access Mapping & Provider Shortage Analysis</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.ruralaccess_map') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-map display-4 mb-3" style="color: #6f42c1;"></i>
+                    <h5>Interactive Map</h5>
+                    <p class="text-muted small mb-0">View HPSA designations by county</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-search display-4 text-muted mb-3"></i>
+                    <h5>Search Counties</h5>
+                    <input type="text" class="form-control form-control-sm" placeholder="Enter FIPS or county name">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-download display-4 text-muted mb-3"></i>
+                    <h5>Export Data</h5>
+                    <button class="btn btn-sm btn-outline-secondary">Download CSV</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-graph-up display-4 text-muted mb-3"></i>
+                    <h5>Analytics</h5>
+                    <p class="text-muted small mb-0">Coming soon</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card stat-card border-danger">
+                <div class="stat-value text-danger">7,200+</div>
+                <div class="stat-label">HPSA Designations</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value">83M</div>
+                <div class="stat-label">People in Shortage Areas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value">17,000+</div>
+                <div class="stat-label">Provider Deficit</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value">46%</div>
+                <div class="stat-label">Rural Counties Designated</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HPSA Types -->
+    <h4 class="mb-3">HPSA Designation Types</h4>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-heart-pulse me-2"></i>Primary Care
+                </div>
+                <div class="card-body">
+                    <p>Areas with physician shortages for primary care services.</p>
+                    <p class="mb-0"><strong>Designated Areas:</strong> 4,200+</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header" style="background: #6f42c1; color: white;">
+                    <i class="bi bi-emoji-smile me-2"></i>Dental Health
+                </div>
+                <div class="card-body">
+                    <p>Areas with dentist shortages for oral health services.</p>
+                    <p class="mb-0"><strong>Designated Areas:</strong> 2,100+</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-brain me-2"></i>Mental Health
+                </div>
+                <div class="card-body">
+                    <p>Areas with psychiatrist/psychologist shortages.</p>
+                    <p class="mb-0"><strong>Designated Areas:</strong> 5,800+</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

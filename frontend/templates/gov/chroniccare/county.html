@@ -1,0 +1,23 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
+            <li class="breadcrumb-item active">County Profile</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-geo-alt me-2"></i>County Chronic Disease Profile
+        <small class="text-muted">FIPS: {{ fips }}</small>
+    </h2>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Chronic disease data for FIPS {{ fips }} will be loaded from the backend API.
+    </div>
+</div>
+{% endblock %}

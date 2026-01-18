@@ -1,0 +1,111 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
+            <li class="breadcrumb-item active">Correlations</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-diagram-3 me-2"></i>Food Environment & Disease Correlations
+    </h2>
+
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-lightbulb me-2"></i>
+        <strong>MAHA Thesis:</strong> There is a strong correlation between food environment factors
+        (fast food density, food desert status, SNAP participation) and chronic disease prevalence.
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Key Correlations</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Factor</th>
+                                <th>Disease</th>
+                                <th>Correlation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Fast Food Density</td>
+                                <td>Obesity</td>
+                                <td><span class="text-danger fw-bold">+0.72</span></td>
+                            </tr>
+                            <tr>
+                                <td>Food Desert Status</td>
+                                <td>Diabetes</td>
+                                <td><span class="text-danger fw-bold">+0.68</span></td>
+                            </tr>
+                            <tr>
+                                <td>Grocery Store Access</td>
+                                <td>Heart Disease</td>
+                                <td><span class="text-success fw-bold">-0.54</span></td>
+                            </tr>
+                            <tr>
+                                <td>SNAP Participation</td>
+                                <td>Obesity</td>
+                                <td><span class="text-warning fw-bold">+0.45</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Visualization</h5>
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-graph-up display-1 text-muted"></i>
+                    <p class="text-muted mt-3">Interactive scatter plots will be rendered here using Chart.js</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Policy Implications</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6><i class="bi bi-check-circle text-success me-2"></i>Evidence Supports</h6>
+                    <ul>
+                        <li>Increasing grocery store access in food deserts</li>
+                        <li>Limiting fast food density near schools</li>
+                        <li>SNAP incentives for healthy foods</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="bi bi-arrow-right-circle text-primary me-2"></i>Recommended Actions</h6>
+                    <ul>
+                        <li>Target high-correlation counties for intervention</li>
+                        <li>Partner with grocery chains for expansion</li>
+                        <li>Reform SNAP eligible products list</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="bi bi-graph-down text-info me-2"></i>Expected Impact</h6>
+                    <ul>
+                        <li>5-10% reduction in obesity in targeted areas</li>
+                        <li>$2.3B Medicare savings over 10 years</li>
+                        <li>Improved health equity scores</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

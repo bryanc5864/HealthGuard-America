@@ -1,0 +1,155 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
+            <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-speedometer2 me-2"></i>MAHA Initiative Dashboard
+    </h2>
+
+    <!-- National Summary -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4 fw-bold">45.2</h3>
+                    <p class="mb-0">National Risk Score</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4 fw-bold">234</h3>
+                    <p class="mb-0">Critical Counties</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h3 class="display-4 fw-bold">892</h3>
+                    <p class="mb-0">High Priority Counties</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4 fw-bold">12.5M</h3>
+                    <p class="mb-0">Populations Reached</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regional Breakdown -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Regional Risk Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th>Avg Risk Score</th>
+                                    <th>Critical Counties</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Southeast</td>
+                                    <td><span class="badge bg-danger">52.3</span></td>
+                                    <td>98</td>
+                                    <td><i class="bi bi-arrow-up text-danger"></i> +1.2%</td>
+                                </tr>
+                                <tr>
+                                    <td>Southwest</td>
+                                    <td><span class="badge bg-warning text-dark">46.8</span></td>
+                                    <td>52</td>
+                                    <td><i class="bi bi-arrow-up text-danger"></i> +0.8%</td>
+                                </tr>
+                                <tr>
+                                    <td>Midwest</td>
+                                    <td><span class="badge bg-warning text-dark">44.1</span></td>
+                                    <td>56</td>
+                                    <td><i class="bi bi-dash text-muted"></i> 0%</td>
+                                </tr>
+                                <tr>
+                                    <td>West</td>
+                                    <td><span class="badge bg-success">41.2</span></td>
+                                    <td>48</td>
+                                    <td><i class="bi bi-arrow-down text-success"></i> -0.5%</td>
+                                </tr>
+                                <tr>
+                                    <td>Northeast</td>
+                                    <td><span class="badge bg-success">38.7</span></td>
+                                    <td>32</td>
+                                    <td><i class="bi bi-arrow-down text-success"></i> -0.3%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Top Conditions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Obesity</span>
+                            <span class="fw-bold">42.4%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Diabetes</span>
+                            <span class="fw-bold">11.6%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: 46%;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Heart Disease</span>
+                            <span class="fw-bold">6.2%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" style="width: 25%;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>COPD</span>
+                            <span class="fw-bold">4.5%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-secondary" style="width: 18%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

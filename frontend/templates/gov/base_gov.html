@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title if title else 'Government Portal' }} - HealthGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --portal-color: #0d6efd;
+        --portal-light: #e3f2fd;
+    }
+
+    .navbar {
+        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%) !important;
+    }
+
+    .module-nav {
+        background: white;
+        border-bottom: 1px solid #dee2e6;
+        padding: 0.5rem 0;
+    }
+
+    .module-nav .nav-link {
+        color: #495057;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        margin: 0 0.25rem;
+    }
+
+    .module-nav .nav-link:hover,
+    .module-nav .nav-link.active {
+        background: var(--portal-light);
+        color: var(--portal-color);
+    }
+
+    .module-nav .nav-link i {
+        margin-right: 0.5rem;
+    }
+
+    .breadcrumb-container {
+        background: #f8f9fa;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .btn-primary {
+        background: var(--portal-color);
+        border-color: var(--portal-color);
+    }
+
+    .btn-primary:hover {
+        background: #0b5ed7;
+        border-color: #0b5ed7;
+    }
+
+    .gov-badge {
+        background: var(--portal-light);
+        color: var(--portal-color);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .user-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

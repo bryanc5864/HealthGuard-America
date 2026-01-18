@@ -1,20 +1,35 @@
 #!/usr/bin/env python3
 """
-HealthGuard America - Data Dashboard
-A comprehensive frontend for accessing all HealthGuard data.
+HealthGuard America - Dual Portal Application
+Government Portal: All 5 modules (requires authentication)
+Public Portal: PriceVision, DrugWatch, FoodScore (no auth required)
 
 Run: python frontend/app.py
 Then open: http://localhost:5000
 """
 
+import sys
+from pathlib import Path
+
+# Add frontend directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
 from flask import Flask, render_template, jsonify, send_from_directory, request
 import csv
 import json
 import os
-from pathlib import Path
 from collections import defaultdict
+from config import Config, DevelopmentConfig
 
 app = Flask(__name__)
+app.config.from_object(DevelopmentConfig)
+
+# Register blueprints
+from blueprints.public import public_bp
+from blueprints.gov import gov_bp
+
+app.register_blueprint(public_bp)
+app.register_blueprint(gov_bp)
 
 # Data paths
 BASE_DIR = Path(__file__).parent.parent
@@ -49,6 +64,11 @@ def get_data_inventory():
             'name': 'PriceVision',
             'description': 'Hospital price transparency',
             'datasets': []
+        },
+        'chroniccare': {
+            'name': 'ChronicCare',
+            'description': 'Chronic disease management',
+            'datasets': []
         }
     }
 
@@ -57,7 +77,7 @@ def get_data_inventory():
         module_dir = DATA_DIR / module
         if module_dir.exists():
             for f in module_dir.rglob('*'):
-                if f.is_file() and f.suffix in ['.csv', '.json', '.txt', '.xlsx', '.zip', '.gz']:
+                if f.is_file() and f.suffix in ['.csv', '.json', '.txt', '.xlsx', '.zip', '.gz', '.parquet']:
                     size = f.stat().st_size
                     inventory[module]['datasets'].append({
                         'name': f.name,
@@ -155,8 +175,17 @@ def get_mrf_urls():
 
 
 # Routes
+
 @app.route('/')
-def index():
+def landing():
+    """Landing page with portal selector"""
+    return render_template('landing.html', modules=Config.MODULES)
+
+
+# Legacy routes (redirect to new structure)
+@app.route('/dashboard')
+def dashboard():
+    """Legacy dashboard - now shows inventory"""
     inventory = get_data_inventory()
     hospitals = get_hospitals()
     urls = get_mrf_urls()
@@ -245,9 +274,14 @@ def download_file(filepath):
 
 if __name__ == '__main__':
     print("="*60)
-    print("HealthGuard America - Data Dashboard")
+    print("HealthGuard America - Dual Portal Application")
     print("="*60)
     print("Starting server at http://localhost:5000")
+    print("")
+    print("Portals:")
+    print("  Public:     http://localhost:5000/public/")
+    print("  Government: http://localhost:5000/gov/")
+    print("")
     print("Press Ctrl+C to stop")
     print("="*60)
     app.run(debug=True, host='0.0.0.0', port=5000)
