@@ -27,12 +27,15 @@ def chroniccare_home():
 def chroniccare_dashboard():
     """MAHA metrics dashboard"""
     state = request.args.get('state', '')
+    limit = int(request.args.get('limit', 100))
     stats = ChronicCareService.get_stats()
     trends = ChronicCareService.get_national_trends()
 
     # Get counties - filtered by state if specified
+    # If showing all, fetch 5000 to cover all counties
+    fetch_limit = 5000 if limit >= 3000 else limit
     counties = ChronicCareService.get_county_health(
-        state=state if state else None, limit=500
+        state=state if state else None, limit=fetch_limit
     )
     states = ChronicCareService.get_states()
 
@@ -70,7 +73,7 @@ def chroniccare_dashboard():
 
     return render_template('gov/chroniccare/dashboard.html',
                           stats=stats, trends=trends, counties=counties,
-                          states=states, selected_state=state)
+                          states=states, selected_state=state, selected_limit=limit)
 
 
 @gov_bp.route('/chroniccare/correlations')
@@ -91,8 +94,10 @@ def chroniccare_interventions():
     priority = request.args.get('priority', '')
     limit = int(request.args.get('limit', 50))
 
-    # Get all priorities first (up to the limit requested)
-    priorities = ChronicCareService.get_intervention_priorities(limit=limit * 2)
+    # Get all priorities - fetch enough to cover filtering
+    # If showing all (~3000), fetch all data
+    fetch_limit = 5000 if limit >= 3000 else max(limit * 3, 500)
+    priorities = ChronicCareService.get_intervention_priorities(limit=fetch_limit)
 
     # Filter by state if specified
     if state:
@@ -102,8 +107,9 @@ def chroniccare_interventions():
     if priority:
         priorities = [p for p in priorities if p.get('priority') == priority]
 
-    # Apply limit
-    priorities = priorities[:limit]
+    # Apply limit (unless showing all)
+    if limit < 3000:
+        priorities = priorities[:limit]
 
     stats = ChronicCareService.get_stats()
     states = ChronicCareService.get_states()
