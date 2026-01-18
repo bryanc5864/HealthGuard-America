@@ -1,0 +1,46 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.pricevision_home') }}">PriceVision</a></li>
+            <li class="breadcrumb-item active">Hospital Details</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-hospital me-2"></i>{{ hospital.get('hospital_name', 'Hospital ' + npi) }}
+    </h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Hospital Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>NPI:</strong> {{ npi }}</p>
+                    <p><strong>Location:</strong> {{ hospital.get('city', 'N/A') }}, {{ hospital.get('state', 'N/A') }}</p>
+                    <p><strong>Address:</strong> {{ hospital.get('address', 'N/A') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Procedure Prices</h5>
+                    <input type="text" class="form-control w-50" placeholder="Filter procedures...">
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Hospital price data will be loaded from the backend API.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

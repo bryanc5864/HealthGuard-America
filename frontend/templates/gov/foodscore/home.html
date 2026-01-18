@@ -1,0 +1,82 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item active">FoodScore</li>
+        </ol>
+    </nav>
+
+    <div class="page-header mb-5">
+        <h1><i class="bi bi-basket me-2" style="color: #28a745;"></i>FoodScore</h1>
+        <p class="lead text-muted">Food Health Scoring with SNAP Analysis</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.foodscore_search') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-search display-4 text-success mb-3"></i>
+                    <h5>Search Products</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.foodscore_snap') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-credit-card display-4 text-success mb-3"></i>
+                    <h5>SNAP Analysis</h5>
+                    <span class="badge bg-primary">Gov Only</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-exclamation-triangle display-4 text-muted mb-3"></i>
+                    <h5>Additive Alerts</h5>
+                    <small class="text-muted">Coming soon</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-file-earmark-arrow-down display-4 text-muted mb-3"></i>
+                    <h5>Export Data</h5>
+                    <button class="btn btn-sm btn-outline-secondary">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">500K+</div>
+                <div class="stat-label">Products</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">96.16%</div>
+                <div class="stat-label">NOVA Classifier</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">85.71%</div>
+                <div class="stat-label">Additive Scorer</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-warning">
+                <div class="stat-value text-warning" style="font-size: 1.8rem;">73%</div>
+                <div class="stat-label">Ultra-Processed Foods</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

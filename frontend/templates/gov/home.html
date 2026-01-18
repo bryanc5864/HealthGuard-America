@@ -1,0 +1,169 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-building me-2"></i>Government Portal</h1>
+            <p class="text-muted mb-0">Full access to all HealthGuard modules</p>
+        </div>
+        <div>
+            <span class="gov-badge me-2">
+                <i class="bi bi-person-check me-1"></i>{{ session.get('gov_username', 'Admin') }}
+            </span>
+            <a href="{{ url_for('gov.logout') }}" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Consumer-Facing Modules -->
+    <h4 class="mb-3">Consumer-Facing Modules</h4>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 module-card module-pricevision">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box me-3" style="background: rgba(253, 126, 20, 0.1);">
+                            <i class="bi bi-currency-dollar" style="color: #fd7e14;"></i>
+                        </div>
+                        <h5 class="mb-0">PriceVision</h5>
+                    </div>
+                    <p class="card-text text-muted">Hospital price transparency with compliance analytics.</p>
+                    <a href="{{ url_for('gov.pricevision_home') }}" class="btn btn-outline-warning">
+                        Access Module
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 module-card module-drugwatch">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box me-3" style="background: rgba(220, 53, 69, 0.1);">
+                            <i class="bi bi-capsule" style="color: #dc3545;"></i>
+                        </div>
+                        <h5 class="mb-0">DrugWatch</h5>
+                    </div>
+                    <p class="card-text text-muted">Drug pricing with MFN (Most Favored Nation) analysis.</p>
+                    <a href="{{ url_for('gov.drugwatch_home') }}" class="btn btn-outline-danger">
+                        Access Module
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 module-card module-foodscore">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box me-3" style="background: rgba(40, 167, 69, 0.1);">
+                            <i class="bi bi-basket" style="color: #28a745;"></i>
+                        </div>
+                        <h5 class="mb-0">FoodScore</h5>
+                    </div>
+                    <p class="card-text text-muted">Food health scoring with SNAP eligibility analysis.</p>
+                    <a href="{{ url_for('gov.foodscore_home') }}" class="btn btn-outline-success">
+                        Access Module
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Government-Only Modules -->
+    <h4 class="mb-3">
+        Government-Only Modules
+        <span class="badge bg-primary ms-2">Restricted Access</span>
+    </h4>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 module-card module-ruralaccess">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box me-3" style="background: rgba(111, 66, 193, 0.1);">
+                            <i class="bi bi-geo-alt" style="color: #6f42c1;"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">RuralAccess</h5>
+                            <small class="text-muted">Healthcare Access Mapping</small>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">
+                        Map healthcare provider shortages, HPSA designations, and access disparities across the nation.
+                    </p>
+                    <a href="{{ url_for('gov.ruralaccess_home') }}" class="btn btn-outline-purple" style="border-color: #6f42c1; color: #6f42c1;">
+                        Access Module
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 module-card" style="border-left-color: #0dcaf0;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon-box me-3" style="background: rgba(13, 202, 240, 0.1);">
+                            <i class="bi bi-activity" style="color: #0dcaf0;"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">ChronicCare</h5>
+                            <small class="text-muted">MAHA Initiative Support</small>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">
+                        Chronic disease risk prediction and ML-powered intervention prioritization for public health planning.
+                    </p>
+                    <a href="{{ url_for('gov.chroniccare_home') }}" class="btn btn-outline-info">
+                        Access Module
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mt-5">
+        <div class="col-12">
+            <h4>Platform Statistics</h4>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">1,002</div>
+                <div class="stat-label">Hospitals</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">30.2M</div>
+                <div class="stat-label">Price Records</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">3,598</div>
+                <div class="stat-label">Drugs</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">500K+</div>
+                <div class="stat-label">Food Products</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">3,142</div>
+                <div class="stat-label">Counties</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.8rem;">6</div>
+                <div class="stat-label">ML Models</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

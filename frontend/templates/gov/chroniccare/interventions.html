@@ -1,0 +1,142 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
+            <li class="breadcrumb-item active">Interventions</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-bullseye me-2"></i>ML-Prioritized Intervention Targets
+    </h2>
+
+    <div class="alert alert-success mb-4">
+        <i class="bi bi-cpu me-2"></i>
+        <strong>Intervention Prioritizer Model:</strong> 93.9% accuracy in ranking intervention urgency.
+        Counties are classified into 4 priority levels based on 20 health and socioeconomic features.
+    </div>
+
+    <!-- Priority Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label">Priority Level</label>
+                    <select class="form-select">
+                        <option value="">All Priorities</option>
+                        <option value="1">Critical (Priority 1)</option>
+                        <option value="2">High (Priority 2)</option>
+                        <option value="3">Medium (Priority 3)</option>
+                        <option value="4">Low (Priority 4)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Condition</label>
+                    <select class="form-select">
+                        <option value="">All Conditions</option>
+                        <option value="diabetes">Diabetes</option>
+                        <option value="obesity">Obesity</option>
+                        <option value="heart">Heart Disease</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">State</label>
+                    <select class="form-select">
+                        <option value="">All States</option>
+                        <option value="MS">Mississippi</option>
+                        <option value="AL">Alabama</option>
+                        <option value="LA">Louisiana</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Top Priority Counties</h5>
+            <button class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>Export CSV
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>County</th>
+                            <th>State</th>
+                            <th>Priority</th>
+                            <th>Risk Score</th>
+                            <th>Primary Condition</th>
+                            <th>Recommended Action</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Holmes County</td>
+                            <td>MS</td>
+                            <td><span class="badge bg-danger">Critical</span></td>
+                            <td>94.2</td>
+                            <td>Diabetes</td>
+                            <td>Community screening programs</td>
+                            <td><a href="#" class="btn btn-sm btn-outline-primary">Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Wilcox County</td>
+                            <td>AL</td>
+                            <td><span class="badge bg-danger">Critical</span></td>
+                            <td>91.8</td>
+                            <td>Obesity</td>
+                            <td>Nutrition education</td>
+                            <td><a href="#" class="btn btn-sm btn-outline-primary">Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Tensas Parish</td>
+                            <td>LA</td>
+                            <td><span class="badge bg-danger">Critical</span></td>
+                            <td>89.5</td>
+                            <td>Heart Disease</td>
+                            <td>Mobile health clinics</td>
+                            <td><a href="#" class="btn btn-sm btn-outline-primary">Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Quitman County</td>
+                            <td>MS</td>
+                            <td><span class="badge bg-warning text-dark">High</span></td>
+                            <td>78.3</td>
+                            <td>Diabetes</td>
+                            <td>Healthcare access expansion</td>
+                            <td><a href="#" class="btn btn-sm btn-outline-primary">Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Perry County</td>
+                            <td>AL</td>
+                            <td><span class="badge bg-warning text-dark">High</span></td>
+                            <td>75.1</td>
+                            <td>Obesity</td>
+                            <td>SNAP healthy incentives</td>
+                            <td><a href="#" class="btn btn-sm btn-outline-primary">Details</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

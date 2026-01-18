@@ -1,0 +1,95 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a></li>
+            <li class="breadcrumb-item active">MFN Analysis</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-globe me-2"></i>Most Favored Nation (MFN) Pricing Analysis
+        <span class="badge bg-primary ms-2">Government Only</span>
+    </h2>
+
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-lightbulb me-2"></i>
+        <strong>MFN Policy:</strong> If the US adopted Most Favored Nation pricing (paying the lowest price among comparable nations),
+        Medicare could save an estimated $180 billion annually.
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4">$275.9B</h3>
+                    <p class="mb-0">Current US Spending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4">$95.9B</h3>
+                    <p class="mb-0">MFN Spending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="display-4">$180B</h3>
+                    <p class="mb-0">Potential Savings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Top Drugs by Savings Potential</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Drug</th>
+                            <th>US Price</th>
+                            <th>MFN Price</th>
+                            <th>US Spending</th>
+                            <th>Potential Savings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Eliquis (apixaban)</td>
+                            <td>$15.20/unit</td>
+                            <td>$2.45/unit</td>
+                            <td>$18.3B</td>
+                            <td class="text-success fw-bold">$15.4B</td>
+                        </tr>
+                        <tr>
+                            <td>Humira (adalimumab)</td>
+                            <td>$2,984/syringe</td>
+                            <td>$841/syringe</td>
+                            <td>$4.4B</td>
+                            <td class="text-success fw-bold">$3.2B</td>
+                        </tr>
+                        <tr>
+                            <td>Ozempic (semaglutide)</td>
+                            <td>$892/pen</td>
+                            <td>$285/pen</td>
+                            <td>$9.2B</td>
+                            <td class="text-success fw-bold">$6.3B</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

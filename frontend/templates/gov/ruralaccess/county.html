@@ -1,0 +1,50 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a></li>
+            <li class="breadcrumb-item active">County Details</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-geo-alt me-2"></i>County Profile
+        <small class="text-muted">FIPS: {{ fips }}</small>
+    </h2>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        County data for FIPS {{ fips }} will be loaded from the backend API.
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Demographics</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Population:</strong> Loading...</p>
+                    <p><strong>Rural/Urban:</strong> Loading...</p>
+                    <p><strong>Median Income:</strong> Loading...</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Healthcare Access</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Primary Care Physicians:</strong> Loading...</p>
+                    <p><strong>HPSA Score:</strong> Loading...</p>
+                    <p><strong>Access Equity Score:</strong> Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

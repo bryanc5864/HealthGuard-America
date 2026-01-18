@@ -1,0 +1,136 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item active">ChronicCare</li>
+        </ol>
+    </nav>
+
+    <div class="page-header mb-5">
+        <div class="d-flex align-items-center">
+            <h1><i class="bi bi-activity me-2" style="color: #0dcaf0;"></i>ChronicCare</h1>
+            <span class="badge bg-info ms-3">MAHA Initiative</span>
+        </div>
+        <p class="lead text-muted">Chronic Disease Risk Prediction & Intervention Planning</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.chroniccare_dashboard') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-speedometer2 display-4 text-info mb-3"></i>
+                    <h5>MAHA Dashboard</h5>
+                    <p class="text-muted small mb-0">National health metrics</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.chroniccare_correlations') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-diagram-3 display-4 text-info mb-3"></i>
+                    <h5>Correlations</h5>
+                    <p class="text-muted small mb-0">Food-disease relationships</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.chroniccare_interventions') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-bullseye display-4 text-info mb-3"></i>
+                    <h5>Interventions</h5>
+                    <p class="text-muted small mb-0">ML-prioritized targets</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-search display-4 text-muted mb-3"></i>
+                    <h5>Search Counties</h5>
+                    <input type="text" class="form-control form-control-sm" placeholder="Enter FIPS code">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ML Model Status -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Models Status</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
+                        <div>
+                            <strong>Chronic Risk Predictor</strong>
+                            <br><small class="text-muted">Predicts county-level chronic disease risk</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success">Active</span>
+                            <br><small>MAE: 1.76</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
+                        <div>
+                            <strong>Intervention Prioritizer</strong>
+                            <br><small class="text-muted">Ranks intervention urgency by county</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success">Active</span>
+                            <br><small>Accuracy: 93.9%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Statistics -->
+    <h4 class="mb-3">National Chronic Disease Burden</h4>
+    <div class="row g-4">
+        <div class="col-md-2">
+            <div class="card stat-card border-danger">
+                <div class="stat-value text-danger" style="font-size: 1.5rem;">42.4%</div>
+                <div class="stat-label">Obesity Rate</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card border-warning">
+                <div class="stat-value text-warning" style="font-size: 1.5rem;">11.6%</div>
+                <div class="stat-label">Diabetes</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.5rem;">6.2%</div>
+                <div class="stat-label">Heart Disease</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.5rem;">234</div>
+                <div class="stat-label">Critical Counties</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 1.5rem;">42.5M</div>
+                <div class="stat-label">At-Risk Population</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card stat-card border-success">
+                <div class="stat-value text-success" style="font-size: 1.5rem;">47</div>
+                <div class="stat-label">Active Initiatives</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

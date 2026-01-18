@@ -1,0 +1,65 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
+            <li class="breadcrumb-item active">Search</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-search me-2"></i>
+        {% if query %}Search Results for "{{ query }}"{% else %}Search Food Products{% endif %}
+    </h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('public.foodscore_search') }}" method="get">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="{{ query }}"
+                           placeholder="Search food products...">
+                    <button class="btn btn-success" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Results</h5>
+        </div>
+        <div class="card-body">
+            {% if query %}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">{{ query }} - Example Product</h6>
+                                <span class="badge bg-warning">NOVA 3</span>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Brand Name</small>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: 65%;"></div>
+                                </div>
+                                <span class="fw-bold">65</span>
+                            </div>
+                            <a href="{{ url_for('public.foodscore_product', barcode='0123456789') }}"
+                               class="btn btn-sm btn-outline-success w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">Enter a product name to search.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

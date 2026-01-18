@@ -1,0 +1,90 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
+            <li class="breadcrumb-item active">Product Details</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Product Image Placeholder -->
+            <div class="card mb-4">
+                <div class="card-body text-center p-5">
+                    <i class="bi bi-box-seam display-1 text-muted"></i>
+                    <p class="text-muted mt-2">Product Image</p>
+                </div>
+            </div>
+
+            <!-- Health Score -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Health Score</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="display-1 fw-bold text-warning">72</div>
+                    <p class="text-muted">out of 100</p>
+                    <div class="progress mb-3" style="height: 12px;">
+                        <div class="progress-bar bg-warning" style="width: 72%;"></div>
+                    </div>
+                    <span class="badge bg-warning text-dark">NOVA Group 3</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Product Information</h5>
+                </div>
+                <div class="card-body">
+                    <h3>Example Product Name</h3>
+                    <p class="text-muted">Barcode: {{ barcode }}</p>
+                    <p><strong>Brand:</strong> Example Brand</p>
+                    <p><strong>Category:</strong> Snacks</p>
+                </div>
+            </div>
+
+            <!-- Additives -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Additives</h5>
+                    <span class="badge bg-warning">3 detected</span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-danger">E621 (MSG) - Risk: 45</span>
+                        <span class="badge bg-warning">E330 (Citric Acid) - Risk: 15</span>
+                        <span class="badge bg-success">E300 (Vitamin C) - Risk: 5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Nutrition Facts (per 100g)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Calories:</strong> 250 kcal</p>
+                            <p><strong>Fat:</strong> 12g</p>
+                            <p><strong>Carbs:</strong> 30g</p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Sugar:</strong> 8g</p>
+                            <p><strong>Protein:</strong> 5g</p>
+                            <p><strong>Salt:</strong> 1.2g</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

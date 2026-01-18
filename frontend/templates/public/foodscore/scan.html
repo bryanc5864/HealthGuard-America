@@ -1,0 +1,60 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
+            <li class="breadcrumb-item active">Scan Barcode</li>
+        </ol>
+    </nav>
+
+    <div class="text-center mb-5">
+        <h2><i class="bi bi-upc-scan me-2"></i>Scan Barcode</h2>
+        <p class="text-muted">Point your camera at a product barcode</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center p-5">
+                    <div class="border border-2 border-dashed rounded p-5 mb-4" style="min-height: 300px;">
+                        <i class="bi bi-camera display-1 text-muted"></i>
+                        <p class="text-muted mt-3">Camera feed will appear here</p>
+                        <small class="text-muted">Barcode scanning requires camera access</small>
+                    </div>
+                    <button class="btn btn-success btn-lg" id="startCamera">
+                        <i class="bi bi-camera-video me-2"></i>Start Camera
+                    </button>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6>Or enter barcode manually:</h6>
+                    <form action="{{ url_for('public.foodscore_product', barcode='') }}" method="get" id="barcodeForm">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="barcodeInput"
+                                   placeholder="Enter barcode number..." pattern="[0-9]{8,14}">
+                            <button class="btn btn-outline-success" type="submit">Look Up</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.getElementById('barcodeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const barcode = document.getElementById('barcodeInput').value;
+    if (barcode) {
+        window.location.href = '{{ url_for("public.foodscore_product", barcode="") }}' + barcode;
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

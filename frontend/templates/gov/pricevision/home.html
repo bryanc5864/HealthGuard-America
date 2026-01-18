@@ -1,0 +1,81 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item active">PriceVision</li>
+        </ol>
+    </nav>
+
+    <div class="page-header mb-5">
+        <h1><i class="bi bi-currency-dollar me-2" style="color: #fd7e14;"></i>PriceVision</h1>
+        <p class="lead text-muted">Hospital Price Transparency with Compliance Analytics</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.pricevision_search') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-search display-4 text-warning mb-3"></i>
+                    <h5>Search Procedures</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.pricevision_compare') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-bar-chart display-4 text-warning mb-3"></i>
+                    <h5>Compare Prices</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('gov.pricevision_analytics') }}" class="card h-100 text-decoration-none">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-graph-up display-4 text-warning mb-3"></i>
+                    <h5>Compliance Analytics</h5>
+                    <span class="badge bg-primary">Gov Only</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-file-earmark-arrow-down display-4 text-muted mb-3"></i>
+                    <h5>Export Data</h5>
+                    <button class="btn btn-sm btn-outline-secondary">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 2rem;">1,002</div>
+                <div class="stat-label">Hospitals</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 2rem;">30.2M</div>
+                <div class="stat-label">Price Records</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 2rem;">~500</div>
+                <div class="stat-label">Payers</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-value" style="font-size: 2rem;">82%</div>
+                <div class="stat-label">ML Match Accuracy</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
