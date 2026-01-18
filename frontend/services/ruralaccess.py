@@ -4,6 +4,7 @@ Load healthcare access and shortage data - OPTIMIZED
 """
 import pandas as pd
 from pathlib import Path
+from . import VALID_US_STATES
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
@@ -41,7 +42,13 @@ class RuralAccessService:
 
     @classmethod
     def get_hpsa_designations(cls, state=None, discipline=None, limit=100):
-        """Get Health Professional Shortage Areas"""
+        """Get Health Professional Shortage Areas
+
+        Args:
+            state: Filter by state abbreviation (optional)
+            discipline: Filter by discipline type (optional)
+            limit: Maximum number of records to return. Use 0 or None for all records.
+        """
         df = cls._get_hpsa_df()
         if df.empty:
             return []
@@ -54,7 +61,28 @@ class RuralAccessService:
             disc_col = 'discipline' if 'discipline' in df.columns else 'HPSA Discipline Class'
             df = df[df[disc_col].fillna('').str.lower().str.contains(discipline.lower(), regex=False)]
 
+        # If limit is 0 or None, return all records
+        if limit is None or limit == 0:
+            return df.to_dict('records')
+
         return df.head(limit).to_dict('records')
+
+    @classmethod
+    def get_total_hpsa_count(cls, state=None, discipline=None):
+        """Get total count of HPSAs (for pagination info)"""
+        df = cls._get_hpsa_df()
+        if df.empty:
+            return 0
+
+        if state:
+            state_col = 'state' if 'state' in df.columns else 'Common State Name'
+            df = df[df[state_col] == state]
+
+        if discipline:
+            disc_col = 'discipline' if 'discipline' in df.columns else 'HPSA Discipline Class'
+            df = df[df[disc_col].fillna('').str.lower().str.contains(discipline.lower(), regex=False)]
+
+        return len(df)
 
     @classmethod
     def get_hpsa(cls, hpsa_id):
@@ -72,7 +100,12 @@ class RuralAccessService:
 
     @classmethod
     def get_counties(cls, state=None, limit=100):
-        """Get county-level data"""
+        """Get county-level data
+
+        Args:
+            state: Filter by state abbreviation (optional)
+            limit: Maximum number of records to return. Use 0 or None for all records.
+        """
         df = cls._get_counties_df()
         if df.empty:
             return []
@@ -80,7 +113,23 @@ class RuralAccessService:
         if state:
             df = df[df['state'] == state]
 
+        # If limit is 0 or None, return all records
+        if limit is None or limit == 0:
+            return df.to_dict('records')
+
         return df.head(limit).to_dict('records')
+
+    @classmethod
+    def get_total_counties_count(cls, state=None):
+        """Get total count of counties (for pagination info)"""
+        df = cls._get_counties_df()
+        if df.empty:
+            return 0
+
+        if state:
+            df = df[df['state'] == state]
+
+        return len(df)
 
     @classmethod
     def get_county(cls, fips):
@@ -132,7 +181,7 @@ class RuralAccessService:
 
     @classmethod
     def get_states(cls):
-        """Get list of states (cached)"""
+        """Get list of valid US states/territories (cached)"""
         if 'states' not in cls._cache:
             df = cls._get_hpsa_df()
             if df.empty:
@@ -140,7 +189,8 @@ class RuralAccessService:
             else:
                 state_col = 'state' if 'state' in df.columns else 'Common State Name'
                 states = df[state_col].dropna().unique()
-                cls._cache['states'] = sorted([s for s in states if len(str(s)) == 2])
+                # Filter to only valid US states/territories (50 states + DC + territories)
+                cls._cache['states'] = sorted([s for s in states if str(s).upper() in VALID_US_STATES])
         return cls._cache['states']
 
     @classmethod

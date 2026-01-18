@@ -34,7 +34,8 @@
     </div>
 
     <!-- Key Finding Alert -->
-    {% set nova4_pct = ((nova_dist.get(4, 0) / snap_analysis.total_products * 100) | int) if snap_analysis.total_products > 0 else 0 %}
+    {% set nova_total = nova_dist.get(1, 0) + nova_dist.get(2, 0) + nova_dist.get(3, 0) + nova_dist.get(4, 0) %}
+    {% set nova4_pct = ((nova_dist.get(4, 0) / nova_total * 100) | round(1)) if nova_total > 0 else 0 %}
     <div class="alert alert-danger mb-4">
         <i class="bi bi-exclamation-triangle me-2"></i>
         <strong>Key Finding:</strong> {{ nova4_pct }}% of analyzed products are classified as ultra-processed (NOVA 4).
@@ -42,8 +43,8 @@
     </div>
 
     <!-- NOVA Distribution Stats -->
-    <div class="row g-4 mb-5">
-        {% set total = snap_analysis.total_products %}
+    <div class="row g-4 mb-4">
+        {% set total = nova_total %}
         {% set n1 = nova_dist.get(1, 0) %}
         {% set n2 = nova_dist.get(2, 0) %}
         {% set n3 = nova_dist.get(3, 0) %}
@@ -77,6 +78,179 @@
             </div>
         </div>
     </div>
+
+    <!-- ML NOVA Classification Comparison -->
+    {% if ml_nova_analysis %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML NOVA Classification Analysis</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                Real-time ML classification of {{ ml_nova_analysis.classified_count }} products with ingredient data.
+                Compares ML predictions against stored NOVA values.
+            </p>
+
+            <!-- ML vs Stored Distribution Comparison -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6 class="text-center mb-3">Stored NOVA Distribution</h6>
+                    <div class="d-flex justify-content-around">
+                        <div class="text-center">
+                            <span class="badge bg-success fs-6">{{ n1 }}</span>
+                            <div class="small text-muted">NOVA 1</div>
+                        </div>
+                        <div class="text-center">
+                            <span class="badge bg-info fs-6">{{ n2 }}</span>
+                            <div class="small text-muted">NOVA 2</div>
+                        </div>
+                        <div class="text-center">
+                            <span class="badge bg-warning text-dark fs-6">{{ n3 }}</span>
+                            <div class="small text-muted">NOVA 3</div>
+                        </div>
+                        <div class="text-center">
+                            <span class="badge bg-danger fs-6">{{ n4 }}</span>
+                            <div class="small text-muted">NOVA 4</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-center mb-3">ML Predicted Distribution</h6>
+                    {% set ml_dist = ml_nova_analysis.ml_nova_distribution %}
+                    <div class="d-flex justify-content-around">
+                        <div class="text-center">
+                            <span class="badge bg-success fs-6">{{ ml_dist.get(1, 0) }}</span>
+                            <div class="small text-muted">NOVA 1</div>
+                        </div>
+                        <div class="text-center">
+                            <span class="badge bg-info fs-6">{{ ml_dist.get(2, 0) }}</span>
+                            <div class="small text-muted">NOVA 2</div>
+                        </div>
+                        <div class="text-center">
+                            <span class="badge bg-warning text-dark fs-6">{{ ml_dist.get(3, 0) }}</span>
+                            <div class="small text-muted">NOVA 3</div>
+                        </div>
+                        <div class="text-center">
+                            <span class="badge bg-danger fs-6">{{ ml_dist.get(4, 0) }}</span>
+                            <div class="small text-muted">NOVA 4</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disagreements Alert -->
+            {% if ml_nova_analysis.disagreement_count > 0 %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>{{ ml_nova_analysis.disagreement_count }} classification disagreements</strong> detected between stored values and ML predictions.
+            </div>
+
+            {% if ml_nova_analysis.disagreements %}
+            <h6 class="mt-3">Sample Disagreements:</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Stored NOVA</th>
+                            <th>ML NOVA</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in ml_nova_analysis.disagreements[:5] %}
+                        <tr>
+                            <td>{{ d.product_name[:40] }}{% if d.product_name|length > 40 %}...{% endif %}</td>
+                            <td>
+                                <span class="badge {% if d.stored_nova == 4 %}bg-danger{% elif d.stored_nova == 3 %}bg-warning text-dark{% elif d.stored_nova == 2 %}bg-info{% else %}bg-success{% endif %}">
+                                    {{ d.stored_nova }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if d.ml_nova == 4 %}bg-danger{% elif d.ml_nova == 3 %}bg-warning text-dark{% elif d.ml_nova == 2 %}bg-info{% else %}bg-success{% endif %}">
+                                    {{ d.ml_nova }}
+                                </span>
+                            </td>
+                            <td>{{ d.confidence }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="alert alert-success mb-0">
+                <i class="bi bi-check-circle me-2"></i>
+                No significant disagreements between stored values and ML predictions.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ML Additive Risk Patterns -->
+    {% if ml_additive_patterns %}
+    <div class="card mb-5">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-exclamation-octagon me-2"></i>ML Additive Risk Pattern Analysis</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                Analysis of {{ ml_additive_patterns.total_unique_additives }} unique additives across the product set.
+                Identifies high-risk additives that appear frequently.
+            </p>
+
+            <!-- Summary Stats -->
+            <div class="row mb-4">
+                <div class="col-md-4 text-center">
+                    <div class="fs-3 fw-bold text-primary">{{ ml_additive_patterns.total_unique_additives }}</div>
+                    <small class="text-muted">Unique Additives</small>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="fs-3 fw-bold text-danger">{{ ml_additive_patterns.high_risk_additive_count }}</div>
+                    <small class="text-muted">High Risk Additives</small>
+                </div>
+                <div class="col-md-4 text-center">
+                    {% set hr_pct = ((ml_additive_patterns.high_risk_additive_count / ml_additive_patterns.total_unique_additives * 100) | round(1)) if ml_additive_patterns.total_unique_additives > 0 else 0 %}
+                    <div class="fs-3 fw-bold {% if hr_pct > 20 %}text-danger{% elif hr_pct > 10 %}text-warning{% else %}text-success{% endif %}">{{ hr_pct }}%</div>
+                    <small class="text-muted">High Risk Rate</small>
+                </div>
+            </div>
+
+            <!-- Most Common High Risk Additives -->
+            {% if ml_additive_patterns.most_common_high_risk %}
+            <h6 class="mb-3">Most Common High-Risk Additives:</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Additive</th>
+                            <th>Risk Score</th>
+                            <th>Products</th>
+                            <th>Example Products</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for add in ml_additive_patterns.most_common_high_risk[:8] %}
+                        <tr>
+                            <td><strong>{{ add.name }}</strong></td>
+                            <td><span class="badge bg-danger">{{ add.risk_score }}</span></td>
+                            <td>{{ add.count }}</td>
+                            <td><small class="text-muted">{{ add.example_products | join(', ') }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-success mb-0">
+                <i class="bi bi-check-circle me-2"></i>
+                No high-risk additives detected in the analyzed products.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Summary Stats -->
     <div class="row g-4 mb-4">

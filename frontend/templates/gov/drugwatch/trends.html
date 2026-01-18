@@ -15,6 +15,35 @@
         <span class="badge bg-primary ms-2">Government Only</span>
     </h2>
 
+    <!-- Search Box -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.drugwatch_trends') }}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label">Search Drugs</label>
+                    <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="Search by brand or generic name...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Show</label>
+                    <select class="form-select" name="limit">
+                        <option value="25" {% if limit == 25 %}selected{% endif %}>25</option>
+                        <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
+                        <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
+                        <option value="200" {% if limit == 200 %}selected{% endif %}>200</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+                {% if search %}
+                <div class="col-md-2">
+                    <a href="{{ url_for('gov.drugwatch_trends') }}" class="btn btn-outline-secondary w-100">Clear</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
     <!-- Overview -->
     <div class="card mb-4">
         <div class="card-header bg-info text-white">
@@ -23,11 +52,11 @@
         <div class="card-body">
             <p>
                 This analysis tracks Medicare Part D prescription drug spending patterns, identifying the highest-cost
-                medications and their impact on federal healthcare expenditures. Understanding these trends is crucial
-                for policy decisions around drug pricing reform.
+                medications and their impact on federal healthcare expenditures.
             </p>
             <p class="mb-0">
-                <strong>Data Source:</strong> CMS Medicare Part D Spending by Drug dataset (2023)
+                <strong>Data Source:</strong> CMS Medicare Part D Spending by Drug dataset (2023) |
+                <strong>Total Drugs:</strong> {{ total_drugs }} {% if search %}matching "{{ search }}"{% endif %}
             </p>
         </div>
     </div>
@@ -94,6 +123,66 @@
         </div>
     </div>
 
+    <!-- Full Drug Table -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>All Drugs by Medicare Spending</h5>
+            <span class="badge bg-secondary">Page {{ page }} of {{ total_pages }} ({{ total_drugs }} drugs)</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>#</th>
+                            <th>Brand Name</th>
+                            <th>Generic Name</th>
+                            <th>Total Spending (2023)</th>
+                            <th>Beneficiaries</th>
+                            <th>Claims</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for drug in drugs %}
+                        <tr>
+                            <td>{{ (page - 1) * limit + loop.index }}</td>
+                            <td><strong>{{ (drug.get('brand_name') or 'N/A')[:30] }}</strong></td>
+                            <td><small>{{ (drug.get('generic_name') or 'N/A')[:40] }}</small></td>
+                            <td class="text-danger fw-bold">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
+                            <td>{{ "{:,}".format(drug.get('beneficiary_count_2023', 0) | int) if drug.get('beneficiary_count_2023') else 'N/A' }}</td>
+                            <td>{{ "{:,}".format(drug.get('claim_count_2023', 0) | int) if drug.get('claim_count_2023') else 'N/A' }}</td>
+                            <td><a href="{{ url_for('gov.drugwatch_drug', drug_id=drug.get('brand_name', '')) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" class="text-center text-muted">No drugs found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <nav class="mt-3">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page > 1 %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=page-1) }}">Previous</a></li>
+                    {% endif %}
+                    {% for p in range(1, total_pages + 1) %}
+                    {% if p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2) %}
+                    <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=p) }}">{{ p }}</a></li>
+                    {% elif p == 4 or p == total_pages - 3 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if page < total_pages %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=page+1) }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- Spending by Category -->
     <div class="card mb-4">
         <div class="card-header">
@@ -108,7 +197,6 @@
                         <li>Brand-name drugs dominate spending despite generics being available for many conditions</li>
                         <li>Specialty drugs (biologics, cancer treatments) have the highest per-unit costs</li>
                         <li>Diabetes medications represent a significant portion of total spending</li>
-                        <li>GLP-1 agonists (Ozempic, Mounjaro) are the fastest-growing spending category</li>
                     </ul>
                 </div>
                 <div class="col-md-6">
@@ -121,10 +209,6 @@
                         <tr>
                             <td>Annual Price Increases</td>
                             <td class="text-end"><span class="badge bg-warning text-dark">5-10%/year</span></td>
-                        </tr>
-                        <tr>
-                            <td>New Drug Launch Prices</td>
-                            <td class="text-end"><span class="badge bg-danger">+15%/year</span></td>
                         </tr>
                         <tr>
                             <td>Specialty Drug Share</td>

@@ -28,6 +28,51 @@
                     <p><strong>Type:</strong> {{ hospital.get('Hospital Type', 'N/A') }}</p>
                 </div>
             </div>
+
+            <!-- AI Pricing Analysis -->
+            {% if pricing_analysis %}
+            <div class="card mb-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-robot me-2"></i>AI Pricing Insights</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Average Markup:</strong>
+                        <span class="badge {% if pricing_analysis.avg_markup > 100 %}bg-danger{% elif pricing_analysis.avg_markup > 50 %}bg-warning text-dark{% else %}bg-success{% endif %} ms-2">
+                            {{ pricing_analysis.avg_markup }}%
+                        </span>
+                        <small class="d-block text-muted">How much more than cash price</small>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Pricing Consistency:</strong>
+                        <div class="progress mt-1" style="height: 20px;">
+                            <div class="progress-bar {% if pricing_analysis.pricing_consistency >= 70 %}bg-success{% elif pricing_analysis.pricing_consistency >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                 role="progressbar" style="width: {{ pricing_analysis.pricing_consistency }}%;">
+                                {{ pricing_analysis.pricing_consistency }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">Higher = more predictable pricing</small>
+                    </div>
+                    {% if pricing_analysis.specialties %}
+                    <div class="mb-3">
+                        <strong>Services Available:</strong><br>
+                        {% for specialty in pricing_analysis.specialties %}
+                        <span class="badge bg-secondary me-1 mt-1">{{ specialty }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <strong>Price Range:</strong>
+                        <span class="text-success">${{ "{:,.0f}".format(pricing_analysis.price_range[0]) }}</span> -
+                        <span class="text-danger">${{ "{:,.0f}".format(pricing_analysis.price_range[1]) }}</span>
+                    </div>
+                    <div>
+                        <strong>Avg Cash Price:</strong>
+                        ${{ "{:,.0f}".format(pricing_analysis.avg_cash_price) }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
         <div class="col-md-8">
             <div class="card">

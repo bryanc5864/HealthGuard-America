@@ -12,7 +12,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-speedometer2 me-2"></i>MAHA Initiative Dashboard</h2>
-        <span class="badge bg-primary">Covering all 50 US States + 9 Territories</span>
+        <span class="badge bg-primary">Covering all 50 US States + DC + Territories</span>
     </div>
 
     <!-- Filters -->
@@ -85,6 +85,108 @@
             </div>
         </div>
     </div>
+
+    <!-- ML Insights Section -->
+    {% if ml_available %}
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Insights</h5>
+            <span class="badge bg-light text-primary">Model Confidence: {{ ml_insights.model_confidence }}%</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Emerging Hotspots -->
+                <div class="col-md-6">
+                    <h6><i class="bi bi-graph-up-arrow text-danger me-2"></i>Emerging Hotspots</h6>
+                    <p class="text-muted small">Counties with predicted risk increase based on current trends.</p>
+
+                    {% if ml_insights.emerging_hotspots %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>County</th>
+                                    <th>Current</th>
+                                    <th>Predicted</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hotspot in ml_insights.emerging_hotspots %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('gov.chroniccare_county', fips=hotspot.fips) }}">
+                                            {{ hotspot.county }}, {{ hotspot.state }}
+                                        </a>
+                                    </td>
+                                    <td>{{ hotspot.current_score }}</td>
+                                    <td>{{ hotspot.predicted_score }}</td>
+                                    <td>
+                                        <span class="badge bg-danger">+{{ hotspot.risk_increase }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-check-circle me-2"></i>
+                        No significant emerging hotspots detected. Risk levels are stable.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Top Risk Factors -->
+                <div class="col-md-6">
+                    <h6><i class="bi bi-exclamation-triangle text-warning me-2"></i>Top Risk Factors Nationwide</h6>
+                    <p class="text-muted small">Most frequently occurring risk factors across analyzed counties.</p>
+
+                    {% if ml_insights.top_risk_factors %}
+                    {% for factor in ml_insights.top_risk_factors %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ factor.name }}</span>
+                        <div>
+                            <span class="badge bg-secondary me-1">{{ factor.frequency }} counties</span>
+                            <span class="badge bg-info">Avg: {{ factor.avg_contribution }}%</span>
+                        </div>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar"
+                             style="width: {{ (factor.frequency / 50 * 100)|int }}%"></div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">No significant risk factors identified.</p>
+                    {% endif %}
+
+                    {% if ml_insights.prediction_summary %}
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 class="mb-0">{{ ml_insights.prediction_summary.counties_analyzed }}</h4>
+                            <small class="text-muted">Analyzed</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="mb-0 text-danger">{{ ml_insights.prediction_summary.high_risk_predicted }}</h4>
+                            <small class="text-muted">High Risk</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="mb-0">{{ ml_insights.prediction_summary.avg_predicted_risk }}</h4>
+                            <small class="text-muted">Avg Risk</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>ML Insights Unavailable:</strong> The ML prediction model is not currently loaded. Enhanced analytics and predictions are disabled.
+    </div>
+    {% endif %}
 
     <div class="row">
         <!-- Interactive Map -->

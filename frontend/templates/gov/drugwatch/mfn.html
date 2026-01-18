@@ -15,6 +15,41 @@
         <span class="badge bg-primary ms-2">Government Only</span>
     </h2>
 
+    <!-- Search Box -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.drugwatch_mfn') }}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label">Search Drugs</label>
+                    <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="Search by brand or generic name...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Show</label>
+                    <select class="form-select" name="limit">
+                        <option value="25" {% if limit == 25 %}selected{% endif %}>25</option>
+                        <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
+                        <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
+                        <option value="200" {% if limit == 200 %}selected{% endif %}>200</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+                {% if search %}
+                <div class="col-md-2">
+                    <a href="{{ url_for('gov.drugwatch_mfn') }}" class="btn btn-outline-secondary w-100">Clear</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>{{ total_drugs }}</strong> drugs found{% if search %} matching "{{ search }}"{% endif %}. Showing top {{ mfn_analysis | length }} by spending.
+    </div>
+
     <!-- What is MFN -->
     <div class="card mb-4">
         <div class="card-header bg-info text-white">
@@ -69,16 +104,18 @@
         </div>
     </div>
 
-    <!-- Top Drugs Analysis -->
+    <!-- All Drugs MFN Analysis Table -->
     <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Top Drugs by Savings Potential</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>MFN Savings by Drug</h5>
+            <span class="badge bg-secondary">{{ mfn_analysis | length }} drugs shown</span>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light sticky-top">
                         <tr>
+                            <th>#</th>
                             <th>Drug Name</th>
                             <th>Generic Name</th>
                             <th>US Medicare Spending</th>
@@ -88,19 +125,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for drug in top_drugs[:15] %}
-                        {% set spending = drug.get('total_spending_2023', 0) | float %}
+                        {% for item in mfn_analysis %}
+                        {% set spending = item.us_spending | float %}
                         {% set mfn_spending = spending * 0.35 %}
-                        {% set savings = spending - mfn_spending %}
-                        {% set savings_pct = 65 %}
+                        {% set savings = item.potential_savings | float %}
+                        {% set savings_pct = ((savings / spending * 100) | round(0)) if spending > 0 else 0 %}
                         <tr>
-                            <td><strong>{{ drug.get('brand_name', 'N/A') }}</strong></td>
-                            <td><small class="text-muted">{{ drug.get('generic_name', 'N/A') }}</small></td>
+                            <td>{{ loop.index }}</td>
+                            <td><strong>{{ item.drug }}</strong></td>
+                            <td><small class="text-muted">{{ (item.generic or 'N/A')[:40] }}</small></td>
                             <td class="text-danger">${{ "{:,.0f}".format(spending) }}</td>
                             <td class="text-warning">${{ "{:,.0f}".format(mfn_spending) }}</td>
                             <td class="text-success fw-bold">${{ "{:,.0f}".format(savings) }}</td>
-                            <td><span class="badge bg-success">{{ savings_pct }}%</span></td>
+                            <td><span class="badge bg-success">{{ savings_pct | int }}%</span></td>
                         </tr>
+                        {% else %}
+                        <tr><td colspan="7" class="text-center text-muted">No drugs found</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

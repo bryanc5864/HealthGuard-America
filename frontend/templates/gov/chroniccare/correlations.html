@@ -14,6 +14,40 @@
         <i class="bi bi-diagram-3 me-2"></i>Food Environment & Disease Correlations
     </h2>
 
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.chroniccare_correlations') }}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Filter by State</label>
+                    <select name="state" class="form-select">
+                        <option value="">All States ({{ states | length }})</option>
+                        {% for s in states %}
+                        <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Show</label>
+                    <select name="limit" class="form-select">
+                        <option value="50" {% if selected_limit == 50 %}selected{% endif %}>50 counties</option>
+                        <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 counties</option>
+                        <option value="250" {% if selected_limit == 250 %}selected{% endif %}>250 counties</option>
+                        <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 counties</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </div>
+                {% if selected_state or selected_limit != 100 %}
+                <div class="col-md-2">
+                    <a href="{{ url_for('gov.chroniccare_correlations') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
     <div class="alert alert-info mb-4">
         <i class="bi bi-lightbulb me-2"></i>
         <strong>MAHA Thesis:</strong> There is a strong correlation between food environment factors

@@ -54,8 +54,19 @@ def drugwatch_drug(drug_id):
 @gov_required
 def drugwatch_mfn():
     """Most Favored Nation pricing analysis (gov-only)"""
+    search = request.args.get('q', '')
+    limit = int(request.args.get('limit', 50))
+
     stats = DrugWatchService.get_stats()
-    top_drugs = DrugWatchService.get_top_expensive(limit=20)
+
+    # Get drugs - with search
+    if search:
+        all_drugs = DrugWatchService.get_us_drugs(search=search, limit=500)
+        all_drugs = sorted(all_drugs, key=lambda x: float(x.get('total_spending_2023', 0) or 0), reverse=True)
+    else:
+        all_drugs = DrugWatchService.get_top_expensive(limit=500)
+
+    top_drugs = all_drugs[:limit]
     intl_prices = DrugWatchService.get_international_prices()
 
     # Calculate MFN savings potential
@@ -66,27 +77,52 @@ def drugwatch_mfn():
         if drug_name and us_spending > 0:
             mfn_analysis.append({
                 'drug': drug_name,
+                'generic': drug.get('generic_name', ''),
                 'us_spending': us_spending,
                 'potential_savings': us_spending * 0.3  # Estimated 30% savings
             })
 
     return render_template('gov/drugwatch/mfn.html',
                           stats=stats, top_drugs=top_drugs,
-                          intl_prices=intl_prices[:50], mfn_analysis=mfn_analysis)
+                          intl_prices=intl_prices[:100], mfn_analysis=mfn_analysis,
+                          search=search, limit=limit, total_drugs=len(all_drugs))
 
 
 @gov_bp.route('/drugwatch/trends')
 @gov_required
 def drugwatch_trends():
     """Drug spending trends analysis (gov-only)"""
-    stats = DrugWatchService.get_stats()
-    top_drugs = DrugWatchService.get_top_expensive(limit=25)
+    search = request.args.get('q', '')
+    limit = int(request.args.get('limit', 50))
+    page = int(request.args.get('page', 1))
 
-    # Calculate spending by category
+    stats = DrugWatchService.get_stats()
+
+    # Get drugs - with search and pagination
+    if search:
+        all_drugs = DrugWatchService.get_us_drugs(search=search, limit=1000)
+        # Sort by spending
+        all_drugs = sorted(all_drugs, key=lambda x: float(x.get('total_spending_2023', 0) or 0), reverse=True)
+    else:
+        all_drugs = DrugWatchService.get_top_expensive(limit=500)
+
+    # Pagination
+    total_drugs = len(all_drugs)
+    start = (page - 1) * limit
+    end = start + limit
+    drugs = all_drugs[start:end]
+    total_pages = (total_drugs + limit - 1) // limit
+
+    # Top 25 for chart
+    top_drugs = all_drugs[:25] if not search else drugs[:25]
+
+    # Calculate spending stats
     spending_data = {
-        'total': sum(float(d.get('total_spending_2023', 0) or 0) for d in top_drugs),
-        'drugs': top_drugs
+        'total': sum(float(d.get('total_spending_2023', 0) or 0) for d in all_drugs[:100]),
+        'drugs': drugs
     }
 
     return render_template('gov/drugwatch/trends.html',
-                          stats=stats, spending_data=spending_data, top_drugs=top_drugs)
+                          stats=stats, spending_data=spending_data, top_drugs=top_drugs,
+                          drugs=drugs, search=search, limit=limit, page=page,
+                          total_drugs=total_drugs, total_pages=total_pages)
