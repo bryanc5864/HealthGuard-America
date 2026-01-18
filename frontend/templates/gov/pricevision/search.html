@@ -10,22 +10,107 @@
         </ol>
     </nav>
 
-    <h2 class="mb-4"><i class="bi bi-search me-2"></i>Search Procedures</h2>
+    <h2 class="mb-4">
+        <i class="bi bi-search me-2"></i>
+        {% if query %}Search Results for "{{ query }}"{% else %}Browse {% if search_type == 'hospital' %}Hospitals{% else %}Procedures{% endif %}{% endif %}
+    </h2>
 
+    <!-- Search Box -->
     <div class="card mb-4">
         <div class="card-body">
             <form action="{{ url_for('gov.pricevision_search') }}" method="get">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Search procedures...">
-                    <button class="btn btn-warning" type="submit">Search</button>
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <select name="type" class="form-select">
+                            <option value="procedure" {% if search_type != 'hospital' %}selected{% endif %}>Procedures</option>
+                            <option value="hospital" {% if search_type == 'hospital' %}selected{% endif %}>Hospitals</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="state" class="form-select">
+                            <option value="">All States</option>
+                            {% for s in states %}
+                            <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="q" value="{{ query }}"
+                               placeholder="Search...">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-warning w-100" type="submit">Search</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Search results will be loaded from the backend API.
+    <!-- Results -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Results ({{ results | length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if results %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        {% if search_type == 'hospital' %}
+                        <tr>
+                            <th>Hospital Name</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Type</th>
+                            <th>Action</th>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <th>Procedure Description</th>
+                            <th>HCPCS Code</th>
+                            <th>Action</th>
+                        </tr>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% if search_type == 'hospital' %}
+                            {% for h in results %}
+                            <tr>
+                                <td><strong>{{ h.get('Facility Name', 'Unknown') }}</strong></td>
+                                <td>{{ h.get('City/Town', h.get('City', '')) }}</td>
+                                <td>{{ h.get('State', '') }}</td>
+                                <td><span class="badge bg-secondary">{{ h.get('Hospital Type', 'N/A')[:30] }}</span></td>
+                                <td>
+                                    <a href="{{ url_for('gov.pricevision_hospital', npi=h.get('Facility ID', '')) }}"
+                                       class="btn btn-sm btn-outline-warning">View Prices</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            {% for p in results %}
+                            <tr>
+                                <td><strong>{{ p.get('canonical_description', 'Unknown') }}</strong></td>
+                                <td><span class="badge bg-primary">{{ p.get('hcpcs_code', 'N/A') }}</span></td>
+                                <td>
+                                    <a href="{{ url_for('gov.pricevision_compare', procedure=p.get('hcpcs_code', '')) }}"
+                                       class="btn btn-sm btn-outline-primary">Compare Prices</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">
+                {% if query %}
+                No results found for "{{ query }}". Try a different search term.
+                {% else %}
+                Enter a search term to find {% if search_type == 'hospital' %}hospitals{% else %}procedures{% endif %}.
+                {% endif %}
+            </p>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

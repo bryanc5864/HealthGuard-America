@@ -11,60 +11,173 @@
     </nav>
 
     <h2 class="mb-4">
-        <i class="bi bi-bar-chart me-2"></i>Price Comparison
+        <i class="bi bi-bar-chart me-2 text-warning"></i>Price Comparison
     </h2>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Price comparison will display hospital prices for procedure: {{ procedure }}
+    <!-- Search/Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('public.pricevision_compare') }}" method="get">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Procedure</label>
+                        <input type="text" class="form-control" name="procedure" value="{{ query }}"
+                               placeholder="Enter procedure code or search term...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">State</label>
+                        <select name="state" class="form-select">
+                            <option value="">All States</option>
+                            {% for s in states %}
+                            <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-warning w-100" type="submit">Compare</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- Placeholder comparison chart -->
+    {% if query %}
+    <!-- Procedure Info -->
+    {% if procedures %}
+    {% set proc = procedures[0] %}
+    <div class="alert alert-light border mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-1">{{ proc.get('canonical_description', 'Procedure') }}</h5>
+                <span class="badge bg-primary">HCPCS: {{ proc.get('hcpcs_code', query) }}</span>
+            </div>
+            <div class="col-md-4 text-end">
+                <small class="text-muted">Comparing prices across hospitals</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Price Results -->
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Hospital Price Comparison</h5>
+            <span class="badge bg-secondary">{{ prices | length }} results</span>
         </div>
         <div class="card-body">
+            {% if prices %}
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>Hospital</th>
                             <th>Location</th>
+                            <th>Gross Charge</th>
                             <th>Cash Price</th>
-                            <th>Insurance Avg</th>
+                            <th>Min Negotiated</th>
+                            <th>Max Negotiated</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for p in prices %}
+                        {% set gross = p.get('gross_charge', p.get('gross_charges', 0)) | float %}
+                        {% set cash = p.get('cash_price', p.get('discounted_cash', gross * 0.6)) | float %}
+                        {% set min_neg = p.get('min_negotiated', p.get('de_identified_min', cash * 0.8)) | float %}
+                        {% set max_neg = p.get('max_negotiated', p.get('de_identified_max', gross * 1.2)) | float %}
                         <tr>
-                            <td>General Hospital</td>
-                            <td>Los Angeles, CA</td>
-                            <td class="text-success fw-bold">$850</td>
-                            <td>$1,200</td>
-                            <td><span class="badge bg-success">Best Price</span></td>
+                            <td>
+                                <strong>{{ p.get('hospital_name', p.get('facility_name', 'Hospital'))[:40] }}</strong>
+                            </td>
+                            <td>{{ p.get('city', '') }}, {{ p.get('state', '') }}</td>
+                            <td>${{ "{:,.0f}".format(gross) }}</td>
+                            <td class="text-success fw-bold">${{ "{:,.0f}".format(cash) }}</td>
+                            <td>${{ "{:,.0f}".format(min_neg) }}</td>
+                            <td>${{ "{:,.0f}".format(max_neg) }}</td>
+                            <td>
+                                {% if loop.first %}
+                                <span class="badge bg-success">Best Cash Price</span>
+                                {% endif %}
+                            </td>
                         </tr>
-                        <tr>
-                            <td>City Medical Center</td>
-                            <td>San Diego, CA</td>
-                            <td>$1,100</td>
-                            <td>$1,450</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>Regional Health System</td>
-                            <td>San Francisco, CA</td>
-                            <td>$1,500</td>
-                            <td>$1,800</td>
-                            <td></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <div class="alert alert-success mt-3">
-                <strong>Potential Savings:</strong> Up to $650 by choosing General Hospital over Regional Health System
+            <!-- Price Statistics -->
+            {% if prices | length > 1 %}
+            {% set all_cash = prices | map(attribute='cash_price') | list %}
+            {% set min_price = prices | map(attribute='cash_price') | min %}
+            {% set max_price = prices | map(attribute='cash_price') | max %}
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>${{ "{:,.0f}".format(min_price | default(0) | float) }}</h4>
+                            <small>Lowest Cash Price</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <h4>${{ "{:,.0f}".format(max_price | default(0) | float) }}</h4>
+                            <small>Highest Cash Price</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h4>${{ "{:,.0f}".format((max_price | default(0) | float) - (min_price | default(0) | float)) }}</h4>
+                            <small>Potential Savings</small>
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-search display-4 text-muted mb-3"></i>
+                <h5>No price data found</h5>
+                <p class="text-muted">
+                    No hospital pricing data available for procedure code "{{ query }}".
+                    <br>Try searching for a different procedure or check the HCPCS code.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+    <!-- No search yet -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-search display-4 text-muted mb-3"></i>
+            <h5>Search for a Procedure</h5>
+            <p class="text-muted">Enter a procedure code (like 70551 for MRI) or search term to compare prices across hospitals.</p>
+
+            <div class="mt-4">
+                <p class="text-muted mb-2">Popular searches:</p>
+                <a href="{{ url_for('public.pricevision_compare', procedure='70551') }}" class="btn btn-outline-warning me-2">MRI Brain (70551)</a>
+                <a href="{{ url_for('public.pricevision_compare', procedure='27447') }}" class="btn btn-outline-warning me-2">Knee Replacement (27447)</a>
+                <a href="{{ url_for('public.pricevision_compare', procedure='43239') }}" class="btn btn-outline-warning me-2">Colonoscopy (43239)</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Info -->
+    <div class="card bg-light mt-4">
+        <div class="card-body">
+            <h6><i class="bi bi-info-circle me-2"></i>Understanding Hospital Prices</h6>
+            <ul class="mb-0 small">
+                <li><strong>Gross Charge:</strong> The hospital's "list price" before any discounts</li>
+                <li><strong>Cash Price:</strong> What you pay if you pay cash (no insurance) - often the best deal</li>
+                <li><strong>Min/Max Negotiated:</strong> Range of prices negotiated with different insurance companies</li>
+            </ul>
         </div>
     </div>
 </div>

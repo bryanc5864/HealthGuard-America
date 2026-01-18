@@ -9,7 +9,9 @@
       "Bash(python scripts/process_data.py:*)",
       "WebFetch(domain:data.hrsa.gov)",
       "WebFetch(domain:www.data.va.gov)",
-      "WebFetch(domain:datadashboard.fda.gov)"
+      "WebFetch(domain:datadashboard.fda.gov)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

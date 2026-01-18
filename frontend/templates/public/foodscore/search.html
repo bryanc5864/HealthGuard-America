@@ -29,35 +29,55 @@
 
     <div class="card">
         <div class="card-header">
-            <h5 class="mb-0">Results</h5>
+            <h5 class="mb-0">Results ({{ products | length }})</h5>
         </div>
         <div class="card-body">
-            {% if query %}
+            {% if products %}
             <div class="row g-3">
+                {% for p in products %}
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">{{ query }} - Example Product</h6>
-                                <span class="badge bg-warning">NOVA 3</span>
+                                <h6 class="card-title mb-0">{{ p.get('product_name', 'Unknown')[:35] }}{% if p.get('product_name', '')|length > 35 %}...{% endif %}</h6>
+                                {% set nova = p.get('nova_group', 0) | string %}
+                                {% if nova == '4' or 'en:4' in nova %}
+                                <span class="badge bg-danger">NOVA 4</span>
+                                {% elif nova == '3' or 'en:3' in nova %}
+                                <span class="badge bg-warning text-dark">NOVA 3</span>
+                                {% elif nova == '2' or 'en:2' in nova %}
+                                <span class="badge bg-info">NOVA 2</span>
+                                {% elif nova == '1' or 'en:1' in nova %}
+                                <span class="badge bg-success">NOVA 1</span>
+                                {% else %}
+                                <span class="badge bg-secondary">N/A</span>
+                                {% endif %}
                             </div>
                             <div class="mb-2">
-                                <small class="text-muted">Brand Name</small>
+                                <small class="text-muted">{{ p.get('brands', 'Unknown brand')[:30] }}</small>
                             </div>
+                            {% set score = p.get('maha_score', 50) | int %}
                             <div class="d-flex align-items-center mb-3">
                                 <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: 65%;"></div>
+                                    <div class="progress-bar {% if score < 40 %}bg-danger{% elif score < 60 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ score }}%;"></div>
                                 </div>
-                                <span class="fw-bold">65</span>
+                                <span class="fw-bold">{{ score }}</span>
                             </div>
-                            <a href="{{ url_for('public.foodscore_product', barcode='0123456789') }}"
+                            <a href="{{ url_for('public.foodscore_product', barcode=p.get('code', '')) }}"
                                class="btn btn-sm btn-outline-success w-100">View Details</a>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
             {% else %}
-            <p class="text-muted text-center py-4">Enter a product name to search.</p>
+            <p class="text-muted text-center py-4">
+                {% if query %}
+                No products found for "{{ query }}". Try a different search term.
+                {% else %}
+                Enter a product name to search.
+                {% endif %}
+            </p>
             {% endif %}
         </div>
     </div>

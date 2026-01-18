@@ -20,7 +20,7 @@
             <form action="{{ url_for('public.drugwatch_search') }}" method="get">
                 <div class="input-group">
                     <input type="text" class="form-control" name="q" value="{{ query }}"
-                           placeholder="Search drugs...">
+                           placeholder="Search by brand or generic name...">
                     <button class="btn btn-danger" type="submit">Search</button>
                 </div>
             </form>
@@ -28,40 +28,48 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Results</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Results ({{ drugs | length }})</h5>
         </div>
         <div class="card-body">
-            {% if query %}
+            {% if drugs %}
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Drug Name</th>
-                            <th>Generic</th>
-                            <th>US Price</th>
-                            <th>Canada</th>
-                            <th>Savings</th>
-                            <th></th>
+                            <th>Brand Name</th>
+                            <th>Generic Name</th>
+                            <th>Manufacturer</th>
+                            <th>Total Spending (2023)</th>
+                            <th>Avg Price/Unit</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for d in drugs %}
                         <tr>
-                            <td><strong>{{ query }}</strong></td>
-                            <td><span class="badge bg-info">Generic Available</span></td>
-                            <td>$12.50/unit</td>
-                            <td>$0.85/unit</td>
-                            <td><span class="text-success fw-bold">93%</span></td>
+                            <td><strong>{{ d.get('brand_name', 'N/A') }}</strong></td>
+                            <td>{{ d.get('generic_name', 'N/A') }}</td>
+                            <td>{{ d.get('manufacturer', 'N/A') }}</td>
+                            <td>${{ "{:,.0f}".format(d.get('total_spending_2023', 0) | float) }}</td>
+                            <td>${{ "%.2f" | format(d.get('avg_price_per_unit_2023', 0) | float) }}</td>
                             <td>
-                                <a href="{{ url_for('public.drugwatch_compare', drug_id='1') }}"
+                                <a href="{{ url_for('public.drugwatch_drug', drug_id=d.get('brand_name', '')) }}"
                                    class="btn btn-sm btn-outline-danger">Compare</a>
                             </td>
                         </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
             {% else %}
-            <p class="text-muted text-center py-4">Enter a drug name to search.</p>
+            <p class="text-muted text-center py-4">
+                {% if query %}
+                No drugs found for "{{ query }}". Try a different search term.
+                {% else %}
+                Enter a drug name to search.
+                {% endif %}
+            </p>
             {% endif %}
         </div>
     </div>

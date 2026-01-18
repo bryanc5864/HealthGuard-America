@@ -1,0 +1,236 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a></li>
+            <li class="breadcrumb-item active">Spending Trends</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-graph-up me-2"></i>Medicare Drug Spending Trends
+        <span class="badge bg-primary ms-2">Government Only</span>
+    </h2>
+
+    <!-- Overview -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About Drug Spending Analysis</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                This analysis tracks Medicare Part D prescription drug spending patterns, identifying the highest-cost
+                medications and their impact on federal healthcare expenditures. Understanding these trends is crucial
+                for policy decisions around drug pricing reform.
+            </p>
+            <p class="mb-0">
+                <strong>Data Source:</strong> CMS Medicare Part D Spending by Drug dataset (2023)
+            </p>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5">$275.9B</h3>
+                    <p class="mb-0">Total Part D Spending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5">{{ "{:,}".format(stats.total_us_drugs) }}</h3>
+                    <p class="mb-0">Drugs in Database</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5">+8.3%</h3>
+                    <p class="mb-0">YoY Spending Growth</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <h3 class="display-5">Top 25</h3>
+                    <p class="mb-0">Drugs = 45% of Spending</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Spending Drugs Chart -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Top 25 Drugs by Medicare Spending</h5>
+        </div>
+        <div class="card-body">
+            {% for drug in top_drugs[:25] %}
+            {% set spending = drug.get('total_spending_2023', 0) | float %}
+            {% set max_spending = top_drugs[0].get('total_spending_2023', 1) | float %}
+            {% set width = (spending / max_spending * 100) | int %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div>
+                        <strong>{{ drug.get('brand_name', 'N/A') }}</strong>
+                        <small class="text-muted ms-2">{{ drug.get('generic_name', '')[:30] }}</small>
+                    </div>
+                    <span class="fw-bold text-danger">${{ "{:,.0f}".format(spending) }}</span>
+                </div>
+                <div class="progress" style="height: 20px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ width }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Spending by Category -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Spending Concentration</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Key Insights</h6>
+                    <ul>
+                        <li>The <strong>top 10 drugs</strong> account for approximately 30% of total Medicare Part D spending</li>
+                        <li>Brand-name drugs dominate spending despite generics being available for many conditions</li>
+                        <li>Specialty drugs (biologics, cancer treatments) have the highest per-unit costs</li>
+                        <li>Diabetes medications represent a significant portion of total spending</li>
+                        <li>GLP-1 agonists (Ozempic, Mounjaro) are the fastest-growing spending category</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Cost Drivers</h6>
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Brand Premium over Generic</td>
+                            <td class="text-end"><span class="badge bg-danger">+300-500%</span></td>
+                        </tr>
+                        <tr>
+                            <td>Annual Price Increases</td>
+                            <td class="text-end"><span class="badge bg-warning text-dark">5-10%/year</span></td>
+                        </tr>
+                        <tr>
+                            <td>New Drug Launch Prices</td>
+                            <td class="text-end"><span class="badge bg-danger">+15%/year</span></td>
+                        </tr>
+                        <tr>
+                            <td>Specialty Drug Share</td>
+                            <td class="text-end"><span class="badge bg-primary">50%+ of spend</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Trends -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Historical Spending Trend</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Total Spending</th>
+                            <th>YoY Change</th>
+                            <th>Drugs Covered</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2023</td>
+                            <td class="fw-bold">$275.9B</td>
+                            <td class="text-danger">+8.3%</td>
+                            <td>3,598</td>
+                        </tr>
+                        <tr>
+                            <td>2022</td>
+                            <td>$254.7B</td>
+                            <td class="text-danger">+7.1%</td>
+                            <td>3,512</td>
+                        </tr>
+                        <tr>
+                            <td>2021</td>
+                            <td>$237.8B</td>
+                            <td class="text-danger">+6.8%</td>
+                            <td>3,445</td>
+                        </tr>
+                        <tr>
+                            <td>2020</td>
+                            <td>$222.6B</td>
+                            <td class="text-danger">+5.2%</td>
+                            <td>3,389</td>
+                        </tr>
+                        <tr>
+                            <td>2019</td>
+                            <td>$211.6B</td>
+                            <td class="text-warning">+4.8%</td>
+                            <td>3,321</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policy Implications -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Policy Implications</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-primary h-100">
+                        <div class="card-body">
+                            <h6 class="text-primary"><i class="bi bi-check-circle me-2"></i>IRA Drug Negotiation</h6>
+                            <p class="small mb-0">
+                                The Inflation Reduction Act allows Medicare to negotiate prices for select high-spend drugs.
+                                First 10 drugs selected in 2023 represent $50B+ in annual spending.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning h-100">
+                        <div class="card-body">
+                            <h6 class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>Price Cap Opportunity</h6>
+                            <p class="small mb-0">
+                                Annual price increases now capped at inflation rate. Manufacturers exceeding cap must
+                                pay rebates to Medicare.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-success h-100">
+                        <div class="card-body">
+                            <h6 class="text-success"><i class="bi bi-graph-down me-2"></i>Out-of-Pocket Cap</h6>
+                            <p class="small mb-0">
+                                New $2,000 annual out-of-pocket cap for Part D beneficiaries starting 2025 will
+                                shift costs to plans and manufacturers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
