@@ -53,7 +53,7 @@ def pricevision_compare():
     procedures = PriceVisionService.get_procedures(search=procedure if procedure else None, limit=20)
     prices = []
     if procedure:
-        prices = PriceVisionService.get_prices(procedure_code=procedure, limit=50)
+        prices = PriceVisionService.get_prices(procedure_code=procedure, state=state if state else None, limit=50)
 
     states = PriceVisionService.get_states()
     return render_template('gov/pricevision/compare.html',

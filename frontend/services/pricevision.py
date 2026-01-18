@@ -1,10 +1,10 @@
 """
 PriceVision Data Service
-Load hospital and procedure pricing data
+Load hospital and procedure pricing data - OPTIMIZED
 """
 import pandas as pd
+import pyarrow.parquet as pq
 from pathlib import Path
-import json
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
@@ -12,6 +12,7 @@ DATA_DIR = BASE_DIR / 'data'
 
 class PriceVisionService:
     _cache = {}
+    _price_file = None
 
     @classmethod
     def get_procedures(cls, limit=100, search=None):
@@ -57,28 +58,80 @@ class PriceVisionService:
         return None
 
     @classmethod
-    def get_prices(cls, hospital_npi=None, procedure_code=None, limit=100):
-        """Get price data"""
-        if 'prices' not in cls._cache:
-            price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
-            if price_file.exists():
-                try:
-                    df = pd.read_parquet(price_file)
-                    # Sample for memory efficiency
-                    if len(df) > 50000:
-                        df = df.sample(n=50000, random_state=42)
-                    cls._cache['prices'] = df.to_dict('records')
-                except Exception:
-                    cls._cache['prices'] = []
-            else:
-                cls._cache['prices'] = []
+    def get_prices(cls, hospital_npi=None, procedure_code=None, state=None, limit=50):
+        """Get price data using predicate pushdown - only loads matching rows"""
+        if not hospital_npi and not procedure_code:
+            return []  # Don't load without a filter
 
-        prices = cls._cache['prices']
-        if hospital_npi:
-            prices = [p for p in prices if str(p.get('hospital_npi', '')) == str(hospital_npi)]
-        if procedure_code:
-            prices = [p for p in prices if str(p.get('procedure_code', '')) == str(procedure_code)]
-        return prices[:limit]
+        price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+        if not price_file.exists():
+            return []
+
+        try:
+            # If state filter provided, get hospital IDs in that state
+            state_hospital_ids = None
+            if state:
+                state_hospitals = cls.get_hospitals(state=state, limit=10000)
+                state_hospital_ids = set(str(h.get('Facility ID', '')) for h in state_hospitals)
+
+            # Build filter for predicate pushdown
+            filters = []
+            if procedure_code:
+                filters.append(('procedure_code', '==', str(procedure_code)))
+
+            # Read with filter - only loads matching rows from disk
+            if filters:
+                df = pd.read_parquet(
+                    price_file,
+                    columns=['description', 'procedure_code', 'gross_charge', 'hospital_npi',
+                             'cash_price', 'min_price', 'max_price', 'payer_name'],
+                    filters=filters
+                )
+            else:
+                # For hospital_npi filter (string matching), read sample and filter
+                df = pd.read_parquet(
+                    price_file,
+                    columns=['description', 'procedure_code', 'gross_charge', 'hospital_npi',
+                             'cash_price', 'min_price', 'max_price', 'payer_name']
+                )
+                if len(df) > 10000:
+                    df = df.sample(n=10000, random_state=42)
+
+            # Additional filtering if needed
+            if hospital_npi:
+                df = df[df['hospital_npi'].astype(str) == str(hospital_npi)]
+
+            # Filter by state if provided
+            if state_hospital_ids:
+                df = df[df['hospital_npi'].astype(str).isin(state_hospital_ids)]
+
+            # Sort by cash_price for best prices first
+            if 'cash_price' in df.columns:
+                df = df.sort_values('cash_price', ascending=True, na_position='last')
+
+            # Add hospital info to results
+            results = df.head(limit).to_dict('records')
+            hospital_cache = {}
+            for h in cls.get_hospitals(limit=10000):
+                hospital_cache[str(h.get('Facility ID', ''))] = {
+                    'name': h.get('Facility Name', ''),
+                    'city': h.get('City/Town', ''),
+                    'state': h.get('State', '')
+                }
+            for r in results:
+                npi = str(r.get('hospital_npi', ''))
+                if npi in hospital_cache:
+                    r['hospital_name'] = hospital_cache[npi]['name']
+                    r['hospital_city'] = hospital_cache[npi]['city']
+                    r['hospital_state'] = hospital_cache[npi]['state']
+                else:
+                    r['hospital_name'] = f"Hospital {npi}"
+                    r['hospital_city'] = ''
+                    r['hospital_state'] = ''
+            return results
+        except Exception as e:
+            print(f"Error loading prices: {e}")
+            return []
 
     @classmethod
     def get_states(cls):

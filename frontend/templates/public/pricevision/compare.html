@@ -70,9 +70,8 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Hospital NPI</th>
-                            <th>Description</th>
-                            <th>Payer</th>
+                            <th>Hospital</th>
+                            <th>Location</th>
                             <th>Gross Charge</th>
                             <th>Cash Price</th>
                             <th>Min Price</th>
@@ -88,17 +87,17 @@
                         {% set max_price = p.get('max_price', 0) | float %}
                         <tr>
                             <td>
-                                <strong>{{ p.get('hospital_npi', 'Unknown') }}</strong>
+                                <strong>{{ p.get('hospital_name', p.get('hospital_npi', 'Unknown')) }}</strong>
+                                <br><small class="text-muted">{{ p.get('description', '')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}</small>
                             </td>
-                            <td>{{ p.get('description', '')[:50] }}{% if p.get('description', '')|length > 50 %}...{% endif %}</td>
-                            <td><span class="badge bg-secondary">{{ p.get('payer_name', 'N/A') }}</span></td>
+                            <td>{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</td>
                             <td>${{ "{:,.0f}".format(gross) if gross else 'N/A' }}</td>
                             <td class="text-success fw-bold">${{ "{:,.0f}".format(cash) if cash else 'N/A' }}</td>
                             <td>${{ "{:,.0f}".format(min_price) if min_price else 'N/A' }}</td>
                             <td>${{ "{:,.0f}".format(max_price) if max_price else 'N/A' }}</td>
                             <td>
                                 {% if loop.first and cash %}
-                                <span class="badge bg-success">Best Cash Price</span>
+                                <span class="badge bg-success">Best Price</span>
                                 {% endif %}
                             </td>
                         </tr>
