@@ -11,7 +11,8 @@
       "WebFetch(domain:www.data.va.gov)",
       "WebFetch(domain:datadashboard.fda.gov)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

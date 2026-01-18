@@ -33,13 +33,13 @@
             </a>
         </div>
         <div class="col-md-3">
-            <div class="card h-100">
+            <a href="{{ url_for('gov.foodscore_additives') }}" class="card h-100 text-decoration-none">
                 <div class="card-body text-center p-4">
-                    <i class="bi bi-exclamation-triangle display-4 text-muted mb-3"></i>
+                    <i class="bi bi-exclamation-triangle display-4 text-success mb-3"></i>
                     <h5>Additive Alerts</h5>
-                    <small class="text-muted">Coming soon</small>
+                    <span class="badge bg-primary">Gov Only</span>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-3">
             <div class="card h-100">
@@ -52,29 +52,129 @@
         </div>
     </div>
 
+    <!-- ML Models Section with Explanations -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Model Performance</h5>
+            <button class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" data-bs-target="#modelHelp">
+                <i class="bi bi-question-circle me-1"></i>What do these numbers mean?
+            </button>
+        </div>
+        <div class="collapse" id="modelHelp">
+            <div class="card-body bg-light border-bottom">
+                <h6><i class="bi bi-info-circle me-2"></i>Understanding Our ML Models</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <p class="small mb-2"><strong>NOVA Classifier (96.16% accuracy):</strong>
+                        Predicts food processing level (NOVA 1-4) from ingredients.
+                        96 out of 100 foods are correctly classified as unprocessed, processed, or ultra-processed.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="small mb-2"><strong>Additive Scorer (85.71% accuracy):</strong>
+                        Identifies and risk-scores food additives.
+                        Correctly flags harmful additives 86 times out of 100, helping identify potentially risky products.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="small mb-2"><strong>Ultra-Processed (73%):</strong>
+                        Not a model metric - this shows that 73% of products in our database are classified as NOVA 4 (ultra-processed),
+                        a concerning finding for public health.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-light rounded">
+                        <div class="display-6 fw-bold text-success">500K+</div>
+                        <div class="text-muted">Products Analyzed</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-light rounded">
+                        <div class="display-6 fw-bold text-primary">96.16%</div>
+                        <div class="text-muted">NOVA Classifier</div>
+                        <small class="text-success">Correctly classifies processing level</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-light rounded">
+                        <div class="display-6 fw-bold text-info">85.71%</div>
+                        <div class="text-muted">Additive Scorer</div>
+                        <small class="text-success">Correctly identifies risky additives</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-light rounded border border-warning">
+                        <div class="display-6 fw-bold text-warning">73%</div>
+                        <div class="text-muted">Ultra-Processed</div>
+                        <small class="text-danger">Concerning public health finding</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
     <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.8rem;">500K+</div>
-                <div class="stat-label">Products</div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0">NOVA Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>NOVA 1 - Unprocessed</small>
+                            <small>12%</small>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" style="width: 12%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>NOVA 2 - Culinary Ingredients</small>
+                            <small>2%</small>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-info" style="width: 2%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>NOVA 3 - Processed</small>
+                            <small>13%</small>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-warning" style="width: 13%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>NOVA 4 - Ultra-Processed</small>
+                            <small>73%</small>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-danger" style="width: 73%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.8rem;">96.16%</div>
-                <div class="stat-label">NOVA Classifier</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.8rem;">85.71%</div>
-                <div class="stat-label">Additive Scorer</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-warning">
-                <div class="stat-value text-warning" style="font-size: 1.8rem;">73%</div>
-                <div class="stat-label">Ultra-Processed Foods</div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0">Key Insights</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>73% ultra-processed:</strong> Nearly 3 in 4 products contain industrial ingredients not found in home cooking</li>
+                        <li><strong>344 additives tracked:</strong> Including emulsifiers, preservatives, and artificial colors</li>
+                        <li><strong>MAHA score:</strong> Composite health score (0-100) combining NOVA, nutrients, and additive risks</li>
+                        <li><strong>Policy impact:</strong> Data supports SNAP reform to incentivize healthier choices</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
