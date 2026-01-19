@@ -107,27 +107,19 @@
             <div id="hpsa-map" style="height: 300px;"></div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var map = L.map('hpsa-map').setView([{{ hpsa.latitude }}, {{ hpsa.longitude }}], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([{{ hpsa.latitude }}, {{ hpsa.longitude }}]).addTo(map)
+                .bindPopup('{{ hpsa.hpsa_name|e }}')
+                .openPopup();
+        });
+    </script>
     {% endif %}
     {% endif %}
 </div>
-
-{% block extra_css %}
-{{ super() }}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-{% endblock %}
-
-{% block extra_js %}
-{% if hpsa and hpsa.latitude and hpsa.longitude %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    var map = L.map('hpsa-map').setView([{{ hpsa.latitude }}, {{ hpsa.longitude }}], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-    L.marker([{{ hpsa.latitude }}, {{ hpsa.longitude }}]).addTo(map)
-        .bindPopup('{{ hpsa.hpsa_name|e }}')
-        .openPopup();
-</script>
-{% endif %}
-{% endblock %}
 {% endblock %}

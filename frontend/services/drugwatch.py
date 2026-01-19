@@ -130,6 +130,8 @@ class DrugWatchService:
     @classmethod
     def compare_prices(cls, drug_name):
         """Compare US vs international prices for a drug"""
+        if not drug_name:
+            return {'us': None, 'international': []}
         us_drug = cls.get_drug(drug_name)
         intl_prices = cls.get_international_prices()
 
