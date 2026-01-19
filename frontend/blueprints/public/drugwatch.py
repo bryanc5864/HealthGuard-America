@@ -34,9 +34,16 @@ def drugwatch_search():
                           query=query, drugs=drugs)
 
 
+@public_bp.route('/drugwatch/compare')
 @public_bp.route('/drugwatch/compare/<drug_id>')
-def drugwatch_compare(drug_id):
+def drugwatch_compare(drug_id=None):
     """Compare drug prices across countries"""
+    # Support both /compare/aspirin and /compare?drug=aspirin
+    if not drug_id:
+        drug_id = request.args.get('drug', '')
+    if not drug_id:
+        return render_template('public/drugwatch/compare.html',
+                              drug_id=None, drug=None, comparison=None)
     drug = DrugWatchService.get_drug(drug_id)
     comparison = DrugWatchService.compare_prices(drug_id)
     return render_template('public/drugwatch/compare.html',
