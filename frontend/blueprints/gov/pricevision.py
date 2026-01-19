@@ -244,7 +244,14 @@ def pricevision_compare():
     procedures = PriceVisionService.get_procedures(search=procedure if procedure else None, limit=20)
     prices = []
     if procedure:
-        prices = PriceVisionService.get_prices(procedure_code=procedure, state=state if state else None, limit=50)
+        # Get the actual HCPCS code - either use procedure directly if it looks like a code,
+        # or find the matching procedure's code from search results
+        procedure_code = procedure
+        if procedures and not procedure.isdigit():
+            # User searched by name, get the actual code from first match
+            first_match = procedures[0]
+            procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
+        prices = PriceVisionService.get_prices(procedure_code=procedure_code, state=state if state else None, limit=50)
 
         # ML price fairness analysis
         try:
