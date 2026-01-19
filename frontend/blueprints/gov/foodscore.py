@@ -474,3 +474,123 @@ def foodscore_additives():
     return render_template('gov/foodscore/additives.html',
                           additives=additives, stats=stats, search=search,
                           high_risk=high_risk_additives, medium_risk=medium_risk, low_risk=low_risk)
+
+
+@gov_bp.route('/api/foodscore/ocr', methods=['POST'])
+@gov_required
+def api_foodscore_ocr():
+    """API: OCR nutrition label from uploaded image."""
+    import re
+    import io
+
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'error': 'No image file provided'})
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No image file selected'})
+
+    # Check file type
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    if ext not in allowed_extensions:
+        return jsonify({'success': False, 'error': 'Invalid image format'})
+
+    try:
+        # Read image data
+        image_data = file.read()
+
+        # Try to use pytesseract for OCR
+        ocr_text = None
+        try:
+            from PIL import Image
+            import pytesseract
+
+            image = Image.open(io.BytesIO(image_data))
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+
+            ocr_text = pytesseract.image_to_string(image)
+            logger.info(f"OCR extracted {len(ocr_text)} characters")
+        except ImportError:
+            logger.warning("pytesseract not available")
+        except Exception as e:
+            logger.error(f"OCR failed: {e}")
+
+        if not ocr_text:
+            return jsonify({
+                'success': False,
+                'error': 'OCR processing unavailable. Please enter nutrition information manually.'
+            })
+
+        # Parse the OCR text
+        result = parse_nutrition_label(ocr_text)
+        result['success'] = True
+        result['raw_text'] = ocr_text[:500]
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Image processing error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+
+def parse_nutrition_label(text):
+    """Parse OCR text to extract nutrition facts."""
+    import re
+
+    result = {}
+    text = text.replace('\n', ' ').replace('\r', ' ')
+    text_lower = text.lower()
+
+    # Extract serving size
+    serving_match = re.search(r'serving\s*size[:\s]*([^\d]*\d+[^\n,]*)', text_lower)
+    if serving_match:
+        result['serving_size'] = serving_match.group(1).strip()[:50]
+
+    # Extract calories
+    cal_match = re.search(r'calories[:\s]*(\d+)', text_lower)
+    if cal_match:
+        result['calories'] = cal_match.group(1)
+
+    # Extract total fat
+    fat_match = re.search(r'total\s*fat[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if fat_match:
+        result['total_fat'] = fat_match.group(1)
+
+    # Extract saturated fat
+    sat_fat_match = re.search(r'saturated\s*fat[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if sat_fat_match:
+        result['saturated_fat'] = sat_fat_match.group(1)
+
+    # Extract sodium
+    sodium_match = re.search(r'sodium[:\s]*(\d+)\s*m?g', text_lower)
+    if sodium_match:
+        result['sodium'] = sodium_match.group(1)
+
+    # Extract total carbohydrates
+    carb_match = re.search(r'total\s*carb(?:ohydrate)?s?[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if carb_match:
+        result['total_carbs'] = carb_match.group(1)
+
+    # Extract sugars
+    sugar_match = re.search(r'(?:total\s*)?sugars?[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if sugar_match:
+        result['sugars'] = sugar_match.group(1)
+
+    # Extract protein
+    protein_match = re.search(r'protein[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if protein_match:
+        result['protein'] = protein_match.group(1)
+
+    # Extract fiber
+    fiber_match = re.search(r'(?:dietary\s*)?fiber[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if fiber_match:
+        result['fiber'] = fiber_match.group(1)
+
+    # Extract ingredients
+    ing_match = re.search(r'ingredients[:\s]*([^\.]+\.)', text_lower)
+    if ing_match:
+        result['ingredients'] = ing_match.group(1).strip()[:500]
+
+    return result

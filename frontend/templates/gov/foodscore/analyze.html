@@ -13,12 +13,50 @@
     <h2 class="mb-4">
         <i class="bi bi-camera me-2 text-success"></i>Analyze Nutrition Label
     </h2>
-    <p class="text-muted mb-4">Enter the ingredients and nutrition facts from a food label to get an AI-powered health analysis.</p>
+    <p class="text-muted mb-4">Upload a photo of a nutrition label or manually enter the information to get an AI-powered health analysis.</p>
 
     <div class="row">
         <!-- Input Form -->
         <div class="col-lg-6">
-            <form action="{{ url_for('gov.foodscore_analyze') }}" method="get">
+            <!-- Image Upload Section -->
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="bi bi-camera me-2"></i>Upload Nutrition Label Image</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Take or upload a photo of the nutrition label</label>
+                        <input type="file" class="form-control" id="labelImage" accept="image/*" capture="environment">
+                    </div>
+                    <div id="imagePreview" class="mb-3 d-none">
+                        <img id="previewImg" class="img-fluid rounded border" style="max-height: 300px;">
+                    </div>
+                    <div id="ocrStatus" class="d-none">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                            <span>Analyzing image with AI...</span>
+                        </div>
+                    </div>
+                    <div id="ocrResult" class="d-none alert alert-info">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <span id="ocrResultText"></span>
+                    </div>
+                    <button type="button" id="analyzeImageBtn" class="btn btn-outline-success w-100" disabled>
+                        <i class="bi bi-cpu me-2"></i>Extract Text from Image
+                    </button>
+                    <small class="text-muted d-block mt-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        For best results, ensure the nutrition label is well-lit and in focus.
+                    </small>
+                </div>
+            </div>
+
+            <div class="text-center mb-3">
+                <span class="badge bg-secondary">OR</span>
+                <span class="text-muted">Enter information manually below</span>
+            </div>
+
+            <form action="{{ url_for('gov.foodscore_analyze') }}" method="get" id="analyzeForm">
                 <input type="hidden" name="submitted" value="1">
 
                 <!-- Product Name -->
@@ -265,4 +303,109 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const labelImage = document.getElementById('labelImage');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const analyzeImageBtn = document.getElementById('analyzeImageBtn');
+    const ocrStatus = document.getElementById('ocrStatus');
+    const ocrResult = document.getElementById('ocrResult');
+    const ocrResultText = document.getElementById('ocrResultText');
+
+    // Image preview on file select
+    labelImage.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.classList.remove('d-none');
+                analyzeImageBtn.disabled = false;
+                ocrResult.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // OCR analysis
+    analyzeImageBtn.addEventListener('click', async function() {
+        const file = labelImage.files[0];
+        if (!file) return;
+
+        // Show loading
+        ocrStatus.classList.remove('d-none');
+        ocrResult.classList.add('d-none');
+        analyzeImageBtn.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch('{{ url_for("gov.api_foodscore_ocr") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Populate form fields with OCR results
+                if (data.ingredients) {
+                    document.querySelector('textarea[name="ingredients"]').value = data.ingredients;
+                }
+                if (data.product_name) {
+                    document.querySelector('input[name="product_name"]').value = data.product_name;
+                }
+                if (data.serving_size) {
+                    document.querySelector('input[name="serving_size"]').value = data.serving_size;
+                }
+                if (data.calories) {
+                    document.querySelector('input[name="calories"]').value = data.calories;
+                }
+                if (data.total_fat) {
+                    document.querySelector('input[name="total_fat"]').value = data.total_fat;
+                }
+                if (data.saturated_fat) {
+                    document.querySelector('input[name="saturated_fat"]').value = data.saturated_fat;
+                }
+                if (data.sodium) {
+                    document.querySelector('input[name="sodium"]').value = data.sodium;
+                }
+                if (data.total_carbs) {
+                    document.querySelector('input[name="total_carbs"]').value = data.total_carbs;
+                }
+                if (data.sugars) {
+                    document.querySelector('input[name="sugars"]').value = data.sugars;
+                }
+                if (data.protein) {
+                    document.querySelector('input[name="protein"]').value = data.protein;
+                }
+                if (data.fiber) {
+                    document.querySelector('input[name="fiber"]').value = data.fiber;
+                }
+
+                ocrResultText.textContent = 'Nutrition label extracted! Review the values below and click Analyze.';
+                ocrResult.classList.remove('d-none');
+                ocrResult.classList.remove('alert-danger');
+                ocrResult.classList.add('alert-success');
+            } else {
+                ocrResultText.textContent = data.error || 'Could not extract text from image. Please enter manually.';
+                ocrResult.classList.remove('d-none');
+                ocrResult.classList.remove('alert-success');
+                ocrResult.classList.add('alert-warning');
+            }
+        } catch (error) {
+            ocrResultText.textContent = 'Error processing image. Please enter manually.';
+            ocrResult.classList.remove('d-none');
+            ocrResult.classList.remove('alert-success');
+            ocrResult.classList.add('alert-danger');
+        }
+
+        ocrStatus.classList.add('d-none');
+        analyzeImageBtn.disabled = false;
+    });
+});
+</script>
 {% endblock %}
