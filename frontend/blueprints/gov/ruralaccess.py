@@ -31,6 +31,9 @@ def ruralaccess_map():
     """Interactive healthcare shortage map"""
     state = request.args.get('state', '')
     discipline = request.args.get('discipline', '')
+    shortage_level = request.args.get('shortage_level', '')
+    rural_status = request.args.get('rural_status', '')
+    designation_type = request.args.get('designation_type', '')
     limit_param = request.args.get('limit', '500')
 
     # Handle 'all' option for unlimited results
@@ -45,22 +48,45 @@ def ruralaccess_map():
     hpsas = RuralAccessService.get_hpsa_designations(
         state=state if state else None,
         discipline=discipline if discipline else None,
+        shortage_level=shortage_level if shortage_level else None,
+        rural_status=rural_status if rural_status else None,
+        designation_type=designation_type if designation_type else None,
         limit=limit
     )
 
     # Get total count for display
     total_hpsas = RuralAccessService.get_total_hpsa_count(
         state=state if state else None,
-        discipline=discipline if discipline else None
+        discipline=discipline if discipline else None,
+        shortage_level=shortage_level if shortage_level else None,
+        rural_status=rural_status if rural_status else None,
+        designation_type=designation_type if designation_type else None
     )
 
     map_data = RuralAccessService.get_shortage_map_data()
     states = RuralAccessService.get_states()
+    designation_types = RuralAccessService.get_designation_types()
+    rural_statuses = RuralAccessService.get_rural_statuses()
 
     return render_template('gov/ruralaccess/map.html',
                           hpsas=hpsas, map_data=map_data, states=states,
+                          designation_types=designation_types, rural_statuses=rural_statuses,
                           selected_state=state, selected_discipline=discipline,
+                          selected_shortage_level=shortage_level, selected_rural_status=rural_status,
+                          selected_designation_type=designation_type,
                           selected_limit=limit_param, total_hpsas=total_hpsas)
+
+
+@gov_bp.route('/ruralaccess/analytics')
+@gov_required
+def ruralaccess_analytics():
+    """Healthcare shortage analytics and insights"""
+    stats = RuralAccessService.get_stats()
+    analytics = RuralAccessService.get_analytics()
+    states = RuralAccessService.get_states()
+
+    return render_template('gov/ruralaccess/analytics.html',
+                          stats=stats, analytics=analytics, states=states)
 
 
 @gov_bp.route('/ruralaccess/county/<fips>')
@@ -95,10 +121,16 @@ def api_hpsas():
     Query params:
         state: Filter by state abbreviation
         discipline: Filter by discipline type
+        shortage_level: Filter by severity (critical, high, moderate, low)
+        rural_status: Filter by rural status
+        designation_type: Filter by designation type
         limit: Number of records (100, 500, 1000, or 'all' for unlimited)
     """
     state = request.args.get('state', '')
     discipline = request.args.get('discipline', '')
+    shortage_level = request.args.get('shortage_level', '')
+    rural_status = request.args.get('rural_status', '')
+    designation_type = request.args.get('designation_type', '')
     limit_param = request.args.get('limit', '100')
 
     # Handle 'all' option for unlimited results
@@ -113,11 +145,17 @@ def api_hpsas():
     hpsas = RuralAccessService.get_hpsa_designations(
         state=state if state else None,
         discipline=discipline if discipline else None,
+        shortage_level=shortage_level if shortage_level else None,
+        rural_status=rural_status if rural_status else None,
+        designation_type=designation_type if designation_type else None,
         limit=limit
     )
     total = RuralAccessService.get_total_hpsa_count(
         state=state if state else None,
-        discipline=discipline if discipline else None
+        discipline=discipline if discipline else None,
+        shortage_level=shortage_level if shortage_level else None,
+        rural_status=rural_status if rural_status else None,
+        designation_type=designation_type if designation_type else None
     )
 
     return jsonify({
@@ -126,6 +164,14 @@ def api_hpsas():
         'returned': len(hpsas),
         'limit': limit_param
     })
+
+
+@gov_bp.route('/api/ruralaccess/analytics')
+@gov_required
+def api_analytics():
+    """API: Get comprehensive analytics data"""
+    analytics = RuralAccessService.get_analytics()
+    return jsonify(analytics)
 
 
 @gov_bp.route('/api/ruralaccess/counties')

@@ -484,29 +484,28 @@ def chroniccare_interventions():
                             )
                             p['ml_risk_score'] = round(ml_risk, 2)
 
-                        # Get prioritization
+                        # Get prioritization confidence from ML model
                         if ml_service.prioritization_service.is_loaded:
                             priority_result = ml_service.prioritization_service.prioritize(features)
                             p['ml_confidence'] = round(priority_result.get('confidence', 0) * 100, 1)
-                            p['ml_priority_tier'] = priority_result.get('priority', 'Unknown')
-
-                            # Check if ML priority differs from stored priority
-                            stored_priority = p.get('priority', '').lower()
-                            ml_priority = p['ml_priority_tier'].lower()
-                            p['priority_changed'] = stored_priority != ml_priority
+                            p['ml_maha_index'] = priority_result.get('maha_index', 0)
                         else:
-                            # Fallback using risk score
-                            ml_risk = p.get('ml_risk_score', p.get('risk_score', 0))
                             p['ml_confidence'] = 85.0
-                            if ml_risk > 22:
-                                p['ml_priority_tier'] = 'Critical'
-                            elif ml_risk > 19:
-                                p['ml_priority_tier'] = 'High'
-                            elif ml_risk > 16:
-                                p['ml_priority_tier'] = 'Medium'
-                            else:
-                                p['ml_priority_tier'] = 'Low'
-                            p['priority_changed'] = p.get('priority', '').lower() != p['ml_priority_tier'].lower()
+                            p['ml_maha_index'] = 0
+
+                        # Derive priority tier from ML risk score (consistent thresholds)
+                        ml_risk = p.get('ml_risk_score', p.get('risk_score', 0))
+                        if ml_risk > 22:
+                            p['ml_priority_tier'] = 'Critical'
+                        elif ml_risk > 19:
+                            p['ml_priority_tier'] = 'High'
+                        elif ml_risk > 16:
+                            p['ml_priority_tier'] = 'Medium'
+                        else:
+                            p['ml_priority_tier'] = 'Low'
+
+                        # Check if ML priority differs from heuristic priority
+                        p['priority_changed'] = p.get('priority', '').lower() != p['ml_priority_tier'].lower()
 
                     except Exception as e:
                         logger.warning(f"ML inference failed for county {p.get('fips')}: {e}")
@@ -610,29 +609,45 @@ def chroniccare_county(fips):
                     # Round for display
                     ml_predictions = {k: round(v, 1) for k, v in ml_predictions.items()}
 
-                # Get prioritization result
-                if ml_service.prioritization_service.is_loaded:
-                    ml_priority = ml_service.prioritization_service.prioritize(features)
+                # Calculate ML risk score from predictions
+                if ml_predictions:
+                    ml_risk_score = (
+                        ml_predictions.get('diabetes_prevalence', 0) * 0.35 +
+                        ml_predictions.get('obesity_prevalence', 0) * 0.35 +
+                        ml_predictions.get('heart_disease_prevalence', 0) * 0.30
+                    )
                 else:
-                    # Create heuristic priority
-                    risk_score = (
+                    ml_risk_score = (
                         float(county.get('diabetes_prevalence', 0) or 0) * 0.35 +
                         float(county.get('obesity_prevalence', 0) or 0) * 0.35 +
                         float(county.get('heart_disease_prevalence', 0) or 0) * 0.30
                     )
-                    if risk_score > 22:
-                        tier = 'Critical'
-                    elif risk_score > 19:
-                        tier = 'High'
-                    elif risk_score > 16:
-                        tier = 'Medium'
-                    else:
-                        tier = 'Low'
-                    ml_priority = {
-                        'priority': tier,
-                        'confidence': 0.85,
-                        'maha_index': risk_score * 4,
-                    }
+
+                # Derive priority tier from ML risk score (consistent thresholds)
+                if ml_risk_score > 22:
+                    tier = 'Critical'
+                elif ml_risk_score > 19:
+                    tier = 'High'
+                elif ml_risk_score > 16:
+                    tier = 'Medium'
+                else:
+                    tier = 'Low'
+
+                # Get MAHA index from prioritization service if available
+                if ml_service.prioritization_service.is_loaded:
+                    priority_result = ml_service.prioritization_service.prioritize(features)
+                    maha_index = priority_result.get('maha_index', ml_risk_score * 4)
+                    confidence = priority_result.get('confidence', 0.85)
+                else:
+                    maha_index = ml_risk_score * 4
+                    confidence = 0.85
+
+                ml_priority = {
+                    'priority': tier,
+                    'confidence': confidence,
+                    'maha_index': maha_index,
+                    'ml_risk_score': round(ml_risk_score, 2),
+                }
 
                 # Get risk breakdown (which factors contribute most)
                 ml_risk_breakdown = get_risk_breakdown(ml_priority, features)
