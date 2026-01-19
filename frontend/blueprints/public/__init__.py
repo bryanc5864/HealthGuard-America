@@ -4,16 +4,36 @@ Access to: PriceVision, DrugWatch, FoodScore
 No authentication required
 """
 from flask import Blueprint, render_template
-from config import Config
 
 public_bp = Blueprint('public', __name__, url_prefix='/public')
+
+# Public modules configuration
+PUBLIC_MODULES = {
+    'pricevision': {
+        'name': 'PriceVision',
+        'description': 'Compare hospital procedure prices across facilities',
+        'icon': 'bi-currency-dollar',
+        'color': '#fd7e14',
+    },
+    'drugwatch': {
+        'name': 'DrugWatch',
+        'description': 'Compare drug prices: US vs international markets',
+        'icon': 'bi-capsule',
+        'color': '#dc3545',
+    },
+    'foodscore': {
+        'name': 'FoodScore',
+        'description': 'Check health scores for food products',
+        'icon': 'bi-basket',
+        'color': '#28a745',
+    },
+}
 
 
 @public_bp.route('/')
 def home():
     """Public portal home page"""
-    modules = {k: v for k, v in Config.MODULES.items() if v['public']}
-    return render_template('public/home.html', modules=modules)
+    return render_template('public/home.html', modules=PUBLIC_MODULES)
 
 
 # Import module routes
