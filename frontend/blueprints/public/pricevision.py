@@ -5,8 +5,11 @@ Hospital price transparency for consumers
 from flask import render_template, request, jsonify
 from . import public_bp
 import sys
+import logging
 from pathlib import Path
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 # Add frontend directory to path for service imports
 FRONTEND_DIR = Path(__file__).parent.parent.parent
@@ -293,9 +296,17 @@ def pricevision_my_price():
             user_price_float = 0
 
         if user_price_float > 0:
+            # Get the actual HCPCS code - either use procedure directly if it looks like a code,
+            # or find the matching procedure's code from search results
+            procedure_code = procedure
+            if procedures and not procedure.isdigit():
+                # User searched by name, get the actual code from first match
+                first_match = procedures[0]
+                procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
+
             # Get market prices for comparison
             prices = PriceVisionService.get_prices(
-                procedure_code=procedure,
+                procedure_code=procedure_code,
                 state=state if state else None,
                 limit=100
             )
