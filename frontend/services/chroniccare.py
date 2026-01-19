@@ -77,8 +77,14 @@ class ChronicCareService:
             return []
 
         if state:
-            state_col = 'StateAbbr' if 'StateAbbr' in df.columns else 'state'
-            df = df[df[state_col] == state]
+            # Try multiple column names for state
+            state_col = None
+            for col in ['StateAbbr', 'state_abbr', 'state']:
+                if col in df.columns:
+                    state_col = col
+                    break
+            if state_col:
+                df = df[df[state_col] == state]
 
         return df.head(limit).to_dict('records')
 
@@ -97,8 +103,14 @@ class ChronicCareService:
             return []
 
         if state:
-            state_col = 'State' if 'State' in df.columns else 'state'
-            df = df[df[state_col] == state]
+            # Try multiple column names for state
+            state_col = None
+            for col in ['State', 'state_abbr', 'state']:
+                if col in df.columns:
+                    state_col = col
+                    break
+            if state_col:
+                df = df[df[state_col] == state]
 
         return df.head(limit).to_dict('records')
 
