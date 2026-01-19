@@ -15,38 +15,46 @@
     </div>
 
     <div class="row g-4 mb-5">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <a href="{{ url_for('gov.foodscore_search') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-search display-4 text-success mb-3"></i>
-                    <h5>Search Products</h5>
+                <div class="card-body text-center p-3">
+                    <i class="bi bi-search display-5 text-success mb-2"></i>
+                    <h6>Search</h6>
                 </div>
             </a>
         </div>
         <div class="col-md-3">
+            <a href="{{ url_for('gov.foodscore_analyze') }}" class="card h-100 text-decoration-none border-success">
+                <div class="card-body text-center p-3">
+                    <i class="bi bi-camera display-5 text-success mb-2"></i>
+                    <h6>Analyze Label</h6>
+                    <span class="badge bg-success">New</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2">
             <a href="{{ url_for('gov.foodscore_snap') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-credit-card display-4 text-success mb-3"></i>
-                    <h5>SNAP Analysis</h5>
-                    <span class="badge bg-primary">Gov Only</span>
+                <div class="card-body text-center p-3">
+                    <i class="bi bi-credit-card display-5 text-success mb-2"></i>
+                    <h6>SNAP</h6>
+                    <span class="badge bg-primary">Gov</span>
                 </div>
             </a>
         </div>
         <div class="col-md-3">
             <a href="{{ url_for('gov.foodscore_additives') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-exclamation-triangle display-4 text-success mb-3"></i>
-                    <h5>Additive Alerts</h5>
-                    <span class="badge bg-primary">Gov Only</span>
+                <div class="card-body text-center p-3">
+                    <i class="bi bi-exclamation-triangle display-5 text-success mb-2"></i>
+                    <h6>Additive Alerts</h6>
+                    <span class="badge bg-primary">Gov</span>
                 </div>
             </a>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-file-earmark-arrow-down display-4 text-muted mb-3"></i>
-                    <h5>Export Data</h5>
-                    <button class="btn btn-sm btn-outline-secondary">Download</button>
+                <div class="card-body text-center p-3">
+                    <i class="bi bi-file-earmark-arrow-down display-5 text-muted mb-2"></i>
+                    <h6>Export</h6>
                 </div>
             </div>
         </div>
