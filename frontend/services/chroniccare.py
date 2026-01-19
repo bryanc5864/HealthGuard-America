@@ -18,15 +18,21 @@ class ChronicCareService:
     def _get_county_health_df(cls):
         """Get county health DataFrame (cached)"""
         if 'county_health_df' not in cls._df_cache:
-            health_file = DATA_DIR / 'processed/chroniccare/chroniccare_merged.parquet'
-            if health_file.exists():
-                cls._df_cache['county_health_df'] = pd.read_parquet(health_file)
+            # Try multiple file locations
+            possible_files = [
+                DATA_DIR / 'processed/chroniccare/chroniccare_merged.parquet',
+                DATA_DIR / 'processed/chroniccare/chroniccare_merged.csv',
+                DATA_DIR / 'processed/chroniccare/county_health_metrics.csv',
+            ]
+            for f in possible_files:
+                if f.exists():
+                    if f.suffix == '.parquet':
+                        cls._df_cache['county_health_df'] = pd.read_parquet(f)
+                    else:
+                        cls._df_cache['county_health_df'] = pd.read_csv(f)
+                    break
             else:
-                csv_file = DATA_DIR / 'processed/chroniccare/chroniccare_merged.csv'
-                if csv_file.exists():
-                    cls._df_cache['county_health_df'] = pd.read_csv(csv_file)
-                else:
-                    cls._df_cache['county_health_df'] = pd.DataFrame()
+                cls._df_cache['county_health_df'] = pd.DataFrame()
         return cls._df_cache['county_health_df']
 
     @classmethod

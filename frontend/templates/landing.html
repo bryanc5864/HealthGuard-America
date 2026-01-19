@@ -1,238 +1,340 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthGuard America</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            --public-color: #28a745;
-            --gov-color: #0d6efd;
-        }
+{% extends "base.html" %}
 
-        body {
-            background: var(--primary-gradient);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+{% block title %}HealthGuard America - Healthcare Transparency Platform{% endblock %}
 
-        .hero {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
+{% block navbar %}{% endblock %}
 
-        .hero-content {
-            text-align: center;
-            color: white;
-            max-width: 900px;
-        }
+{% block footer %}{% endblock %}
 
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
+{% block content %}
+<div class="hero hero-landing">
+    <!-- Background Pattern -->
+    <div style="position: absolute; inset: 0; opacity: 0.1; background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
 
-        .hero-subtitle {
-            font-size: 1.25rem;
-            opacity: 0.9;
-            margin-bottom: 3rem;
-        }
-
-        .portal-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .portal-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2.5rem;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .portal-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            color: inherit;
-        }
-
-        .portal-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 2.5rem;
-            color: white;
-        }
-
-        .portal-public .portal-icon {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        }
-
-        .portal-gov .portal-icon {
-            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-        }
-
-        .portal-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .portal-description {
-            color: #6c757d;
-            margin-bottom: 1.5rem;
-        }
-
-        .portal-modules {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .module-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .portal-public .module-badge {
-            background: #e8f5e9;
-            color: #28a745;
-        }
-
-        .portal-gov .module-badge {
-            background: #e3f2fd;
-            color: #0d6efd;
-        }
-
-        .portal-btn {
-            display: inline-block;
-            padding: 0.75rem 2rem;
-            border-radius: 30px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .portal-public .portal-btn {
-            background: var(--public-color);
-            color: white;
-        }
-
-        .portal-public:hover .portal-btn {
-            background: #218838;
-        }
-
-        .portal-gov .portal-btn {
-            background: var(--gov-color);
-            color: white;
-        }
-
-        .portal-gov:hover .portal-btn {
-            background: #0b5ed7;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            color: rgba(255,255,255,0.7);
-        }
-
-        .footer a {
-            color: rgba(255,255,255,0.9);
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .portal-cards {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="hero">
-        <div class="hero-content">
+    <div class="hero-content" style="text-align: center;">
+        <!-- Logo and Title -->
+        <div style="margin-bottom: var(--spacing-8);">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 24px; margin-bottom: var(--spacing-6);">
+                <i class="bi bi-shield-plus" style="font-size: 3rem; color: white;"></i>
+            </div>
             <h1 class="hero-title">
-                <i class="bi bi-heart-pulse me-3"></i>HealthGuard America
+                HealthGuard <span>America</span>
             </h1>
-            <p class="hero-subtitle">
-                Healthcare Transparency Platform - Empowering informed health decisions through data
+            <p class="hero-subtitle" style="max-width: 700px; margin: 0 auto;">
+                Healthcare Transparency & Analytics Platform. Empowering Americans with
+                data-driven insights for informed health decisions.
             </p>
+        </div>
 
-            <div class="portal-cards">
-                <!-- Public Portal -->
-                <a href="/public/" class="portal-card portal-public">
-                    <div class="portal-icon">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <h2 class="portal-title">Public Portal</h2>
-                    <p class="portal-description">
-                        Free access to healthcare transparency tools. Compare hospital prices,
-                        find affordable drugs, and check food health scores.
-                    </p>
-                    <div class="portal-modules">
-                        <span class="module-badge"><i class="bi bi-currency-dollar me-1"></i>PriceVision</span>
-                        <span class="module-badge"><i class="bi bi-capsule me-1"></i>DrugWatch</span>
-                        <span class="module-badge"><i class="bi bi-basket me-1"></i>FoodScore</span>
-                    </div>
-                    <span class="portal-btn">Enter Public Portal</span>
-                </a>
+        <!-- Stats Row -->
+        <div class="hero-stats" style="justify-content: center; margin-bottom: var(--spacing-12);">
+            <div class="hero-stat">
+                <div class="hero-stat-value">30.2M</div>
+                <div class="hero-stat-label">Price Records</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">75K+</div>
+                <div class="hero-stat-label">Drugs Tracked</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">50K+</div>
+                <div class="hero-stat-label">Food Products</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">2,956</div>
+                <div class="hero-stat-label">Counties</div>
+            </div>
+        </div>
 
-                <!-- Government Portal -->
-                <a href="/gov/" class="portal-card portal-gov">
-                    <div class="portal-icon">
-                        <i class="bi bi-building"></i>
-                    </div>
-                    <h2 class="portal-title">Government Portal</h2>
-                    <p class="portal-description">
-                        Full access to all modules including healthcare access mapping
-                        and chronic disease analytics. Requires authentication.
-                    </p>
-                    <div class="portal-modules">
-                        <span class="module-badge"><i class="bi bi-currency-dollar me-1"></i>PriceVision</span>
-                        <span class="module-badge"><i class="bi bi-capsule me-1"></i>DrugWatch</span>
-                        <span class="module-badge"><i class="bi bi-basket me-1"></i>FoodScore</span>
-                        <span class="module-badge"><i class="bi bi-geo-alt me-1"></i>RuralAccess</span>
-                        <span class="module-badge"><i class="bi bi-activity me-1"></i>ChronicCare</span>
-                    </div>
-                    <span class="portal-btn">Enter Government Portal</span>
-                </a>
+        <!-- Portal Selection Cards -->
+        <div class="portal-cards">
+            <!-- Public Portal -->
+            <a href="{{ url_for('public.home') }}" class="portal-card">
+                <div class="portal-card-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <h2 class="portal-card-title">Public Portal</h2>
+                <p class="portal-card-description">
+                    Free access to healthcare transparency tools. Compare hospital prices,
+                    find affordable medications, and check food health scores.
+                </p>
+                <div class="portal-card-modules">
+                    <span class="portal-card-badge" style="background: rgba(34, 197, 94, 0.2);">
+                        <i class="bi bi-currency-dollar"></i> PriceVision
+                    </span>
+                    <span class="portal-card-badge" style="background: rgba(239, 68, 68, 0.2);">
+                        <i class="bi bi-capsule"></i> DrugWatch
+                    </span>
+                    <span class="portal-card-badge" style="background: rgba(34, 197, 94, 0.2);">
+                        <i class="bi bi-basket"></i> FoodScore
+                    </span>
+                </div>
+                <div class="btn btn-white btn-lg" style="margin-top: var(--spacing-4);">
+                    Enter Public Portal <i class="bi bi-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Government Portal -->
+            <a href="{{ url_for('gov.home') }}" class="portal-card">
+                <div class="portal-card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+                <h2 class="portal-card-title">Government Portal</h2>
+                <p class="portal-card-description">
+                    Full access to all analytics modules including healthcare access mapping
+                    and chronic disease data. Authentication required.
+                </p>
+                <div class="portal-card-modules">
+                    <span class="portal-card-badge">All Public Tools</span>
+                    <span class="portal-card-badge" style="background: rgba(139, 92, 246, 0.2);">
+                        <i class="bi bi-geo-alt"></i> RuralAccess
+                    </span>
+                    <span class="portal-card-badge" style="background: rgba(6, 182, 212, 0.2);">
+                        <i class="bi bi-activity"></i> ChronicCare
+                    </span>
+                </div>
+                <div class="btn btn-white btn-lg" style="margin-top: var(--spacing-4);">
+                    Enter Gov Portal <i class="bi bi-lock"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- Data Sources -->
+        <div style="margin-top: var(--spacing-16); padding-top: var(--spacing-8); border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="color: var(--primary-300); font-size: var(--text-sm); margin-bottom: var(--spacing-4);">
+                POWERED BY OFFICIAL DATA SOURCES
+            </p>
+            <div style="display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); flex-wrap: wrap; opacity: 0.7;">
+                <span style="color: white; font-weight: 500;">CMS</span>
+                <span style="color: white; font-weight: 500;">CDC PLACES</span>
+                <span style="color: white; font-weight: 500;">HRSA</span>
+                <span style="color: white; font-weight: 500;">FDA</span>
+                <span style="color: white; font-weight: 500;">Open Food Facts</span>
             </div>
         </div>
     </div>
+</div>
 
-    <footer class="footer">
-        <p>Data sourced from CMS, FDA, HRSA, CDC, and public hospital disclosures</p>
-        <p><a href="/dashboard">Data Dashboard</a> | <a href="https://github.com/bryanc5864/PresidentialAIChallenge" target="_blank">GitHub</a></p>
-    </footer>
+<!-- Features Section -->
+<section class="section" style="background: white;">
+    <div class="container container-xl">
+        <div style="text-align: center; margin-bottom: var(--spacing-12);">
+            <h2 style="font-size: var(--text-3xl); font-weight: 800; margin-bottom: var(--spacing-4);">
+                Five Powerful Modules
+            </h2>
+            <p style="color: var(--neutral-600); font-size: var(--text-lg); max-width: 600px; margin: 0 auto;">
+                Comprehensive healthcare transparency tools for consumers and policy makers
+            </p>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--spacing-6);">
+            <!-- PriceVision -->
+            <div class="module-card module-card--pricevision">
+                <div class="module-card-image">
+                    <img src="{{ url_for('static', filename='images/pricevision/UF-Health-Shands-Hospital-North-Tower.jpg') }}" alt="Hospital">
+                    <div class="module-card-overlay"></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                </div>
+                <div class="module-card-body">
+                    <h3 class="module-card-title">PriceVision</h3>
+                    <p class="module-card-description">
+                        Compare hospital procedure prices across 1,000+ facilities.
+                        See cash prices, insurance rates, and price variations.
+                    </p>
+                    <ul class="module-card-features">
+                        <li><i class="bi bi-check-circle-fill"></i> 30.2M price records</li>
+                        <li><i class="bi bi-check-circle-fill"></i> All 50 states coverage</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Real-time price comparison</li>
+                    </ul>
+                    <a href="{{ url_for('public.pricevision_home') }}" class="btn btn-pricevision">
+                        Explore Prices <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- DrugWatch -->
+            <div class="module-card module-card--drugwatch">
+                <div class="module-card-image">
+                    <img src="{{ url_for('static', filename='images/drugwatch/Pill-Bottles.jpg') }}" alt="Medications">
+                    <div class="module-card-overlay"></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+                </div>
+                <div class="module-card-body">
+                    <h3 class="module-card-title">DrugWatch</h3>
+                    <p class="module-card-description">
+                        Track drug prices across US, Australia, and Canada.
+                        See Medicare spending and international price comparisons.
+                    </p>
+                    <ul class="module-card-features">
+                        <li><i class="bi bi-check-circle-fill"></i> 75,854 drugs tracked</li>
+                        <li><i class="bi bi-check-circle-fill"></i> International comparisons</li>
+                        <li><i class="bi bi-check-circle-fill"></i> $276B Medicare spending data</li>
+                    </ul>
+                    <a href="{{ url_for('public.drugwatch_home') }}" class="btn btn-drugwatch">
+                        Compare Drugs <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- FoodScore -->
+            <div class="module-card module-card--foodscore">
+                <div class="module-card-image">
+                    <img src="{{ url_for('static', filename='images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.jpg') }}" alt="Healthy Food">
+                    <div class="module-card-overlay"></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-basket"></i>
+                    </div>
+                </div>
+                <div class="module-card-body">
+                    <h3 class="module-card-title">FoodScore</h3>
+                    <p class="module-card-description">
+                        Check health scores for 50,000+ food products.
+                        NOVA classification, additive risks, and MAHA scores.
+                    </p>
+                    <ul class="module-card-features">
+                        <li><i class="bi bi-check-circle-fill"></i> 50,000+ products analyzed</li>
+                        <li><i class="bi bi-check-circle-fill"></i> ML-powered NOVA classification</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Additive risk scoring</li>
+                    </ul>
+                    <a href="{{ url_for('public.foodscore_home') }}" class="btn btn-foodscore">
+                        Check Foods <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- RuralAccess -->
+            <div class="module-card module-card--ruralaccess">
+                <div class="module-card-image">
+                    <img src="{{ url_for('static', filename='images/ruralaccess/rural-hospitals.jpg') }}" alt="Rural Healthcare">
+                    <div class="module-card-overlay"></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                </div>
+                <div class="module-card-body">
+                    <h3 class="module-card-title">RuralAccess</h3>
+                    <p class="module-card-description">
+                        Map healthcare shortage areas (HPSAs) across America.
+                        Identify underserved communities and access gaps.
+                    </p>
+                    <ul class="module-card-features">
+                        <li><i class="bi bi-check-circle-fill"></i> 14,631 HPSA designations</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Interactive shortage maps</li>
+                        <li><i class="bi bi-check-circle-fill"></i> County-level analytics</li>
+                    </ul>
+                    <a href="{{ url_for('gov.ruralaccess_home') }}" class="btn btn-ruralaccess">
+                        View Map <i class="bi bi-lock"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ChronicCare -->
+            <div class="module-card module-card--chroniccare">
+                <div class="module-card-image">
+                    <img src="{{ url_for('static', filename='images/chroniccare/healthcare.jpg') }}" alt="Healthcare Analytics">
+                    <div class="module-card-overlay"></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                </div>
+                <div class="module-card-body">
+                    <h3 class="module-card-title">ChronicCare</h3>
+                    <p class="module-card-description">
+                        Analyze chronic disease patterns by county.
+                        ML-powered intervention prioritization and MAHA index.
+                    </p>
+                    <ul class="module-card-features">
+                        <li><i class="bi bi-check-circle-fill"></i> 2,956 counties analyzed</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Disease correlation insights</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Intervention recommendations</li>
+                    </ul>
+                    <a href="{{ url_for('gov.chroniccare_home') }}" class="btn btn-chroniccare">
+                        Analyze Data <i class="bi bi-lock"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="background: linear-gradient(135deg, var(--primary-900), var(--primary-700)); padding: var(--spacing-16) 0;">
+    <div class="container container-lg" style="text-align: center;">
+        <h2 style="font-size: var(--text-3xl); font-weight: 800; color: white; margin-bottom: var(--spacing-4);">
+            Make America Healthy Again
+        </h2>
+        <p style="color: var(--primary-200); font-size: var(--text-lg); margin-bottom: var(--spacing-8); max-width: 600px; margin-left: auto; margin-right: auto;">
+            Transparency is the first step toward a healthier nation.
+            Start exploring healthcare data today.
+        </p>
+        <div style="display: flex; gap: var(--spacing-4); justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('public.home') }}" class="btn btn-white btn-lg">
+                <i class="bi bi-arrow-right-circle"></i> Get Started Free
+            </a>
+            <a href="{{ url_for('gov.login') }}" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-building"></i> Government Access
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer for landing page -->
+<footer class="footer" style="margin-top: 0;">
+    <div class="container container-2xl">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand">
+                    <i class="bi bi-shield-plus"></i> HealthGuard America
+                </div>
+                <p class="footer-description">
+                    Empowering Americans with transparent healthcare data.
+                    Compare hospital prices, drug costs, food safety scores,
+                    and access to care across the nation.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="footer-title">Public Tools</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('public.pricevision_home') }}"><i class="bi bi-currency-dollar"></i> PriceVision</a></li>
+                    <li><a href="{{ url_for('public.drugwatch_home') }}"><i class="bi bi-capsule"></i> DrugWatch</a></li>
+                    <li><a href="{{ url_for('public.foodscore_home') }}"><i class="bi bi-basket"></i> FoodScore</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-title">Government Portal</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('gov.home') }}"><i class="bi bi-building"></i> Gov Dashboard</a></li>
+                    <li><a href="{{ url_for('gov.ruralaccess_home') }}"><i class="bi bi-geo-alt"></i> RuralAccess</a></li>
+                    <li><a href="{{ url_for('gov.chroniccare_home') }}"><i class="bi bi-activity"></i> ChronicCare</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-title">Data Sources</h4>
+                <ul class="footer-links">
+                    <li><a href="https://data.cms.gov/" target="_blank">CMS Hospital Data</a></li>
+                    <li><a href="https://www.cdc.gov/places/" target="_blank">CDC PLACES</a></li>
+                    <li><a href="https://data.hrsa.gov/" target="_blank">HRSA HPSA</a></li>
+                    <li><a href="https://world.openfoodfacts.org/" target="_blank">Open Food Facts</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="footer-copyright">
+                &copy; 2026 HealthGuard America. A healthcare transparency initiative.
+            </p>
+            <div class="flex items-center gap-4">
+                <img src="{{ url_for('static', filename='images/gov/Flag_of_the_United_States (1).png') }}" alt="US Flag" style="height: 20px; width: auto;">
+                <span class="text-sm">Made in the USA</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

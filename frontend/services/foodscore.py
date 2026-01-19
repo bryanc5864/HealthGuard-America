@@ -33,9 +33,19 @@ class FoodScoreService:
     def _get_products_df(cls):
         """Get products DataFrame (cached)"""
         if 'products_df' not in cls._df_cache:
-            prod_file = DATA_DIR / 'processed/foodscore/us_products_scored.parquet'
-            if prod_file.exists():
-                cls._df_cache['products_df'] = pd.read_parquet(prod_file)
+            # Try multiple file locations
+            possible_files = [
+                DATA_DIR / 'processed/foodscore/us_products_scored.parquet',
+                DATA_DIR / 'processed/foodscore/products_scored.csv',
+                DATA_DIR / 'processed/foodscore/products_scored.parquet',
+            ]
+            for f in possible_files:
+                if f.exists():
+                    if f.suffix == '.parquet':
+                        cls._df_cache['products_df'] = pd.read_parquet(f)
+                    else:
+                        cls._df_cache['products_df'] = pd.read_csv(f)
+                    break
             else:
                 cls._df_cache['products_df'] = pd.DataFrame()
         return cls._df_cache['products_df']
@@ -61,7 +71,8 @@ class FoodScoreService:
 
         if category:
             cat_lower = category.lower()
-            df = df[df['categories_en'].fillna('').str.lower().str.contains(cat_lower, regex=False)]
+            cat_col = 'categories_en' if 'categories_en' in df.columns else 'categories'
+            df = df[df[cat_col].fillna('').str.lower().str.contains(cat_lower, regex=False)]
 
         return clean_nan_records(df.head(limit).to_dict('records'))
 
@@ -88,17 +99,23 @@ class FoodScoreService:
     def get_additives(cls, limit=100, search=None):
         """Get food additives with risk scores"""
         if 'additives' not in cls._cache:
-            add_file = DATA_DIR / 'raw/foodscore/additive_risks_expanded.csv'
-            if add_file.exists():
-                df = pd.read_csv(add_file)
-                cls._cache['additives'] = clean_nan_records(df.to_dict('records'))
+            # Try multiple file locations
+            possible_files = [
+                DATA_DIR / 'raw/foodscore/additive_risks_expanded.csv',
+                DATA_DIR / 'processed/foodscore/additives_database.csv',
+                DATA_DIR / 'raw/foodscore/additive_risks.json',
+            ]
+            for f in possible_files:
+                if f.exists():
+                    if f.suffix == '.csv':
+                        df = pd.read_csv(f)
+                        cls._cache['additives'] = clean_nan_records(df.to_dict('records'))
+                    else:
+                        with open(f) as fh:
+                            cls._cache['additives'] = json.load(fh)
+                    break
             else:
-                json_file = DATA_DIR / 'raw/foodscore/additive_risks.json'
-                if json_file.exists():
-                    with open(json_file) as f:
-                        cls._cache['additives'] = json.load(f)
-                else:
-                    cls._cache['additives'] = []
+                cls._cache['additives'] = []
 
         additives = cls._cache['additives']
         if search:
@@ -127,7 +144,8 @@ class FoodScoreService:
                 cls._cache['categories'] = []
             else:
                 categories = set()
-                for cats in df['categories_en'].dropna().head(10000):
+                cat_col = 'categories_en' if 'categories_en' in df.columns else 'categories'
+                for cats in df[cat_col].dropna().head(10000):
                     for c in str(cats).split(','):
                         c = c.strip()
                         if c and len(c) > 2:

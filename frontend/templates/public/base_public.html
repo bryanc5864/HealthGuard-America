@@ -1,64 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title if title else 'Public Portal' }} - HealthGuard{% endblock %}
+{% block title %}{{ title if title else 'Public Portal' }} - HealthGuard America{% endblock %}
 
-{% block extra_css %}
-<style>
-    :root {
-        --portal-color: #28a745;
-        --portal-light: #e8f5e9;
-    }
+{% block navbar %}
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="{{ url_for('landing') }}" class="navbar-brand">
+            <i class="bi bi-shield-plus"></i>
+            HealthGuard America
+        </a>
 
-    .navbar {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
-    }
-
-    .module-nav {
-        background: white;
-        border-bottom: 1px solid #dee2e6;
-        padding: 0.5rem 0;
-    }
-
-    .module-nav .nav-link {
-        color: #495057;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        margin: 0 0.25rem;
-    }
-
-    .module-nav .nav-link:hover,
-    .module-nav .nav-link.active {
-        background: var(--portal-light);
-        color: var(--portal-color);
-    }
-
-    .module-nav .nav-link i {
-        margin-right: 0.5rem;
-    }
-
-    .breadcrumb-container {
-        background: #f8f9fa;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .page-header {
-        margin-bottom: 2rem;
-    }
-
-    .page-header h1 {
-        font-weight: 700;
-        color: #1a1a2e;
-    }
-
-    .btn-primary {
-        background: var(--portal-color);
-        border-color: var(--portal-color);
-    }
-
-    .btn-primary:hover {
-        background: #218838;
-        border-color: #218838;
-    }
-</style>
+        <ul class="navbar-nav">
+            <li>
+                <a href="{{ url_for('public.home') }}" class="nav-link {% if request.endpoint == 'public.home' %}active{% endif %}">
+                    <i class="bi bi-house"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('public.pricevision_home') }}" class="nav-link {% if 'pricevision' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-currency-dollar"></i>
+                    PriceVision
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('public.drugwatch_home') }}" class="nav-link {% if 'drugwatch' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-capsule"></i>
+                    DrugWatch
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('public.foodscore_home') }}" class="nav-link {% if 'foodscore' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-basket"></i>
+                    FoodScore
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('gov.home') }}" class="nav-link">
+                    <i class="bi bi-building"></i>
+                    Gov Portal
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
 {% endblock %}
+
+{% block content %}{% endblock %}
