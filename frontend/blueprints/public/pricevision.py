@@ -30,9 +30,59 @@ def get_procedure_matching_service():
         try:
             from ml.procedure_encoder.inference import ProcedureMatchingService
             _procedure_matching_service = ProcedureMatchingService.load()
-        except Exception:
-            pass
+            logger.info("ProcedureMatchingService loaded successfully")
+        except Exception as e:
+            logger.warning(f"Failed to load ProcedureMatchingService: {e}")
     return _procedure_matching_service
+
+
+# CPT/HCPCS code specialty mapping (more accurate than first-digit heuristic)
+CPT_SPECIALTY_RANGES = {
+    # Evaluation & Management (99xxx)
+    (99000, 99999): 'Evaluation & Management',
+    # Anesthesia (00xxx-01999)
+    (0, 1999): 'Anesthesia',
+    # Surgery by body system (10xxx-69xxx)
+    (10000, 19999): 'Integumentary Surgery',
+    (20000, 29999): 'Musculoskeletal Surgery',
+    (30000, 32999): 'Respiratory Surgery',
+    (33000, 37999): 'Cardiovascular Surgery',
+    (38000, 39999): 'Hemic/Lymphatic Surgery',
+    (40000, 49999): 'Digestive Surgery',
+    (50000, 53999): 'Urinary Surgery',
+    (54000, 55999): 'Male Genital Surgery',
+    (56000, 58999): 'Female Genital Surgery',
+    (59000, 59999): 'Maternity Care',
+    (60000, 60999): 'Endocrine Surgery',
+    (61000, 64999): 'Nervous System Surgery',
+    (65000, 68999): 'Eye Surgery',
+    (69000, 69999): 'Auditory Surgery',
+    # Radiology (70xxx-79xxx)
+    (70000, 79999): 'Imaging/Radiology',
+    # Pathology & Lab (80xxx-89xxx)
+    (80000, 89999): 'Laboratory/Pathology',
+    # Medicine (90xxx-99xxx but not E&M)
+    (90000, 98999): 'Medicine/Therapy',
+}
+
+
+def get_specialty_from_code(code):
+    """Get specialty category from CPT/HCPCS code using range lookup."""
+    if not code:
+        return None
+    try:
+        # Extract numeric part
+        numeric = ''.join(c for c in str(code) if c.isdigit())
+        if not numeric:
+            return None
+        code_num = int(numeric)
+
+        for (start, end), specialty in CPT_SPECIALTY_RANGES.items():
+            if start <= code_num <= end:
+                return specialty
+        return 'Other'
+    except (ValueError, TypeError):
+        return None
 
 
 def analyze_price_fairness(prices):
@@ -91,20 +141,13 @@ def analyze_hospital_pricing(prices):
     markup_std = np.std(markups)
     pricing_consistency = max(0, 100 - markup_std)  # Higher consistency = lower std
 
-    # Identify specialties based on procedure codes
+    # Identify specialties based on procedure codes using accurate range lookup
     procedure_codes = [p.get('procedure_code', '') for p in prices if p.get('procedure_code')]
     specialties = set()
     for code in procedure_codes:
-        if code.startswith('7'):
-            specialties.add('Imaging/Radiology')
-        elif code.startswith('2'):
-            specialties.add('Surgery')
-        elif code.startswith('9'):
-            specialties.add('Evaluation & Management')
-        elif code.startswith('8'):
-            specialties.add('Laboratory')
-        elif code.startswith('3') or code.startswith('4'):
-            specialties.add('Diagnostic')
+        specialty = get_specialty_from_code(code)
+        if specialty:
+            specialties.add(specialty)
 
     return {
         'avg_markup': round(avg_markup, 1),
@@ -158,19 +201,25 @@ def pricevision_search():
                             'ml_matched_description': desc
                         }
 
-                    # Enhance results with ML scores
+                    # Enhance results with ML scores (limit individual calls to first 10)
+                    individual_calls = 0
+                    max_individual_calls = 10
                     for r in results:
                         code = r.get('hcpcs_code', '')
                         if code in ml_scores:
                             r['ml_match_confidence'] = ml_scores[code]['ml_match_confidence']
                             r['ml_matched_description'] = ml_scores[code]['ml_matched_description']
-                        else:
-                            # Get individual score for this procedure
+                        elif individual_calls < max_individual_calls:
+                            # Get individual score for this procedure (limited)
                             try:
                                 match = service.match(r.get('canonical_description', ''))
                                 r['ml_match_confidence'] = round(match.confidence * 100, 1)
-                            except Exception:
+                                individual_calls += 1
+                            except Exception as e:
+                                logger.debug(f"ML match failed for procedure: {e}")
                                 r['ml_match_confidence'] = None
+                        else:
+                            r['ml_match_confidence'] = None
 
                     # Sort by ML confidence (highest first)
                     results_with_ml = [r for r in results if r.get('ml_match_confidence') is not None]
@@ -183,8 +232,8 @@ def pricevision_search():
                         {'code': code, 'description': desc, 'confidence': round(conf * 100, 1)}
                         for code, desc, conf in similar[:5]
                     ]
-            except Exception:
-                pass  # Continue without ML features
+            except Exception as e:
+                logger.warning(f"ML semantic matching failed: {e}")
 
     states = PriceVisionService.get_states()
     return render_template('public/pricevision/search.html',
@@ -237,8 +286,8 @@ def pricevision_compare():
                 if prices_with_cash:
                     best = min(prices_with_cash, key=lambda x: x.get('cash_price', float('inf')))
                     best_value_npi = best.get('hospital_npi')
-        except Exception:
-            pass  # Continue without ML features
+        except Exception as e:
+            logger.warning(f"ML price fairness analysis failed: {e}")
 
     states = PriceVisionService.get_states()
     return render_template('public/pricevision/compare.html',
@@ -257,8 +306,8 @@ def pricevision_hospital(npi):
     # ML pricing pattern analysis
     try:
         pricing_analysis = analyze_hospital_pricing(prices)
-    except Exception:
-        pass  # Continue without ML features
+    except Exception as e:
+        logger.warning(f"Hospital pricing analysis failed: {e}")
 
     return render_template('public/pricevision/hospital.html',
                           hospital=hospital or {}, npi=npi, prices=prices,

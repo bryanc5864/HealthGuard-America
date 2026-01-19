@@ -204,9 +204,9 @@
 
             marker.bindPopup(
                 '<strong>' + (hpsa.hpsa_name || 'Unknown') + '</strong><br>' +
-                '<b>State:</b> ' + (hpsa.state || 'N/A') + '<br>' +
-                '<b>County:</b> ' + (hpsa.county || 'N/A') + '<br>' +
+                '<b>Type:</b> ' + (hpsa.designation_type || 'N/A') + '<br>' +
                 '<b>Discipline:</b> ' + (hpsa.discipline || 'N/A') + '<br>' +
+                '<b>State:</b> ' + (hpsa.state || 'N/A') + '<br>' +
                 '<b>HPSA Score:</b> ' + (hpsa.hpsa_score || 'N/A') + '<br>' +
                 '<b>Status:</b> ' + (hpsa.status || 'N/A') + '<br>' +
                 '<a href="{{ url_for("gov.ruralaccess_hpsa", hpsa_id="__ID__") }}'.replace('__ID__', hpsa.hpsa_id) + '">View Details</a>'
