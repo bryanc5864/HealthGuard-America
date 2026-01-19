@@ -17,15 +17,21 @@ class DrugWatchService:
     def _get_us_drugs_df(cls):
         """Get US drugs DataFrame (cached)"""
         if 'us_drugs_df' not in cls._df_cache:
-            csv_file = DATA_DIR / 'processed/drugwatch/us_drugs.csv'
-            if csv_file.exists():
-                cls._df_cache['us_drugs_df'] = pd.read_csv(csv_file)
+            # Try multiple file locations
+            possible_files = [
+                DATA_DIR / 'processed/drugwatch/us_drugs.csv',
+                DATA_DIR / 'processed/drugwatch/medicare_part_d_spending.csv',
+                DATA_DIR / 'processed/drugwatch/us_drugs.parquet',
+            ]
+            for f in possible_files:
+                if f.exists():
+                    if f.suffix == '.parquet':
+                        cls._df_cache['us_drugs_df'] = pd.read_parquet(f)
+                    else:
+                        cls._df_cache['us_drugs_df'] = pd.read_csv(f)
+                    break
             else:
-                drug_file = DATA_DIR / 'processed/drugwatch/us_drugs.parquet'
-                if drug_file.exists():
-                    cls._df_cache['us_drugs_df'] = pd.read_parquet(drug_file)
-                else:
-                    cls._df_cache['us_drugs_df'] = pd.DataFrame()
+                cls._df_cache['us_drugs_df'] = pd.DataFrame()
         return cls._df_cache['us_drugs_df']
 
     @classmethod

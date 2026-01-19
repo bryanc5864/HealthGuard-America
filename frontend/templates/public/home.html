@@ -1,97 +1,212 @@
 {% extends "public/base_public.html" %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="page-header text-center mb-5">
-        <h1><i class="bi bi-people me-2"></i>Public Portal</h1>
-        <p class="lead text-muted">Healthcare transparency tools for everyone</p>
-    </div>
+{% block title %}Public Portal - HealthGuard America{% endblock %}
 
-    <div class="row g-4">
+{% block content %}
+<!-- Hero Section -->
+<div class="page-header" style="background: linear-gradient(135deg, #166534, #22c55e);">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Public Portal</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-people-fill"></i> Public Portal
+        </h1>
+        <p class="page-subtitle">
+            Free healthcare transparency tools for everyone. No login required.
+        </p>
+    </div>
+</div>
+
+<div class="container container-xl">
+    <!-- Module Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--spacing-6); margin-top: calc(-1 * var(--spacing-16)); position: relative; z-index: 10;">
         <!-- PriceVision -->
-        <div class="col-md-4">
-            <div class="card h-100 module-card module-pricevision">
-                <div class="card-body text-center p-4">
-                    <div class="icon-box mx-auto mb-3" style="background: rgba(253, 126, 20, 0.1);">
-                        <i class="bi bi-currency-dollar" style="color: #fd7e14;"></i>
-                    </div>
-                    <h4 class="card-title">PriceVision</h4>
-                    <p class="card-text text-muted">
-                        Compare hospital procedure prices. Find the best value for your healthcare needs.
-                    </p>
-                    <a href="{{ url_for('public.pricevision_home') }}" class="btn btn-outline-warning">
-                        <i class="bi bi-search me-1"></i>Search Prices
-                    </a>
+        <div class="module-card module-card--pricevision">
+            <div class="module-card-image">
+                <img src="{{ url_for('static', filename='images/pricevision/UF-Health-Shands-Hospital-North-Tower.jpg') }}" alt="Hospital">
+                <div class="module-card-overlay"></div>
+                <div class="module-card-icon">
+                    <i class="bi bi-currency-dollar"></i>
                 </div>
+            </div>
+            <div class="module-card-body">
+                <h3 class="module-card-title">PriceVision</h3>
+                <p class="module-card-description">
+                    Compare hospital procedure prices across 1,000+ facilities.
+                    Find the best value for your healthcare needs.
+                </p>
+                <ul class="module-card-features">
+                    <li><i class="bi bi-check-circle-fill"></i> Search by procedure or hospital</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Compare cash vs insurance rates</li>
+                    <li><i class="bi bi-check-circle-fill"></i> See price variations by state</li>
+                </ul>
+                <a href="{{ url_for('public.pricevision_home') }}" class="btn btn-pricevision">
+                    Search Prices <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
         </div>
 
         <!-- DrugWatch -->
-        <div class="col-md-4">
-            <div class="card h-100 module-card module-drugwatch">
-                <div class="card-body text-center p-4">
-                    <div class="icon-box mx-auto mb-3" style="background: rgba(220, 53, 69, 0.1);">
-                        <i class="bi bi-capsule" style="color: #dc3545;"></i>
-                    </div>
-                    <h4 class="card-title">DrugWatch</h4>
-                    <p class="card-text text-muted">
-                        Compare drug prices across countries. See how much you could save.
-                    </p>
-                    <a href="{{ url_for('public.drugwatch_home') }}" class="btn btn-outline-danger">
-                        <i class="bi bi-search me-1"></i>Search Drugs
-                    </a>
+        <div class="module-card module-card--drugwatch">
+            <div class="module-card-image">
+                <img src="{{ url_for('static', filename='images/drugwatch/Pill-Bottles.jpg') }}" alt="Medications">
+                <div class="module-card-overlay"></div>
+                <div class="module-card-icon">
+                    <i class="bi bi-capsule"></i>
                 </div>
+            </div>
+            <div class="module-card-body">
+                <h3 class="module-card-title">DrugWatch</h3>
+                <p class="module-card-description">
+                    Compare drug prices across US, Australia, and Canada.
+                    See Medicare spending data and find affordable alternatives.
+                </p>
+                <ul class="module-card-features">
+                    <li><i class="bi bi-check-circle-fill"></i> International price comparison</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Medicare spending analysis</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Generic alternatives search</li>
+                </ul>
+                <a href="{{ url_for('public.drugwatch_home') }}" class="btn btn-drugwatch">
+                    Compare Drugs <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
         </div>
 
         <!-- FoodScore -->
-        <div class="col-md-4">
-            <div class="card h-100 module-card module-foodscore">
-                <div class="card-body text-center p-4">
-                    <div class="icon-box mx-auto mb-3" style="background: rgba(40, 167, 69, 0.1);">
-                        <i class="bi bi-basket" style="color: #28a745;"></i>
-                    </div>
-                    <h4 class="card-title">FoodScore</h4>
-                    <p class="card-text text-muted">
-                        Check health scores for food products. Make informed choices at the grocery store.
-                    </p>
-                    <a href="{{ url_for('public.foodscore_home') }}" class="btn btn-outline-success">
-                        <i class="bi bi-search me-1"></i>Search Foods
-                    </a>
+        <div class="module-card module-card--foodscore">
+            <div class="module-card-image">
+                <img src="{{ url_for('static', filename='images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.jpg') }}" alt="Healthy Food">
+                <div class="module-card-overlay"></div>
+                <div class="module-card-icon">
+                    <i class="bi bi-basket"></i>
                 </div>
+            </div>
+            <div class="module-card-body">
+                <h3 class="module-card-title">FoodScore</h3>
+                <p class="module-card-description">
+                    Check health scores for 50,000+ food products.
+                    NOVA classification, additive risks, and nutrition analysis.
+                </p>
+                <ul class="module-card-features">
+                    <li><i class="bi bi-check-circle-fill"></i> MAHA health scores (0-100)</li>
+                    <li><i class="bi bi-check-circle-fill"></i> NOVA processing classification</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Additive risk warnings</li>
+                </ul>
+                <a href="{{ url_for('public.foodscore_home') }}" class="btn btn-foodscore">
+                    Check Foods <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="row g-4 mt-5">
-        <div class="col-12">
-            <h3 class="text-center mb-4">Platform Statistics</h3>
+    <!-- Stats Section -->
+    <section class="section">
+        <div style="text-align: center; margin-bottom: var(--spacing-8);">
+            <h2 style="font-size: var(--text-2xl); font-weight: 700;">Platform Statistics</h2>
+            <p class="text-muted">Real data powering your healthcare decisions</p>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">1,000+</div>
-                <div class="stat-label">Hospitals</div>
+
+        <div class="stats-grid">
+            <div class="stat-card stat-card--pricevision">
+                <div class="stat-card-value">30.2M</div>
+                <div class="stat-card-label">Price Records</div>
+            </div>
+            <div class="stat-card stat-card--pricevision">
+                <div class="stat-card-value">1,002</div>
+                <div class="stat-card-label">Hospitals</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">75,854</div>
+                <div class="stat-card-label">Drugs Tracked</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">$276B</div>
+                <div class="stat-card-label">Medicare Spending</div>
+            </div>
+            <div class="stat-card stat-card--foodscore">
+                <div class="stat-card-value">50,000+</div>
+                <div class="stat-card-label">Food Products</div>
+            </div>
+            <div class="stat-card stat-card--foodscore">
+                <div class="stat-card-value">344</div>
+                <div class="stat-card-label">Additives Scored</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">3,500+</div>
-                <div class="stat-label">Drugs Tracked</div>
-            </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="section-sm" style="background: var(--neutral-100); border-radius: var(--radius-2xl); padding: var(--spacing-8);">
+        <div style="text-align: center; margin-bottom: var(--spacing-6);">
+            <h2 style="font-size: var(--text-xl); font-weight: 700;">Quick Actions</h2>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">500K+</div>
-                <div class="stat-label">Food Products</div>
-            </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-4);">
+            <a href="{{ url_for('public.pricevision_search') }}" class="card" style="padding: var(--spacing-4); text-decoration: none;">
+                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                    <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--pricevision-light); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search" style="color: var(--pricevision);"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--neutral-900);">Search Procedures</div>
+                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">Find prices for any procedure</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('public.drugwatch_search') }}" class="card" style="padding: var(--spacing-4); text-decoration: none;">
+                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                    <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--drugwatch-light); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-capsule" style="color: var(--drugwatch);"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--neutral-900);">Compare Drug Prices</div>
+                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">US vs international pricing</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('public.foodscore_search') }}" class="card" style="padding: var(--spacing-4); text-decoration: none;">
+                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                    <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-upc-scan" style="color: var(--foodscore);"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--neutral-900);">Scan Product</div>
+                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">Check food health scores</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('public.foodscore_additives') }}" class="card" style="padding: var(--spacing-4); text-decoration: none;">
+                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                    <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-exclamation-triangle" style="color: var(--foodscore);"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--neutral-900);">Additive Database</div>
+                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">Look up additive risks</div>
+                    </div>
+                </div>
+            </a>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">4</div>
-                <div class="stat-label">Countries Compared</div>
-            </div>
+    </section>
+
+    <!-- Government Access CTA -->
+    <section class="section-sm" style="margin-top: var(--spacing-8);">
+        <div class="card" style="background: linear-gradient(135deg, var(--primary-900), var(--primary-700)); padding: var(--spacing-8); text-align: center;">
+            <h3 style="color: white; font-size: var(--text-xl); margin-bottom: var(--spacing-2);">
+                Need More Data?
+            </h3>
+            <p style="color: var(--primary-200); margin-bottom: var(--spacing-4);">
+                Government officials can access RuralAccess and ChronicCare modules for comprehensive healthcare analytics.
+            </p>
+            <a href="{{ url_for('gov.login') }}" class="btn btn-white">
+                <i class="bi bi-building"></i> Government Portal Login
+            </a>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

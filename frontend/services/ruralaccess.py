@@ -18,15 +18,21 @@ class RuralAccessService:
     def _get_hpsa_df(cls):
         """Get HPSA DataFrame (cached)"""
         if 'hpsa_df' not in cls._df_cache:
-            hpsa_file = DATA_DIR / 'processed/ruralaccess/hpsa_designations.parquet'
-            if hpsa_file.exists():
-                cls._df_cache['hpsa_df'] = pd.read_parquet(hpsa_file)
+            # Try multiple file locations
+            possible_files = [
+                DATA_DIR / 'processed/ruralaccess/hpsa_designations.parquet',
+                DATA_DIR / 'processed/ruralaccess/hpsa_designations.csv',
+                DATA_DIR / 'raw/ruralaccess/hrsa_hpsa.csv',
+            ]
+            for f in possible_files:
+                if f.exists():
+                    if f.suffix == '.parquet':
+                        cls._df_cache['hpsa_df'] = pd.read_parquet(f)
+                    else:
+                        cls._df_cache['hpsa_df'] = pd.read_csv(f, low_memory=False)
+                    break
             else:
-                raw_file = DATA_DIR / 'raw/ruralaccess/hrsa_hpsa.csv'
-                if raw_file.exists():
-                    cls._df_cache['hpsa_df'] = pd.read_csv(raw_file, low_memory=False, nrows=10000)
-                else:
-                    cls._df_cache['hpsa_df'] = pd.DataFrame()
+                cls._df_cache['hpsa_df'] = pd.DataFrame()
         return cls._df_cache['hpsa_df']
 
     @classmethod

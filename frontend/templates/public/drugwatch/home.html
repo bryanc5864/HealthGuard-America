@@ -1,161 +1,173 @@
 {% extends "public/base_public.html" %}
 
-{% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
-            <li class="breadcrumb-item active">DrugWatch</li>
-        </ol>
-    </nav>
+{% block title %}DrugWatch - Drug Price Comparison{% endblock %}
 
-    <div class="page-header text-center mb-5">
-        <h1><i class="bi bi-capsule me-2" style="color: #dc3545;"></i>DrugWatch</h1>
-        <p class="lead text-muted">Compare drug prices: US vs International</p>
+{% block content %}
+<!-- Hero Section -->
+<div class="page-header page-header--drugwatch">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.home') }}">Public Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>DrugWatch</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-capsule"></i> DrugWatch
+        </h1>
+        <p class="page-subtitle">
+            Compare drug prices: US vs International markets
+        </p>
     </div>
+</div>
+
+<div class="container container-xl">
+    <!-- Stats Section -->
+    <section style="margin-top: calc(-1 * var(--spacing-10)); position: relative; z-index: 10;">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">$276B</div>
+                <div class="stat-card-label">Medicare Spending</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">75,854</div>
+                <div class="stat-card-label">Drugs Tracked</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">3</div>
+                <div class="stat-card-label">Countries</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">60-90%</div>
+                <div class="stat-card-label">Potential Savings</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Search Box -->
-    <div class="row justify-content-center mb-5">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <form action="{{ url_for('public.drugwatch_search') }}" method="get">
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control" name="q"
-                                   placeholder="Search drugs (e.g., Lipitor, metformin, insulin...)">
-                            <button class="btn btn-danger" type="submit">Search</button>
-                        </div>
-                    </form>
-                    <div class="mt-3 text-center">
-                        <span class="text-muted">Top drugs by spending:</span>
-                        <a href="{{ url_for('public.drugwatch_search', q='Eliquis') }}" class="badge bg-light text-dark me-1">Eliquis</a>
-                        <a href="{{ url_for('public.drugwatch_search', q='Ozempic') }}" class="badge bg-light text-dark me-1">Ozempic</a>
-                        <a href="{{ url_for('public.drugwatch_search', q='Humira') }}" class="badge bg-light text-dark me-1">Humira</a>
-                        <a href="{{ url_for('public.drugwatch_search', q='Jardiance') }}" class="badge bg-light text-dark me-1">Jardiance</a>
-                    </div>
+    <section class="section-sm">
+        <div class="card" style="padding: var(--spacing-8); max-width: 800px; margin: 0 auto;">
+            <h2 style="font-size: var(--text-xl); font-weight: 700; text-align: center; margin-bottom: var(--spacing-6);">
+                <i class="bi bi-search" style="color: var(--drugwatch);"></i> Search Drug Prices
+            </h2>
+            <form action="{{ url_for('public.drugwatch_search') }}" method="get">
+                <div class="search-box" style="margin-bottom: var(--spacing-4);">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control" name="q"
+                           placeholder="Search drugs (e.g., Lipitor, metformin, insulin...)"
+                           style="padding-left: 3rem; font-size: var(--text-lg);">
+                </div>
+                <button type="submit" class="btn btn-drugwatch btn-lg w-full">
+                    Search Drugs <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+            <div style="text-align: center; margin-top: var(--spacing-4);">
+                <span style="color: var(--neutral-500); font-size: var(--text-sm);">Top drugs by spending:</span>
+                <div style="display: flex; justify-content: center; gap: var(--spacing-2); flex-wrap: wrap; margin-top: var(--spacing-2);">
+                    <a href="{{ url_for('public.drugwatch_search', q='Eliquis') }}" class="badge" style="background: var(--drugwatch-light); color: var(--drugwatch-dark);">Eliquis</a>
+                    <a href="{{ url_for('public.drugwatch_search', q='Ozempic') }}" class="badge" style="background: var(--drugwatch-light); color: var(--drugwatch-dark);">Ozempic</a>
+                    <a href="{{ url_for('public.drugwatch_search', q='Humira') }}" class="badge" style="background: var(--drugwatch-light); color: var(--drugwatch-dark);">Humira</a>
+                    <a href="{{ url_for('public.drugwatch_search', q='Jardiance') }}" class="badge" style="background: var(--drugwatch-light); color: var(--drugwatch-dark);">Jardiance</a>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card stat-card border-danger">
-                <div class="stat-value text-danger">$275.9B</div>
-                <div class="stat-label">Medicare Part D Spending</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">{{ stats.total_us_drugs | default(0) }}</div>
-                <div class="stat-label">Drugs Tracked</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">{{ stats.countries | length if stats.countries else 4 }}</div>
-                <div class="stat-label">Countries Compared</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value text-success">60-90%</div>
-                <div class="stat-label">Potential Savings</div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- Top Expensive Drugs -->
     {% if top_drugs %}
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Top Drugs by Medicare Spending</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Drug Name</th>
-                                    <th>Generic Name</th>
-                                    <th>Total Spending</th>
-                                    <th>Beneficiaries</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for drug in top_drugs[:10] %}
-                                <tr>
-                                    <td><strong>{{ drug.get('brand_name', 'N/A') }}</strong></td>
-                                    <td>{{ drug.get('generic_name', 'N/A') }}</td>
-                                    <td>${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
-                                    <td>{{ "{:,.0f}".format(drug.get('total_beneficiaries_2023', 0) | float) }}</td>
-                                    <td>
-                                        <a href="{{ url_for('public.drugwatch_drug', drug_id=drug.get('brand_name', '')) }}" class="btn btn-sm btn-outline-danger">Compare</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <section class="section-sm">
+        <div class="table-container">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">
+                    <i class="bi bi-graph-up-arrow" style="color: var(--drugwatch);"></i> Top Drugs by Medicare Spending
+                </h3>
+                <a href="{{ url_for('public.drugwatch_search') }}" class="btn btn-sm btn-outline" style="border-color: var(--drugwatch); color: var(--drugwatch);">
+                    View All
+                </a>
             </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Brand Name</th>
+                        <th>Generic Name</th>
+                        <th>Total Spending (2023)</th>
+                        <th>Beneficiaries</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for drug in top_drugs[:10] %}
+                    <tr>
+                        <td><strong style="color: var(--neutral-900);">{{ drug.get('brand_name', 'N/A') }}</strong></td>
+                        <td>{{ drug.get('generic_name', 'N/A') }}</td>
+                        <td style="font-weight: 600; color: var(--drugwatch);">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
+                        <td>{{ "{:,.0f}".format(drug.get('total_beneficiaries_2023', 0) | float) }}</td>
+                        <td>
+                            <a href="{{ url_for('public.drugwatch_drug', drug_id=drug.get('brand_name', '')) }}" class="btn btn-sm btn-drugwatch">
+                                Compare
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- Features -->
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-globe display-4 text-danger mb-3"></i>
-                    <h5>International Comparison</h5>
-                    <p class="text-muted">See how US prices compare to Canada, Australia, and the UK.</p>
+    <section class="section">
+        <div style="text-align: center; margin-bottom: var(--spacing-8);">
+            <h2 style="font-size: var(--text-2xl); font-weight: 700;">Why Use DrugWatch?</h2>
+            <p class="text-muted">Understand the true cost of your medications</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-6);">
+            <div class="card" style="padding: var(--spacing-6); text-align: center;">
+                <div style="width: 64px; height: 64px; border-radius: var(--radius-lg); background: var(--drugwatch-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
+                    <i class="bi bi-globe" style="font-size: var(--text-2xl); color: var(--drugwatch);"></i>
                 </div>
+                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">International Comparison</h3>
+                <p class="text-muted">See how US prices compare to Canada, Australia, and other countries where drugs cost less.</p>
+            </div>
+
+            <div class="card" style="padding: var(--spacing-6); text-align: center;">
+                <div style="width: 64px; height: 64px; border-radius: var(--radius-lg); background: var(--drugwatch-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
+                    <i class="bi bi-arrow-repeat" style="font-size: var(--text-2xl); color: var(--drugwatch);"></i>
+                </div>
+                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Find Generics</h3>
+                <p class="text-muted">Discover cheaper generic alternatives to expensive brand-name medications.</p>
+            </div>
+
+            <div class="card" style="padding: var(--spacing-6); text-align: center;">
+                <div style="width: 64px; height: 64px; border-radius: var(--radius-lg); background: var(--drugwatch-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
+                    <i class="bi bi-graph-down" style="font-size: var(--text-2xl); color: var(--drugwatch);"></i>
+                </div>
+                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Price Analysis</h3>
+                <p class="text-muted">See Medicare spending trends and understand why drugs cost what they do.</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-arrow-repeat display-4 text-danger mb-3"></i>
-                    <h5>Find Generics</h5>
-                    <p class="text-muted">Discover cheaper generic alternatives to brand-name drugs.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-graph-down display-4 text-danger mb-3"></i>
-                    <h5>Price Trends</h5>
-                    <p class="text-muted">Track how drug prices have changed over time.</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- Info Section -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card bg-light">
-                <div class="card-body p-4">
-                    <h5><i class="bi bi-info-circle me-2"></i>About Drug Price Transparency</h5>
-                    <p>
+    <section class="section-sm">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-4); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2);">About Drug Price Transparency</h4>
+                    <p style="margin-bottom: var(--spacing-2);">
                         Americans pay significantly more for prescription drugs than people in other developed countries.
-                        DrugWatch aggregates pricing data from Medicare Part D, Canada's PMPRB, Australia's PBS, and the UK's NHS
+                        DrugWatch aggregates pricing data from Medicare Part D, Australia's PBS, and Canada's Drug Database
                         to show you the true cost difference.
                     </p>
-                    <p class="mb-0">
-                        <strong>Data sources:</strong> Medicare Part D, NADAC, Canada PMPRB, Australia PBS, UK NHS Drug Tariff
+                    <p style="margin: 0; font-size: var(--text-sm);">
+                        <strong>Data sources:</strong> Medicare Part D Spending (CMS), Pharmaceutical Benefits Scheme (Australia), Health Canada Drug Database
                     </p>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

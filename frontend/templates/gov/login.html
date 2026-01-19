@@ -1,99 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Government Portal Login - HealthGuard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+{% extends "base.html" %}
 
-        .login-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 100%;
-        }
+{% block title %}Government Portal Login - HealthGuard America{% endblock %}
 
-        .login-header {
-            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-            border-radius: 20px 20px 0 0;
-            padding: 2rem;
-            text-align: center;
-            color: white;
-        }
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
 
-        .login-body {
-            padding: 2rem;
-        }
+{% block content %}
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-900) 0%, var(--primary-700) 100%); padding: var(--spacing-8);">
+    <!-- Background Pattern -->
+    <div style="position: absolute; inset: 0; opacity: 0.05; background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
 
-        .gov-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <div class="login-header">
-            <span class="gov-badge mb-3 d-inline-block">Government Access</span>
-            <h2><i class="bi bi-building me-2"></i>HealthGuard</h2>
-            <p class="mb-0 opacity-75">Government Portal Login</p>
-        </div>
-        <div class="login-body">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div style="position: relative; z-index: 1; width: 100%; max-width: 440px;">
+        <!-- Login Card -->
+        <div class="card" style="border-radius: var(--radius-2xl); overflow: hidden; box-shadow: var(--shadow-xl);">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, var(--primary-800), var(--primary-900)); padding: var(--spacing-8); text-align: center;">
+                <div style="display: flex; justify-content: center; margin-bottom: var(--spacing-4);">
+                    <img src="{{ url_for('static', filename='images/gov/Greater_coat_of_arms_of_the_United_States.png') }}" alt="US Seal" style="height: 80px; width: auto; opacity: 0.9;">
+                </div>
+                <span class="badge" style="background: rgba(255,255,255,0.15); color: white; font-size: var(--text-xs); letter-spacing: 0.1em; margin-bottom: var(--spacing-3);">
+                    OFFICIAL GOVERNMENT ACCESS
+                </span>
+                <h1 style="color: white; font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--spacing-2);">
+                    <i class="bi bi-shield-plus"></i> HealthGuard America
+                </h1>
+                <p style="color: var(--primary-200); font-size: var(--text-sm);">
+                    Government Portal Authentication
+                </p>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body" style="padding: var(--spacing-8);">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }}" style="margin-bottom: var(--spacing-4);">
+                                <i class="bi bi-exclamation-circle"></i> {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('gov.login') }}">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <div style="position: relative;">
+                            <i class="bi bi-person" style="position: absolute; left: var(--spacing-4); top: 50%; transform: translateY(-50%); color: var(--neutral-400);"></i>
+                            <input type="text" name="username" class="form-control" style="padding-left: 2.75rem;" placeholder="Enter your username" required autofocus>
                         </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" id="username" name="username" required>
                     </div>
-                </div>
-                <div class="mb-4">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <input type="password" class="form-control" id="password" name="password" required>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div style="position: relative;">
+                            <i class="bi bi-lock" style="position: absolute; left: var(--spacing-4); top: 50%; transform: translateY(-50%); color: var(--neutral-400);"></i>
+                            <input type="password" name="password" class="form-control" style="padding-left: 2.75rem;" placeholder="Enter your password" required>
+                        </div>
                     </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-full" style="margin-top: var(--spacing-4);">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </button>
+                </form>
+
+                <div style="margin-top: var(--spacing-6); padding-top: var(--spacing-6); border-top: 1px solid var(--neutral-200); text-align: center;">
+                    <a href="{{ url_for('landing') }}" style="color: var(--neutral-500); font-size: var(--text-sm);">
+                        <i class="bi bi-arrow-left"></i> Back to Portal Selection
+                    </a>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-                </button>
-            </form>
 
-            <hr class="my-4">
-
-            <div class="text-center">
-                <a href="/" class="text-decoration-none">
-                    <i class="bi bi-arrow-left me-1"></i>Back to Portal Selection
-                </a>
+                <!-- Demo Credentials Notice -->
+                <div class="alert alert-info" style="margin-top: var(--spacing-4); font-size: var(--text-sm);">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Demo Access:</strong> Use <code>admin</code> / <code>healthguard2026</code>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: var(--spacing-6); color: var(--primary-300); font-size: var(--text-sm);">
+            <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-2); margin-bottom: var(--spacing-2);">
+                <img src="{{ url_for('static', filename='images/gov/Flag_of_the_United_States (1).png') }}" alt="US Flag" style="height: 16px; width: auto;">
+                <span>Official U.S. Government Healthcare Platform</span>
+            </div>
+            <p style="opacity: 0.7;">Authorized personnel only. Unauthorized access is prohibited.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
