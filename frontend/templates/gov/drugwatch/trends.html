@@ -388,17 +388,18 @@
     };
 
     // Top drugs data from backend
-    const topDrugsData = {{ top_drugs[:15]|tojson|safe }};
+    const topDrugsData = {{ top_drugs|tojson|safe }};
+    const chartData = topDrugsData.slice(0, 15); // Limit to 15 for chart
 
     // 1. Top Drugs Horizontal Bar Chart
     new Chart(document.getElementById('topDrugsChart'), {
         type: 'bar',
         data: {
-            labels: topDrugsData.map(d => d.brand_name ? d.brand_name.substring(0, 15) : 'N/A'),
+            labels: chartData.map(d => d.brand_name ? d.brand_name.substring(0, 15) : 'N/A'),
             datasets: [{
                 label: 'Total Spending ($B)',
-                data: topDrugsData.map(d => (d.total_spending_2023 || 0) / 1e9),
-                backgroundColor: topDrugsData.map((d, i) => {
+                data: chartData.map(d => (d.total_spending_2023 || 0) / 1e9),
+                backgroundColor: chartData.map((d, i) => {
                     const spending = d.total_spending_2023 || 0;
                     if (spending > 10e9) return colors.danger;
                     if (spending > 5e9) return '#fd7e14';

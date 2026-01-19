@@ -1,5 +1,10 @@
 {% extends "gov/base_gov.html" %}
 
+{% block extra_css %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
     <nav aria-label="breadcrumb" class="mb-4">
@@ -223,7 +228,9 @@
                     <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Disease Prevalence</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="diseaseChart" height="200"></canvas>
+                    <div class="chart-container-sm">
+                        <canvas id="diseaseChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -232,7 +239,9 @@
                     <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Risk Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="riskPieChart" height="180"></canvas>
+                    <div class="chart-container-sm">
+                        <canvas id="riskPieChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,13 +299,11 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Leaflet CSS/JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
 // Initialize map
 var map = L.map('healthMap').setView([39.8283, -98.5795], 4);
@@ -328,8 +335,8 @@ var stateCoords = {
     'WI': [44.268543, -89.616508], 'WY': [42.755966, -107.302490]
 };
 
-// Add markers
-countyData.slice(0, 100).forEach(function(county) {
+// Add markers for all counties
+countyData.forEach(function(county) {
     var state = county.state_abbr || county.state;
     if (stateCoords[state]) {
         var coords = stateCoords[state];
@@ -375,6 +382,7 @@ new Chart(diseaseCtx, {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { display: false }
         },
@@ -398,6 +406,7 @@ new Chart(riskCtx, {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { position: 'bottom' }
         }
@@ -411,4 +420,4 @@ function setMapView(type) {
     // In a full implementation, this would re-color markers based on the selected metric
 }
 </script>
-{% endblock %}
+{% endblock extra_js %}
