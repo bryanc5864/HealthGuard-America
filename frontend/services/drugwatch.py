@@ -48,11 +48,15 @@ class DrugWatchService:
     @classmethod
     def get_drug(cls, drug_id):
         """Get single drug by ID or name"""
+        # Guard for None or empty input
+        if not drug_id or str(drug_id).strip() == '':
+            return None
+
         df = cls._get_us_drugs_df()
         if df.empty:
             return None
 
-        drug_id_lower = str(drug_id).lower()
+        drug_id_lower = str(drug_id).strip().lower()
 
         # Exact match first
         exact = df[df['brand_name'].fillna('').str.lower() == drug_id_lower]
@@ -111,7 +115,9 @@ class DrugWatchService:
 
         if search:
             search_lower = search.lower()
-            df = df[df['ndc_description'].fillna('').str.lower().str.contains(search_lower, regex=False)]
+            # Use drug_name column (ndc_description doesn't exist in this dataset)
+            search_col = 'drug_name' if 'drug_name' in df.columns else 'ndc_description'
+            df = df[df[search_col].fillna('').str.lower().str.contains(search_lower, regex=False)]
 
         return df.head(limit).to_dict('records')
 
