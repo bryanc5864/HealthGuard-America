@@ -6,7 +6,11 @@ from flask import render_template, request, jsonify
 from . import gov_bp, gov_required
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+# Add project root to path for ML imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from services.drugwatch import DrugWatchService
 
 

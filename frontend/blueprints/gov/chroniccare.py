@@ -7,14 +7,19 @@ from . import gov_bp, gov_required
 import sys
 import logging
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+# Add project root to path for ML imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from services.chroniccare import ChronicCareService
 
 # ML imports for real-time inference
 try:
     from ml.chroniccare.inference import ChronicCareMLService, get_chroniccare_service
     ML_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logging.warning(f"ML module not available: {e}")
     ML_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
