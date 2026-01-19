@@ -7,7 +7,11 @@ from . import public_bp
 import sys
 from pathlib import Path
 import numpy as np
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+# Add project root to path for ML imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from services.pricevision import PriceVisionService
 
 # ML Service singleton (lazy loaded)
