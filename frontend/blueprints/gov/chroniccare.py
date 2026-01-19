@@ -775,7 +775,11 @@ def chroniccare_simulator():
                     # Get disease prevalence predictions
                     if ml_service.risk_service.is_loaded:
                         risk_predictions = ml_service.risk_service.predict(features)
-                        predictions = {k: round(v, 1) for k, v in risk_predictions.items()}
+                        # Clamp predictions to valid percentage ranges (0-100%)
+                        predictions = {
+                            k: round(max(0, min(100, v)), 1)
+                            for k, v in risk_predictions.items()
+                        }
 
                         # Calculate composite risk score
                         ml_risk_score = (
@@ -800,9 +804,9 @@ def chroniccare_simulator():
                         priority_result = ml_service.prioritization_service.prioritize(features)
                         priority = {
                             'tier': priority_result.get('priority', 'Medium'),
-                            'confidence': round(priority_result.get('confidence', 0.85) * 100, 1),
-                            'maha_index': round(priority_result.get('maha_index', 40), 1),
-                            'ml_risk_score': round(ml_risk_score, 2),
+                            'confidence': round(min(100, max(0, priority_result.get('confidence', 0.85) * 100)), 1),
+                            'maha_index': round(min(100, max(0, priority_result.get('maha_index', 40))), 1),
+                            'ml_risk_score': round(min(100, max(0, ml_risk_score)), 2),
                         }
                     else:
                         # Derive tier from risk score
@@ -817,8 +821,8 @@ def chroniccare_simulator():
                         priority = {
                             'tier': tier,
                             'confidence': 85.0,
-                            'maha_index': round(ml_risk_score * 4, 1),
-                            'ml_risk_score': round(ml_risk_score, 2),
+                            'maha_index': round(min(100, max(0, ml_risk_score * 2)), 1),
+                            'ml_risk_score': round(min(100, max(0, ml_risk_score)), 2),
                         }
 
                     # Get risk breakdown
@@ -853,8 +857,8 @@ def chroniccare_simulator():
             priority = {
                 'tier': tier,
                 'confidence': 75.0,
-                'maha_index': round(ml_risk_score * 4, 1),
-                'ml_risk_score': round(ml_risk_score, 2),
+                'maha_index': round(min(100, max(0, ml_risk_score * 2)), 1),
+                'ml_risk_score': round(min(100, max(0, ml_risk_score)), 2),
             }
             risk_breakdown = get_risk_breakdown(priority, features)
             recommendations = get_intervention_recommendations(priority, risk_breakdown, features)
