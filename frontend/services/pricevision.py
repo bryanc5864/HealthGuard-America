@@ -143,6 +143,13 @@ class PriceVisionService:
             # Filter to only hospitals with valid info (exclude unknown hospitals)
             df = df[df['hospital_npi'].astype(str).isin(valid_npis)]
 
+            # Filter out N/A records - must have description AND at least one price
+            df = df[
+                (df['description'].notna()) &
+                (df['description'].str.strip() != '') &
+                (df['cash_price'].notna() | df['gross_charge'].notna())
+            ]
+
             # Sort by cash_price for best prices first
             if 'cash_price' in df.columns:
                 df = df.sort_values('cash_price', ascending=True, na_position='last')
