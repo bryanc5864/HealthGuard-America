@@ -108,6 +108,9 @@ def drugwatch_trends():
         page = int(request.args.get('page', 1) or 1)
     except (ValueError, TypeError):
         page = 1
+    # Ensure limit and page are at least 1 to avoid division by zero
+    limit = max(1, limit)
+    page = max(1, page)
 
     stats = DrugWatchService.get_stats()
 
