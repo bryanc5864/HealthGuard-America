@@ -1,5 +1,19 @@
 {% extends "gov/base_gov.html" %}
 
+{% block extra_css %}
+{{ super() }}
+<style>
+    .chart-container {
+        position: relative;
+        height: 350px;
+    }
+    .chart-container-sm {
+        position: relative;
+        height: 250px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <nav aria-label="breadcrumb" class="mb-4">
@@ -97,29 +111,68 @@
         </div>
     </div>
 
-    <!-- Top Spending Drugs Chart -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Top 25 Drugs by Medicare Spending</h5>
-        </div>
-        <div class="card-body">
-            {% for drug in top_drugs[:25] %}
-            {% set spending = drug.get('total_spending_2023', 0) | float %}
-            {% set max_spending = top_drugs[0].get('total_spending_2023', 1) | float %}
-            {% set width = (spending / max_spending * 100) | int %}
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div>
-                        <strong>{{ drug.get('brand_name', 'N/A') }}</strong>
-                        <small class="text-muted ms-2">{{ drug.get('generic_name', '')[:30] }}</small>
-                    </div>
-                    <span class="fw-bold text-danger">${{ "{:,.0f}".format(spending) }}</span>
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Top Spending Drugs Bar Chart -->
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Top 15 Drugs by Medicare Spending (2023)</h5>
                 </div>
-                <div class="progress" style="height: 20px;">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ width }}%"></div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="topDrugsChart"></canvas>
+                    </div>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+
+        <!-- Historical Trend Line Chart -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Part D Spending Trend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="historicalTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spending Distribution Charts -->
+    <div class="row g-4 mb-4">
+        <!-- Spending by Drug Category -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Spending Concentration</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container-sm">
+                        <canvas id="concentrationChart"></canvas>
+                    </div>
+                    <div class="mt-3 small text-muted text-center">
+                        Top 10 drugs account for ~30% of total Part D spending
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Year over Year Growth -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-percent me-2"></i>Year-over-Year Growth Rate</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container-sm">
+                        <canvas id="growthRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -150,8 +203,8 @@
                             <td><strong>{{ (drug.get('brand_name') or 'N/A')[:30] }}</strong></td>
                             <td><small>{{ (drug.get('generic_name') or 'N/A')[:40] }}</small></td>
                             <td class="text-danger fw-bold">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
-                            <td>{{ "{:,}".format(drug.get('beneficiary_count_2023', 0) | int) if drug.get('beneficiary_count_2023') else 'N/A' }}</td>
-                            <td>{{ "{:,}".format(drug.get('claim_count_2023', 0) | int) if drug.get('claim_count_2023') else 'N/A' }}</td>
+                            <td>{{ "{:,}".format(drug.get('total_beneficiaries_2023', 0) | int) if drug.get('total_beneficiaries_2023') else 'N/A' }}</td>
+                            <td>{{ "{:,}".format(drug.get('total_claims_2023', 0) | int) if drug.get('total_claims_2023') else 'N/A' }}</td>
                             <td><a href="{{ url_for('gov.drugwatch_drug', drug_id=drug.get('brand_name', '')) }}" class="btn btn-sm btn-outline-primary">View</a></td>
                         </tr>
                         {% else %}
@@ -317,4 +370,200 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart.js defaults
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+
+    // Color palette
+    const colors = {
+        primary: '#0d6efd',
+        danger: '#dc3545',
+        warning: '#ffc107',
+        success: '#28a745',
+        info: '#17a2b8'
+    };
+
+    // Top drugs data from backend
+    const topDrugsData = {{ top_drugs[:15]|tojson|safe }};
+
+    // 1. Top Drugs Horizontal Bar Chart
+    new Chart(document.getElementById('topDrugsChart'), {
+        type: 'bar',
+        data: {
+            labels: topDrugsData.map(d => d.brand_name ? d.brand_name.substring(0, 15) : 'N/A'),
+            datasets: [{
+                label: 'Total Spending ($B)',
+                data: topDrugsData.map(d => (d.total_spending_2023 || 0) / 1e9),
+                backgroundColor: topDrugsData.map((d, i) => {
+                    const spending = d.total_spending_2023 || 0;
+                    if (spending > 10e9) return colors.danger;
+                    if (spending > 5e9) return '#fd7e14';
+                    if (spending > 2e9) return colors.warning;
+                    return colors.info;
+                }),
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.raw.toFixed(2) + 'B';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Spending (Billions USD)' },
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value + 'B';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 2. Historical Trend Line Chart
+    new Chart(document.getElementById('historicalTrendChart'), {
+        type: 'line',
+        data: {
+            labels: ['2019', '2020', '2021', '2022', '2023'],
+            datasets: [{
+                label: 'Total Spending',
+                data: [211.6, 222.6, 237.8, 254.7, 275.9],
+                borderColor: colors.danger,
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: colors.danger
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.raw + 'B';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 200,
+                    title: { display: true, text: 'Spending ($B)' },
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value + 'B';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 3. Spending Concentration Doughnut Chart
+    // Calculate spending concentration from top drugs
+    const top10Spending = topDrugsData.slice(0, 10).reduce((sum, d) => sum + (d.total_spending_2023 || 0), 0);
+    const totalSpending = 275.9e9; // $275.9B total Part D
+    const otherSpending = totalSpending - top10Spending;
+
+    new Chart(document.getElementById('concentrationChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Top 10 Drugs', 'All Other Drugs'],
+            datasets: [{
+                data: [top10Spending / 1e9, otherSpending / 1e9],
+                backgroundColor: [colors.danger, '#e9ecef'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const pct = (context.raw / 275.9 * 100).toFixed(1);
+                            return context.label + ': $' + context.raw.toFixed(1) + 'B (' + pct + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 4. Year-over-Year Growth Rate Bar Chart
+    new Chart(document.getElementById('growthRateChart'), {
+        type: 'bar',
+        data: {
+            labels: ['2020', '2021', '2022', '2023'],
+            datasets: [{
+                label: 'YoY Growth %',
+                data: [5.2, 6.8, 7.1, 8.3],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)',
+                    'rgba(253, 126, 20, 0.7)',
+                    'rgba(220, 53, 69, 0.7)'
+                ],
+                borderColor: [
+                    colors.success,
+                    colors.warning,
+                    '#fd7e14',
+                    colors.danger
+                ],
+                borderWidth: 2,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '+' + context.raw + '% growth';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    title: { display: true, text: 'Growth Rate (%)' },
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}
