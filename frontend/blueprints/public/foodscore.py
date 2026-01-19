@@ -193,7 +193,10 @@ def api_products():
     """API: Get products"""
     search = request.args.get('q', '')
     category = request.args.get('category', '')
-    limit = int(request.args.get('limit', 50))
+    try:
+        limit = int(request.args.get('limit', 50) or 50)
+    except (ValueError, TypeError):
+        limit = 50
     products = FoodScoreService.get_products(search=search if search else None,
                                              category=category if category else None,
                                              limit=limit)
@@ -213,7 +216,10 @@ def api_product(barcode):
 def api_additives():
     """API: Get additives"""
     search = request.args.get('q', '')
-    limit = int(request.args.get('limit', 100))
+    try:
+        limit = int(request.args.get('limit', 100) or 100)
+    except (ValueError, TypeError):
+        limit = 100
     additives = FoodScoreService.get_additives(search=search if search else None, limit=limit)
     return jsonify(additives)
 
@@ -274,17 +280,26 @@ def foodscore_analyze():
         health_concerns = []
         health_positives = []
 
+        # Helper to safely parse nutrition values
+        def safe_float(val, default=0):
+            if not val:
+                return default
+            try:
+                return float(val.replace('g', '').replace('mg', '').strip())
+            except (ValueError, AttributeError):
+                return default
+
         # Analyze nutrition
-        if sugars and float(sugars.replace('g', '').strip()) > 10:
+        if sugars and safe_float(sugars) > 10:
             health_concerns.append({'issue': 'High Sugar', 'value': sugars, 'note': 'More than 10g per serving'})
-        if sodium and float(sodium.replace('mg', '').strip()) > 500:
+        if sodium and safe_float(sodium) > 500:
             health_concerns.append({'issue': 'High Sodium', 'value': sodium, 'note': 'More than 500mg per serving'})
-        if saturated_fat and float(saturated_fat.replace('g', '').strip()) > 5:
+        if saturated_fat and safe_float(saturated_fat) > 5:
             health_concerns.append({'issue': 'High Saturated Fat', 'value': saturated_fat, 'note': 'More than 5g per serving'})
 
-        if fiber and float(fiber.replace('g', '').strip()) >= 3:
+        if fiber and safe_float(fiber) >= 3:
             health_positives.append({'benefit': 'Good Fiber Source', 'value': fiber})
-        if protein and float(protein.replace('g', '').strip()) >= 5:
+        if protein and safe_float(protein) >= 5:
             health_positives.append({'benefit': 'Good Protein Source', 'value': protein})
 
         # Calculate a simple health score (0-100)
