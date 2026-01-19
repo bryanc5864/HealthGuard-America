@@ -500,8 +500,10 @@ def api_foodscore_ocr():
         # Read image data
         image_data = file.read()
 
-        # Try to use pytesseract for OCR
         ocr_text = None
+        ocr_method = None
+
+        # Method 1: Try pytesseract (requires Tesseract installed)
         try:
             from PIL import Image
             import pytesseract
@@ -511,13 +513,50 @@ def api_foodscore_ocr():
                 image = image.convert('RGB')
 
             ocr_text = pytesseract.image_to_string(image)
-            logger.info(f"OCR extracted {len(ocr_text)} characters")
+            ocr_method = 'pytesseract'
+            logger.info(f"pytesseract OCR extracted {len(ocr_text)} characters")
         except ImportError:
             logger.warning("pytesseract not available")
         except Exception as e:
-            logger.error(f"OCR failed: {e}")
+            logger.warning(f"pytesseract failed: {e}")
 
-        if not ocr_text:
+        # Method 2: Try Windows OCR (built-in on Windows 10/11)
+        if (not ocr_text or len(ocr_text.strip()) < 10) and sys.platform == 'win32':
+            try:
+                ocr_text = windows_ocr(image_data)
+                if ocr_text and len(ocr_text.strip()) >= 10:
+                    ocr_method = 'windows_ocr'
+                    logger.info(f"Windows OCR extracted {len(ocr_text)} characters")
+            except Exception as e:
+                logger.warning(f"Windows OCR failed: {e}")
+
+        # Method 3: Try easyocr (pure Python, no system dependencies)
+        if not ocr_text or len(ocr_text.strip()) < 10:
+            try:
+                import easyocr
+                from PIL import Image
+                import numpy as np
+
+                # Create reader (this will download models on first use)
+                reader = easyocr.Reader(['en'], gpu=False, verbose=False)
+
+                # Convert image data to numpy array
+                image = Image.open(io.BytesIO(image_data))
+                if image.mode != 'RGB':
+                    image = image.convert('RGB')
+                image_np = np.array(image)
+
+                # Run OCR
+                results = reader.readtext(image_np)
+                ocr_text = ' '.join([text for _, text, _ in results])
+                ocr_method = 'easyocr'
+                logger.info(f"easyocr OCR extracted {len(ocr_text)} characters")
+            except ImportError:
+                logger.warning("easyocr not available")
+            except Exception as e:
+                logger.error(f"easyocr failed: {e}")
+
+        if not ocr_text or len(ocr_text.strip()) < 10:
             return jsonify({
                 'success': False,
                 'error': 'OCR processing unavailable. Please enter nutrition information manually.'
@@ -527,12 +566,39 @@ def api_foodscore_ocr():
         result = parse_nutrition_label(ocr_text)
         result['success'] = True
         result['raw_text'] = ocr_text[:500]
+        result['ocr_method'] = ocr_method
 
         return jsonify(result)
 
     except Exception as e:
         logger.error(f"Image processing error: {e}")
         return jsonify({'success': False, 'error': str(e)})
+
+
+def windows_ocr(image_data):
+    """Use Windows 10/11 built-in OCR via winocr package."""
+    import asyncio
+    import io
+    from PIL import Image
+
+    try:
+        import winocr
+
+        # Load image from bytes
+        image = Image.open(io.BytesIO(image_data))
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        async def do_ocr():
+            result = await winocr.recognize_pil(image, 'en')
+            return result.text
+
+        # Run async OCR
+        return asyncio.run(do_ocr())
+
+    except ImportError:
+        logger.warning("winocr not installed, Windows OCR unavailable")
+        return None
 
 
 def parse_nutrition_label(text):

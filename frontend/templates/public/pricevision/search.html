@@ -16,17 +16,19 @@
     </h2>
 
     <!-- Search Box -->
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <form action="{{ url_for('public.pricevision_search') }}" method="get">
+            <form action="{{ url_for('public.pricevision_search') }}" method="get" id="searchForm">
                 <div class="row g-3">
-                    <div class="col-md-2">
-                        <select name="type" class="form-select">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small text-muted">Search Type</label>
+                        <select name="type" class="form-select" id="searchType">
                             <option value="procedure" {% if search_type != 'hospital' %}selected{% endif %}>Procedures</option>
                             <option value="hospital" {% if search_type == 'hospital' %}selected{% endif %}>Hospitals</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small text-muted">State Filter</label>
                         <select name="state" class="form-select">
                             <option value="">All States</option>
                             {% for s in states %}
@@ -34,42 +36,62 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" name="q" value="{{ query }}"
-                               placeholder="Search...">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small text-muted">Search Term</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="q" value="{{ query }}"
+                                   placeholder="Enter procedure name, code, or hospital name..." id="searchInput">
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-warning w-100" type="submit">Search</button>
+                    <div class="col-12 col-md-2 d-flex align-items-end">
+                        <button class="btn btn-warning w-100" type="submit" id="searchBtn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" id="searchSpinner"></span>
+                            <span id="searchBtnText">Search</span>
+                        </button>
                     </div>
                 </div>
+                {% if not query %}
+                <div class="mt-3">
+                    <small class="text-muted">Popular searches: </small>
+                    <a href="{{ url_for('public.pricevision_search', q='MRI', type='procedure') }}" class="badge bg-light text-dark text-decoration-none me-1">MRI</a>
+                    <a href="{{ url_for('public.pricevision_search', q='X-ray', type='procedure') }}" class="badge bg-light text-dark text-decoration-none me-1">X-ray</a>
+                    <a href="{{ url_for('public.pricevision_search', q='CT scan', type='procedure') }}" class="badge bg-light text-dark text-decoration-none me-1">CT Scan</a>
+                    <a href="{{ url_for('public.pricevision_search', q='knee', type='procedure') }}" class="badge bg-light text-dark text-decoration-none me-1">Knee</a>
+                </div>
+                {% endif %}
             </form>
         </div>
     </div>
 
     <!-- Results -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Results ({{ results | length }})</h5>
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white">
+            <h5 class="mb-0">
+                <i class="bi bi-{% if search_type == 'hospital' %}building{% else %}clipboard2-pulse{% endif %} me-2 text-warning"></i>
+                Results
+            </h5>
+            <span class="badge bg-warning text-dark">{{ results | length }} found</span>
         </div>
         <div class="card-body">
             {% if results %}
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
                         {% if search_type == 'hospital' %}
                         <tr>
                             <th>Hospital Name</th>
-                            <th>City</th>
+                            <th class="d-none d-md-table-cell">City</th>
                             <th>State</th>
-                            <th>Type</th>
-                            <th>Action</th>
+                            <th class="d-none d-lg-table-cell">Type</th>
+                            <th class="text-end">Action</th>
                         </tr>
                         {% else %}
                         <tr>
                             <th>Procedure Description</th>
                             <th>HCPCS Code</th>
-                            <th>Match</th>
-                            <th>Action</th>
+                            <th class="d-none d-md-table-cell">AI Match</th>
+                            <th class="text-end">Action</th>
                         </tr>
                         {% endif %}
                     </thead>
@@ -77,13 +99,18 @@
                         {% if search_type == 'hospital' %}
                             {% for h in results %}
                             <tr>
-                                <td><strong>{{ h.get('Facility Name', 'Unknown') }}</strong></td>
-                                <td>{{ h.get('City/Town', h.get('City', '')) }}</td>
-                                <td>{{ h.get('State', '') }}</td>
-                                <td><span class="badge bg-secondary">{{ h.get('Hospital Type', 'N/A')[:30] }}</span></td>
                                 <td>
+                                    <strong>{{ h.get('Facility Name', 'Unknown') }}</strong>
+                                    <div class="d-md-none small text-muted">{{ h.get('City/Town', h.get('City', '')) }}</div>
+                                </td>
+                                <td class="d-none d-md-table-cell">{{ h.get('City/Town', h.get('City', '')) }}</td>
+                                <td><span class="badge bg-secondary">{{ h.get('State', '') }}</span></td>
+                                <td class="d-none d-lg-table-cell"><span class="badge bg-light text-dark">{{ h.get('Hospital Type', 'N/A')[:25] }}{% if h.get('Hospital Type', '')|length > 25 %}...{% endif %}</span></td>
+                                <td class="text-end">
                                     <a href="{{ url_for('public.pricevision_hospital', npi=h.get('Facility ID', '')) }}"
-                                       class="btn btn-sm btn-outline-warning">View Prices</a>
+                                       class="btn btn-sm btn-warning">
+                                        <i class="bi bi-eye me-1"></i>View Prices
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -93,25 +120,28 @@
                                 <td>
                                     <strong>{{ p.get('canonical_description', 'Unknown') }}</strong>
                                     {% if loop.first and p.get('ml_match_confidence') and p.get('ml_match_confidence') > 80 %}
-                                    <span class="badge bg-success ms-2">Best Match</span>
+                                    <span class="badge bg-success ms-2"><i class="bi bi-star-fill me-1"></i>Best Match</span>
                                     {% endif %}
                                 </td>
-                                <td><span class="badge bg-primary">{{ p.get('hcpcs_code', 'N/A') }}</span></td>
-                                <td>
+                                <td><span class="badge bg-primary fs-6">{{ p.get('hcpcs_code', 'N/A') }}</span></td>
+                                <td class="d-none d-md-table-cell">
                                     {% if p.get('ml_match_confidence') %}
-                                    <div class="progress" style="height: 20px; min-width: 80px;">
-                                        <div class="progress-bar {% if p.get('ml_match_confidence') >= 80 %}bg-success{% elif p.get('ml_match_confidence') >= 60 %}bg-warning{% else %}bg-secondary{% endif %}"
-                                             role="progressbar" style="width: {{ p.get('ml_match_confidence') }}%;">
-                                            {{ p.get('ml_match_confidence') }}%
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 8px; min-width: 60px;">
+                                            <div class="progress-bar {% if p.get('ml_match_confidence') >= 80 %}bg-success{% elif p.get('ml_match_confidence') >= 60 %}bg-warning{% else %}bg-secondary{% endif %}"
+                                                 style="width: {{ p.get('ml_match_confidence') }}%;"></div>
                                         </div>
+                                        <small class="text-muted">{{ p.get('ml_match_confidence') }}%</small>
                                     </div>
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="text-end">
                                     <a href="{{ url_for('public.pricevision_compare', procedure=p.get('hcpcs_code', '')) }}"
-                                       class="btn btn-sm btn-outline-primary">Compare Prices</a>
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-bar-chart me-1"></i>Compare
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -120,41 +150,67 @@
                 </table>
             </div>
             {% else %}
-            <p class="text-muted text-center py-4">
+            <div class="text-center py-5">
+                <i class="bi bi-{% if query %}search{% else %}arrow-up-circle{% endif %} display-4 text-muted mb-3"></i>
                 {% if query %}
-                No results found for "{{ query }}". Try a different search term.
+                <h5>No results found</h5>
+                <p class="text-muted">No results for "{{ query }}". Try a different search term or check the spelling.</p>
                 {% else %}
-                Enter a search term to find {% if search_type == 'hospital' %}hospitals{% else %}procedures{% endif %}.
+                <h5>Start your search</h5>
+                <p class="text-muted">Enter a search term to find {% if search_type == 'hospital' %}hospitals{% else %}medical procedures{% endif %}.</p>
                 {% endif %}
-            </p>
+            </div>
             {% endif %}
         </div>
     </div>
 
     <!-- ML Related Procedures -->
     {% if ml_related_procedures and search_type != 'hospital' %}
-    <div class="card mt-4 border-info">
-        <div class="card-header bg-info text-white">
-            <h6 class="mb-0"><i class="bi bi-robot me-2"></i>AI-Suggested Related Procedures</h6>
+    <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+            <h6 class="mb-0 text-white"><i class="bi bi-robot me-2"></i>AI-Suggested Related Procedures</h6>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-3">Based on your search "{{ query }}", you might also be interested in:</p>
-            <div class="list-group">
+            <div class="row g-2">
                 {% for related in ml_related_procedures %}
-                <a href="{{ url_for('public.pricevision_compare', procedure=related.code) }}"
-                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{{ related.description }}</strong>
-                        <span class="badge bg-primary ms-2">{{ related.code }}</span>
-                    </div>
-                    <span class="badge bg-{% if related.confidence >= 80 %}success{% elif related.confidence >= 60 %}warning{% else %}secondary{% endif %}">
-                        {{ related.confidence }}% match
-                    </span>
-                </a>
+                <div class="col-12 col-md-6">
+                    <a href="{{ url_for('public.pricevision_compare', procedure=related.code) }}"
+                       class="card text-decoration-none h-100 border-0 bg-light hover-shadow">
+                        <div class="card-body py-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="text-dark">{{ related.description[:50] }}{% if related.description|length > 50 %}...{% endif %}</strong>
+                                <br><span class="badge bg-primary">{{ related.code }}</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-{% if related.confidence >= 80 %}success{% elif related.confidence >= 60 %}warning{% else %}secondary{% endif %} fs-6">
+                                    {{ related.confidence }}%
+                                </span>
+                                <br><small class="text-muted">match</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
                 {% endfor %}
             </div>
         </div>
     </div>
     {% endif %}
 </div>
+
+<script>
+document.getElementById('searchForm').addEventListener('submit', function() {
+    document.getElementById('searchSpinner').classList.remove('d-none');
+    document.getElementById('searchBtnText').textContent = 'Searching...';
+    document.getElementById('searchBtn').disabled = true;
+});
+</script>
+
+<style>
+.hover-shadow:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1) !important;
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+</style>
 {% endblock %}

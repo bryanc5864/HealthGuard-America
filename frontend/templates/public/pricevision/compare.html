@@ -98,22 +98,40 @@
 
     <!-- Price Results -->
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="mb-0">Hospital Price Comparison</h5>
-            <span class="badge bg-secondary">{{ prices | length }} results</span>
+            <div class="d-flex align-items-center gap-2">
+                {% if prices %}
+                <div class="btn-group btn-group-sm" role="group" aria-label="Sort options">
+                    <button type="button" class="btn btn-outline-secondary active" onclick="sortTable('price')">
+                        <i class="bi bi-sort-numeric-down"></i> Price
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="sortTable('fairness')">
+                        <i class="bi bi-graph-up"></i> Fairness
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="sortTable('name')">
+                        <i class="bi bi-sort-alpha-down"></i> Name
+                    </button>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" onclick="exportToCSV()">
+                    <i class="bi bi-download"></i> Export
+                </button>
+                {% endif %}
+                <span class="badge bg-secondary">{{ prices | length }} results</span>
+            </div>
         </div>
         <div class="card-body">
             {% if prices %}
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover" id="priceTable">
+                    <thead class="table-light">
                         <tr>
                             <th>Hospital</th>
-                            <th>Location</th>
-                            <th>Gross Charge</th>
+                            <th class="d-none d-md-table-cell">Location</th>
+                            <th class="d-none d-lg-table-cell">Gross Charge</th>
                             <th>Cash Price</th>
-                            <th>Min Price</th>
-                            <th>Max Price</th>
+                            <th class="d-none d-lg-table-cell">Min Price</th>
+                            <th class="d-none d-lg-table-cell">Max Price</th>
                             <th>Price Fairness</th>
                             <th></th>
                         </tr>
@@ -124,27 +142,41 @@
                         {% set cash = p.get('cash_price', 0) | float %}
                         {% set min_price = p.get('min_price', 0) | float %}
                         {% set max_price = p.get('max_price', 0) | float %}
-                        <tr>
+                        {% set fairness = p.get('ml_fairness_score', 50) | float %}
+                        <tr data-price="{{ cash }}" data-fairness="{{ fairness }}" data-name="{{ p.get('hospital_name', '') }}">
                             <td>
-                                <strong>{{ p.get('hospital_name', p.get('hospital_npi', 'Unknown')) }}</strong>
+                                <a href="{{ url_for('public.pricevision_hospital', npi=p.get('hospital_npi', '')) }}" class="text-decoration-none">
+                                    <strong>{{ p.get('hospital_name', p.get('hospital_npi', 'Unknown')) }}</strong>
+                                </a>
                                 <br><small class="text-muted">{{ p.get('description', '')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}</small>
+                                <div class="d-md-none mt-1">
+                                    <small class="text-muted">{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</small>
+                                </div>
                             </td>
-                            <td>{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</td>
-                            <td>${{ "{:,.0f}".format(gross) if gross else 'N/A' }}</td>
-                            <td class="text-success fw-bold">${{ "{:,.0f}".format(cash) if cash else 'N/A' }}</td>
-                            <td>${{ "{:,.0f}".format(min_price) if min_price else 'N/A' }}</td>
-                            <td>${{ "{:,.0f}".format(max_price) if max_price else 'N/A' }}</td>
+                            <td class="d-none d-md-table-cell">{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</td>
+                            <td class="d-none d-lg-table-cell">${{ "{:,.0f}".format(gross) if gross else 'N/A' }}</td>
+                            <td>
+                                <span class="text-success fw-bold fs-5">${{ "{:,.0f}".format(cash) if cash else 'N/A' }}</span>
+                            </td>
+                            <td class="d-none d-lg-table-cell">${{ "{:,.0f}".format(min_price) if min_price else 'N/A' }}</td>
+                            <td class="d-none d-lg-table-cell">${{ "{:,.0f}".format(max_price) if max_price else 'N/A' }}</td>
                             <td>
                                 {% if p.get('ml_price_cluster') %}
                                     {% if p.get('ml_price_cluster') == 'Fair' %}
-                                    <span class="badge bg-success">Fair Price</span>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Fair Price</span>
                                     {% elif p.get('ml_price_cluster') == 'Discount' %}
-                                    <span class="badge bg-info">Discount</span>
+                                    <span class="badge bg-info"><i class="bi bi-tag me-1"></i>Discount</span>
                                     {% elif p.get('ml_price_cluster') == 'Overpriced' %}
-                                    <span class="badge bg-danger">Overpriced</span>
+                                    <span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i>Overpriced</span>
                                     {% endif %}
                                     {% if p.get('ml_is_outlier') %}
-                                    <br><span class="badge bg-warning text-dark mt-1">Price Outlier</span>
+                                    <br><span class="badge bg-warning text-dark mt-1"><i class="bi bi-flag me-1"></i>Outlier</span>
+                                    {% endif %}
+                                    {% if p.get('ml_fairness_score') %}
+                                    <div class="progress mt-1" style="height: 4px; width: 60px;">
+                                        <div class="progress-bar {% if fairness >= 70 %}bg-success{% elif fairness >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                             style="width: {{ fairness }}%;"></div>
+                                    </div>
                                     {% endif %}
                                 {% else %}
                                 <span class="text-muted">-</span>
@@ -152,9 +184,9 @@
                             </td>
                             <td>
                                 {% if p.get('hospital_npi') == best_value_npi and cash %}
-                                <span class="badge bg-success">Best Value</span>
+                                <span class="badge bg-success"><i class="bi bi-star-fill me-1"></i>Best Value</span>
                                 {% elif loop.first and cash %}
-                                <span class="badge bg-primary">Best Price</span>
+                                <span class="badge bg-primary"><i class="bi bi-trophy me-1"></i>Best Price</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -235,8 +267,68 @@
                 <li><strong>Gross Charge:</strong> The hospital's "list price" before any discounts</li>
                 <li><strong>Cash Price:</strong> What you pay if you pay cash (no insurance) - often the best deal</li>
                 <li><strong>Min/Max Negotiated:</strong> Range of prices negotiated with different insurance companies</li>
+                <li><strong>Fair Price:</strong> Within normal market range based on statistical analysis</li>
             </ul>
         </div>
     </div>
 </div>
+
+<script>
+function sortTable(sortBy) {
+    const table = document.getElementById('priceTable');
+    if (!table) return;
+
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // Update button states
+    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.closest('.btn').classList.add('active');
+
+    rows.sort((a, b) => {
+        if (sortBy === 'price') {
+            return parseFloat(a.dataset.price || 999999) - parseFloat(b.dataset.price || 999999);
+        } else if (sortBy === 'fairness') {
+            return parseFloat(b.dataset.fairness || 0) - parseFloat(a.dataset.fairness || 0);
+        } else if (sortBy === 'name') {
+            return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+        }
+        return 0;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+function exportToCSV() {
+    const table = document.getElementById('priceTable');
+    if (!table) return;
+
+    const rows = table.querySelectorAll('tr');
+    let csv = [];
+
+    // Header
+    csv.push(['Hospital', 'Location', 'Cash Price', 'Fairness Score', 'Status'].join(','));
+
+    // Data rows
+    rows.forEach((row, i) => {
+        if (i === 0) return; // Skip header
+        const name = row.dataset.name || '';
+        const price = row.dataset.price || '';
+        const fairness = row.dataset.fairness || '';
+        const cells = row.querySelectorAll('td');
+        const location = cells[1]?.textContent?.trim() || '';
+        const status = cells[6]?.textContent?.trim().replace(/\s+/g, ' ') || '';
+        csv.push([`"${name}"`, `"${location}"`, price, fairness, `"${status}"`].join(','));
+    });
+
+    // Download
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'price_comparison_{{ query | default("export") }}.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
 {% endblock %}
