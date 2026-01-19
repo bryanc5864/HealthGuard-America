@@ -302,6 +302,113 @@ def pricevision_hospital(npi):
                           transparency_score=transparency_score)
 
 
+@gov_bp.route('/pricevision/my-price')
+@gov_required
+def pricevision_my_price():
+    """Check if your quoted price is fair compared to market rates."""
+    procedure = request.args.get('procedure', '')
+    user_price = request.args.get('price', '')
+    state = request.args.get('state', '')
+    hospital_name = request.args.get('hospital', '')
+
+    analysis = None
+    prices = []
+    market_stats = {}
+
+    procedures = PriceVisionService.get_procedures(search=procedure if procedure else None, limit=20)
+
+    if procedure and user_price:
+        try:
+            user_price_float = float(user_price.replace(',', '').replace('$', ''))
+        except ValueError:
+            user_price_float = 0
+
+        if user_price_float > 0:
+            # Get market prices for comparison
+            prices = PriceVisionService.get_prices(
+                procedure_code=procedure,
+                state=state if state else None,
+                limit=100
+            )
+
+            if prices:
+                # Calculate market statistics
+                cash_prices = [p['cash_price'] for p in prices if p.get('cash_price')]
+
+                if cash_prices:
+                    mean_price = np.mean(cash_prices)
+                    std_price = np.std(cash_prices) if len(cash_prices) > 1 else mean_price * 0.2
+                    min_price = min(cash_prices)
+                    max_price = max(cash_prices)
+                    median_price = np.median(cash_prices)
+
+                    # Calculate z-score for user's price
+                    if std_price > 0:
+                        z_score = (user_price_float - mean_price) / std_price
+                    else:
+                        z_score = 0
+
+                    # Determine fairness
+                    if z_score > 1.5:
+                        verdict = 'Overpriced'
+                        verdict_class = 'danger'
+                        explanation = f"Your price is ${user_price_float - mean_price:,.0f} above the average market rate."
+                    elif z_score < -1.5:
+                        verdict = 'Great Deal'
+                        verdict_class = 'success'
+                        explanation = f"Your price is ${mean_price - user_price_float:,.0f} below the average market rate!"
+                    elif z_score < -0.5:
+                        verdict = 'Good Price'
+                        verdict_class = 'info'
+                        explanation = "Your price is below average - a reasonable deal."
+                    elif z_score > 0.5:
+                        verdict = 'Above Average'
+                        verdict_class = 'warning'
+                        explanation = "Your price is above average - consider negotiating or shopping around."
+                    else:
+                        verdict = 'Fair Price'
+                        verdict_class = 'success'
+                        explanation = "Your price is close to the market average."
+
+                    # Calculate potential savings
+                    if user_price_float > min_price:
+                        potential_savings = user_price_float - min_price
+                    else:
+                        potential_savings = 0
+
+                    # Percentile ranking
+                    prices_below = sum(1 for p in cash_prices if p < user_price_float)
+                    percentile = (prices_below / len(cash_prices)) * 100
+
+                    market_stats = {
+                        'mean': mean_price,
+                        'median': median_price,
+                        'min': min_price,
+                        'max': max_price,
+                        'std': std_price,
+                        'sample_size': len(cash_prices)
+                    }
+
+                    analysis = {
+                        'user_price': user_price_float,
+                        'verdict': verdict,
+                        'verdict_class': verdict_class,
+                        'explanation': explanation,
+                        'z_score': round(z_score, 2),
+                        'percentile': round(percentile, 1),
+                        'potential_savings': potential_savings,
+                        'fairness_score': max(0, min(100, 100 - abs(z_score) * 25))
+                    }
+
+    states = PriceVisionService.get_states()
+    return render_template('gov/pricevision/my_price.html',
+                          procedures=procedures, prices=prices[:20],
+                          query=procedure, user_price=user_price,
+                          hospital_name=hospital_name,
+                          state=state, states=states,
+                          analysis=analysis, market_stats=market_stats)
+
+
 @gov_bp.route('/pricevision/analytics')
 @gov_required
 def pricevision_analytics():

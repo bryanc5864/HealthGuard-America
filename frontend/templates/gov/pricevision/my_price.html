@@ -1,0 +1,270 @@
+{% extends "gov/base_gov.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gov.pricevision_home') }}">PriceVision</a></li>
+            <li class="breadcrumb-item active">Check My Price</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-calculator me-2 text-warning"></i>Check My Price
+    </h2>
+    <p class="text-muted mb-4">Enter a procedure and the price you were quoted to see how it compares to market rates.</p>
+
+    <!-- Input Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('gov.pricevision_my_price') }}" method="get">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Procedure Code <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="procedure" value="{{ query }}"
+                               placeholder="e.g., 70551" required>
+                        <small class="text-muted">HCPCS code or search term</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Your Quoted Price <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" name="price" value="{{ user_price }}"
+                                   placeholder="e.g., 1500" required>
+                        </div>
+                        <small class="text-muted">The price you were quoted</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">State (Optional)</label>
+                        <select name="state" class="form-select">
+                            <option value="">All States</option>
+                            {% for s in states %}
+                            <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Compare within your state</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Hospital Name (Optional)</label>
+                        <input type="text" class="form-control" name="hospital" value="{{ hospital_name }}"
+                               placeholder="e.g., General Hospital">
+                        <small class="text-muted">For your reference</small>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button class="btn btn-warning btn-lg" type="submit">
+                            <i class="bi bi-search me-2"></i>Check My Price
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if analysis %}
+    <!-- Analysis Results -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-{{ analysis.verdict_class }}">
+                <div class="card-header bg-{{ analysis.verdict_class }} {% if analysis.verdict_class in ['warning', 'info'] %}text-dark{% else %}text-white{% endif %}">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Price Analysis</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-4 text-{{ analysis.verdict_class }} mb-3">{{ analysis.verdict }}</h1>
+                    <p class="lead">{{ analysis.explanation }}</p>
+
+                    <div class="row text-center mt-4">
+                        <div class="col-6">
+                            <h4>${{ "{:,.0f}".format(analysis.user_price) }}</h4>
+                            <small class="text-muted">Your Price</small>
+                        </div>
+                        <div class="col-6">
+                            <h4>${{ "{:,.0f}".format(market_stats.mean) }}</h4>
+                            <small class="text-muted">Market Average</small>
+                        </div>
+                    </div>
+
+                    {% if analysis.potential_savings > 0 %}
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-piggy-bank me-2"></i>
+                        <strong>Potential Savings:</strong> Up to ${{ "{:,.0f}".format(analysis.potential_savings) }} if you shop around
+                    </div>
+                    {% endif %}
+
+                    <!-- Gov-only: Advanced Metrics -->
+                    <div class="row mt-4 border-top pt-3">
+                        <div class="col-4">
+                            <h5>{{ "{:.1f}".format(analysis.fairness_score) }}</h5>
+                            <small class="text-muted">Fairness Score</small>
+                        </div>
+                        <div class="col-4">
+                            <h5>{{ analysis.z_score }}</h5>
+                            <small class="text-muted">Z-Score</small>
+                        </div>
+                        <div class="col-4">
+                            <h5>{{ analysis.percentile }}%</h5>
+                            <small class="text-muted">Percentile</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Market Statistics</h5>
+                </div>
+                <div class="card-body">
+                    {% if procedures %}
+                    <p class="text-muted mb-3">
+                        <strong>Procedure:</strong> {{ procedures[0].get('canonical_description', query) }}
+                        <br><span class="badge bg-primary">{{ procedures[0].get('hcpcs_code', query) }}</span>
+                        {% if state %}<span class="badge bg-secondary ms-1">{{ state }}</span>{% endif %}
+                    </p>
+                    {% endif %}
+
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Lowest Price</td>
+                            <td class="text-end text-success fw-bold">${{ "{:,.0f}".format(market_stats.min) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Average Price</td>
+                            <td class="text-end">${{ "{:,.0f}".format(market_stats.mean) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Median Price</td>
+                            <td class="text-end">${{ "{:,.0f}".format(market_stats.median) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Highest Price</td>
+                            <td class="text-end text-danger">${{ "{:,.0f}".format(market_stats.max) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Price Variation (Std Dev)</td>
+                            <td class="text-end">${{ "{:,.0f}".format(market_stats.std) }}</td>
+                        </tr>
+                        <tr class="table-light">
+                            <td><strong>Sample Size</strong></td>
+                            <td class="text-end"><strong>{{ market_stats.sample_size }} hospitals</strong></td>
+                        </tr>
+                    </table>
+
+                    <div class="mt-3">
+                        <small class="text-muted">Your price is higher than {{ analysis.percentile }}% of hospitals</small>
+                        <div class="progress mt-2" style="height: 25px;">
+                            <div class="progress-bar bg-{{ analysis.verdict_class }}" role="progressbar"
+                                 style="width: {{ analysis.percentile }}%;"
+                                 aria-valuenow="{{ analysis.percentile }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ analysis.percentile }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    {% if prices %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Hospital Price Comparison</h5>
+            <span class="badge bg-secondary">{{ prices | length }} hospitals</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Hospital</th>
+                            <th>Location</th>
+                            <th>Cash Price</th>
+                            <th>vs Your Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in prices %}
+                        {% set cash = p.get('cash_price', 0) | float %}
+                        {% set diff = analysis.user_price - cash %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('gov.pricevision_hospital', npi=p.get('hospital_npi', '')) }}">
+                                    {{ p.get('hospital_name', 'Unknown') }}
+                                </a>
+                            </td>
+                            <td>{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</td>
+                            <td class="fw-bold">${{ "{:,.0f}".format(cash) if cash else 'N/A' }}</td>
+                            <td>
+                                {% if diff > 0 %}
+                                <span class="text-success">-${{ "{:,.0f}".format(diff) }}</span>
+                                <small class="text-muted">(save {{ "{:.0f}".format((diff/analysis.user_price)*100) }}%)</small>
+                                {% elif diff < 0 %}
+                                <span class="text-danger">+${{ "{:,.0f}".format(-diff) }}</span>
+                                {% else %}
+                                <span class="text-muted">Same price</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% elif query and user_price %}
+    <!-- No data found -->
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>No pricing data found</strong> for procedure "{{ query }}"{% if state %} in {{ state }}{% endif %}.
+        Try a different procedure code or remove the state filter.
+    </div>
+
+    {% else %}
+    <!-- Initial state - show examples -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-calculator display-4 text-muted mb-3"></i>
+            <h5>How It Works</h5>
+            <p class="text-muted">Enter a procedure code and the price you were quoted to see how it compares to market rates.</p>
+
+            <div class="row mt-4 justify-content-center">
+                <div class="col-md-8">
+                    <div class="alert alert-light border">
+                        <h6>Example Searches:</h6>
+                        <a href="{{ url_for('gov.pricevision_my_price', procedure='70551', price='2500') }}" class="btn btn-outline-warning btn-sm me-2 mb-2">
+                            MRI Brain @ $2,500
+                        </a>
+                        <a href="{{ url_for('gov.pricevision_my_price', procedure='27447', price='35000') }}" class="btn btn-outline-warning btn-sm me-2 mb-2">
+                            Knee Replacement @ $35,000
+                        </a>
+                        <a href="{{ url_for('gov.pricevision_my_price', procedure='43239', price='3000') }}" class="btn btn-outline-warning btn-sm mb-2">
+                            Colonoscopy @ $3,000
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Info Card -->
+    <div class="card bg-light mt-4">
+        <div class="card-body">
+            <h6><i class="bi bi-info-circle me-2"></i>About Price Comparison</h6>
+            <ul class="mb-0 small">
+                <li><strong>Data Source:</strong> Hospital price transparency files required by CMS</li>
+                <li><strong>Fair Price:</strong> Within 0.5 standard deviations of the market average</li>
+                <li><strong>Overpriced:</strong> More than 1.5 standard deviations above average</li>
+                <li><strong>Discount:</strong> More than 1.5 standard deviations below average</li>
+                <li>Prices shown are cash/self-pay rates - insurance negotiated rates may differ</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

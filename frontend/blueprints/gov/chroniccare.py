@@ -700,6 +700,160 @@ def api_interventions():
     return jsonify(priorities)
 
 
+@gov_bp.route('/chroniccare/simulator')
+@gov_required
+def chroniccare_simulator():
+    """ML Simulator - input features to get disease predictions and priority scores."""
+    # Default feature values (national averages)
+    default_features = {
+        'grocery_stores_per_1000': 0.25,
+        'fast_food_restaurants_per_1000': 0.65,
+        'food_environment_index': 7.0,
+        'food_insecurity_rate': 12.0,
+        'pct_limited_food_access': 8.0,
+        'pcp_rate': 55.0,
+        'mental_health_provider_rate': 180.0,
+        'pct_uninsured': 10.0,
+        'preventable_hospitalizations': 4500.0,
+        'median_household_income': 55000.0,
+        'child_poverty_rate': 18.0,
+        'income_inequality_ratio': 4.5,
+        'high_school_graduation_rate': 88.0,
+        'pct_some_college': 60.0,
+        'physical_inactivity_prevalence': 26.0,
+        'excessive_drinking_prevalence': 18.0,
+        'smoking_prevalence': 17.0,
+        'pct_insufficient_sleep': 35.0,
+        'pct_rural': 20.0,
+        'chronic_disease_burden_score': 50.0,
+        'food_environment_score': 50.0,
+    }
+
+    # Check if form submitted
+    submitted = request.args.get('submitted', '')
+    predictions = None
+    priority = None
+    risk_breakdown = []
+    recommendations = []
+
+    if submitted:
+        # Collect features from request args
+        features = {}
+        for key in default_features.keys():
+            value = request.args.get(key, '')
+            if value:
+                try:
+                    features[key] = float(value)
+                except ValueError:
+                    features[key] = default_features[key]
+            else:
+                features[key] = default_features[key]
+
+        # Run ML inference
+        if ML_AVAILABLE:
+            try:
+                ml_service = get_chroniccare_service()
+                if ml_service.is_loaded:
+                    # Get disease prevalence predictions
+                    if ml_service.risk_service.is_loaded:
+                        risk_predictions = ml_service.risk_service.predict(features)
+                        predictions = {k: round(v, 1) for k, v in risk_predictions.items()}
+
+                        # Calculate composite risk score
+                        ml_risk_score = (
+                            predictions.get('diabetes_prevalence', 12) * 0.35 +
+                            predictions.get('obesity_prevalence', 30) * 0.35 +
+                            predictions.get('heart_disease_prevalence', 6) * 0.30
+                        )
+                    else:
+                        # Fallback calculation
+                        ml_risk_score = (
+                            features['chronic_disease_burden_score'] * 0.35 +
+                            features['food_environment_score'] * 0.35
+                        )
+                        predictions = {
+                            'diabetes_prevalence': 12.0,
+                            'obesity_prevalence': 32.0,
+                            'heart_disease_prevalence': 6.0,
+                        }
+
+                    # Get intervention priority
+                    if ml_service.prioritization_service.is_loaded:
+                        priority_result = ml_service.prioritization_service.prioritize(features)
+                        priority = {
+                            'tier': priority_result.get('priority', 'Medium'),
+                            'confidence': round(priority_result.get('confidence', 0.85) * 100, 1),
+                            'maha_index': round(priority_result.get('maha_index', 40), 1),
+                            'ml_risk_score': round(ml_risk_score, 2),
+                        }
+                    else:
+                        # Derive tier from risk score
+                        if ml_risk_score > 22:
+                            tier = 'Critical'
+                        elif ml_risk_score > 19:
+                            tier = 'High'
+                        elif ml_risk_score > 16:
+                            tier = 'Medium'
+                        else:
+                            tier = 'Low'
+                        priority = {
+                            'tier': tier,
+                            'confidence': 85.0,
+                            'maha_index': round(ml_risk_score * 4, 1),
+                            'ml_risk_score': round(ml_risk_score, 2),
+                        }
+
+                    # Get risk breakdown
+                    risk_breakdown = get_risk_breakdown(priority, features)
+
+                    # Get intervention recommendations
+                    recommendations = get_intervention_recommendations(priority, risk_breakdown, features)
+
+            except Exception as e:
+                logger.error(f"ML simulator inference failed: {e}")
+                predictions = {'error': str(e)}
+        else:
+            # ML not available - use heuristic calculations
+            predictions = {
+                'diabetes_prevalence': round(10 + features['food_insecurity_rate'] * 0.2 + features['physical_inactivity_prevalence'] * 0.15, 1),
+                'obesity_prevalence': round(25 + features['fast_food_restaurants_per_1000'] * 10 + features['physical_inactivity_prevalence'] * 0.3, 1),
+                'heart_disease_prevalence': round(5 + features['smoking_prevalence'] * 0.1 + features['physical_inactivity_prevalence'] * 0.08, 1),
+            }
+            ml_risk_score = (
+                predictions['diabetes_prevalence'] * 0.35 +
+                predictions['obesity_prevalence'] * 0.35 +
+                predictions['heart_disease_prevalence'] * 0.30
+            )
+            if ml_risk_score > 22:
+                tier = 'Critical'
+            elif ml_risk_score > 19:
+                tier = 'High'
+            elif ml_risk_score > 16:
+                tier = 'Medium'
+            else:
+                tier = 'Low'
+            priority = {
+                'tier': tier,
+                'confidence': 75.0,
+                'maha_index': round(ml_risk_score * 4, 1),
+                'ml_risk_score': round(ml_risk_score, 2),
+            }
+            risk_breakdown = get_risk_breakdown(priority, features)
+            recommendations = get_intervention_recommendations(priority, risk_breakdown, features)
+
+        # Update default features with submitted values for form persistence
+        default_features.update(features)
+
+    return render_template('gov/chroniccare/simulator.html',
+                          features=default_features,
+                          predictions=predictions,
+                          priority=priority,
+                          risk_breakdown=risk_breakdown,
+                          recommendations=recommendations,
+                          submitted=bool(submitted),
+                          ml_available=ML_AVAILABLE)
+
+
 @gov_bp.route('/api/chroniccare/stats')
 @gov_required
 def api_chronic_stats():

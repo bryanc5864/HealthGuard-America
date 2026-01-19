@@ -57,8 +57,11 @@
                         </div>
                     </form>
                     <div class="mt-3 text-center">
-                        <a href="{{ url_for('public.foodscore_scan') }}" class="btn btn-outline-success">
+                        <a href="{{ url_for('public.foodscore_scan') }}" class="btn btn-outline-success me-2">
                             <i class="bi bi-upc-scan me-1"></i>Scan Barcode
+                        </a>
+                        <a href="{{ url_for('public.foodscore_analyze') }}" class="btn btn-success">
+                            <i class="bi bi-camera me-1"></i>Analyze Label
                         </a>
                     </div>
                 </div>

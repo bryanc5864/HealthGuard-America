@@ -218,6 +218,108 @@ def api_additives():
     return jsonify(additives)
 
 
+@public_bp.route('/foodscore/analyze')
+def foodscore_analyze():
+    """Analyze nutrition label data - user enters ingredients and nutrition facts."""
+    # Get submitted data
+    ingredients = request.args.get('ingredients', '')
+    product_name = request.args.get('product_name', '')
+    serving_size = request.args.get('serving_size', '')
+    calories = request.args.get('calories', '')
+    total_fat = request.args.get('total_fat', '')
+    saturated_fat = request.args.get('saturated_fat', '')
+    sodium = request.args.get('sodium', '')
+    total_carbs = request.args.get('total_carbs', '')
+    sugars = request.args.get('sugars', '')
+    protein = request.args.get('protein', '')
+    fiber = request.args.get('fiber', '')
+    submitted = request.args.get('submitted', '')
+
+    analysis = None
+    ml_results = {}
+
+    if submitted and ingredients:
+        # Build a mock product for ML analysis
+        mock_product = {
+            'product_name': product_name or 'User-Entered Product',
+            'ingredients_text': ingredients,
+            'serving_size': serving_size,
+        }
+
+        # Parse nutrition values
+        try:
+            if calories:
+                mock_product['energy_kcal_100g'] = float(calories.replace('g', '').strip())
+            if total_fat:
+                mock_product['fat_100g'] = float(total_fat.replace('g', '').strip())
+            if saturated_fat:
+                mock_product['saturated_fat_100g'] = float(saturated_fat.replace('g', '').strip())
+            if sodium:
+                mock_product['sodium_100g'] = float(sodium.replace('mg', '').strip())
+            if total_carbs:
+                mock_product['carbohydrates_100g'] = float(total_carbs.replace('g', '').strip())
+            if sugars:
+                mock_product['sugars_100g'] = float(sugars.replace('g', '').strip())
+            if protein:
+                mock_product['proteins_100g'] = float(protein.replace('g', '').strip())
+            if fiber:
+                mock_product['fiber_100g'] = float(fiber.replace('g', '').strip())
+        except ValueError:
+            pass
+
+        # Run ML analysis
+        ml_results = enrich_product_with_ml(mock_product)
+
+        # Calculate simple health scores
+        health_concerns = []
+        health_positives = []
+
+        # Analyze nutrition
+        if sugars and float(sugars.replace('g', '').strip()) > 10:
+            health_concerns.append({'issue': 'High Sugar', 'value': sugars, 'note': 'More than 10g per serving'})
+        if sodium and float(sodium.replace('mg', '').strip()) > 500:
+            health_concerns.append({'issue': 'High Sodium', 'value': sodium, 'note': 'More than 500mg per serving'})
+        if saturated_fat and float(saturated_fat.replace('g', '').strip()) > 5:
+            health_concerns.append({'issue': 'High Saturated Fat', 'value': saturated_fat, 'note': 'More than 5g per serving'})
+
+        if fiber and float(fiber.replace('g', '').strip()) >= 3:
+            health_positives.append({'benefit': 'Good Fiber Source', 'value': fiber})
+        if protein and float(protein.replace('g', '').strip()) >= 5:
+            health_positives.append({'benefit': 'Good Protein Source', 'value': protein})
+
+        # Calculate a simple health score (0-100)
+        base_score = 70
+        if ml_results.get('ml_nova_group'):
+            nova_penalty = {1: 0, 2: 5, 3: 15, 4: 30}.get(ml_results['ml_nova_group'], 15)
+            base_score -= nova_penalty
+        base_score -= len(health_concerns) * 10
+        base_score += len(health_positives) * 5
+        base_score = max(10, min(100, base_score))
+
+        analysis = {
+            'product_name': product_name or 'User-Entered Product',
+            'health_score': base_score,
+            'health_concerns': health_concerns,
+            'health_positives': health_positives,
+            'ml_results': ml_results,
+        }
+
+    return render_template('public/foodscore/analyze.html',
+                          ingredients=ingredients,
+                          product_name=product_name,
+                          serving_size=serving_size,
+                          calories=calories,
+                          total_fat=total_fat,
+                          saturated_fat=saturated_fat,
+                          sodium=sodium,
+                          total_carbs=total_carbs,
+                          sugars=sugars,
+                          protein=protein,
+                          fiber=fiber,
+                          analysis=analysis,
+                          submitted=bool(submitted))
+
+
 @public_bp.route('/api/foodscore/stats')
 def api_stats():
     """API: Get statistics"""

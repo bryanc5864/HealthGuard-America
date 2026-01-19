@@ -1,0 +1,268 @@
+{% extends "public/base_public.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
+            <li class="breadcrumb-item active">Analyze Label</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">
+        <i class="bi bi-camera me-2 text-success"></i>Analyze Nutrition Label
+    </h2>
+    <p class="text-muted mb-4">Enter the ingredients and nutrition facts from a food label to get an AI-powered health analysis.</p>
+
+    <div class="row">
+        <!-- Input Form -->
+        <div class="col-lg-6">
+            <form action="{{ url_for('public.foodscore_analyze') }}" method="get">
+                <input type="hidden" name="submitted" value="1">
+
+                <!-- Product Name -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="bi bi-tag me-2"></i>Product Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Product Name (Optional)</label>
+                            <input type="text" class="form-control" name="product_name" value="{{ product_name }}"
+                                   placeholder="e.g., Whole Grain Cereal">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Serving Size (Optional)</label>
+                            <input type="text" class="form-control" name="serving_size" value="{{ serving_size }}"
+                                   placeholder="e.g., 1 cup (30g)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ingredients -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Ingredients List <span class="text-warning">*Required</span></h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Enter ingredients exactly as they appear on the label</label>
+                            <textarea class="form-control" name="ingredients" rows="4" required
+                                      placeholder="e.g., Whole grain wheat, sugar, corn syrup, honey, salt, natural flavor, BHT for freshness">{{ ingredients }}</textarea>
+                            <small class="text-muted">The ML model analyzes ingredients to detect processing level and additives</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Facts -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Nutrition Facts (Optional)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Calories</label>
+                                <input type="text" class="form-control" name="calories" value="{{ calories }}"
+                                       placeholder="e.g., 120">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Total Fat (g)</label>
+                                <input type="text" class="form-control" name="total_fat" value="{{ total_fat }}"
+                                       placeholder="e.g., 3">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Saturated Fat (g)</label>
+                                <input type="text" class="form-control" name="saturated_fat" value="{{ saturated_fat }}"
+                                       placeholder="e.g., 1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sodium (mg)</label>
+                                <input type="text" class="form-control" name="sodium" value="{{ sodium }}"
+                                       placeholder="e.g., 230">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Total Carbs (g)</label>
+                                <input type="text" class="form-control" name="total_carbs" value="{{ total_carbs }}"
+                                       placeholder="e.g., 23">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sugars (g)</label>
+                                <input type="text" class="form-control" name="sugars" value="{{ sugars }}"
+                                       placeholder="e.g., 10">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Protein (g)</label>
+                                <input type="text" class="form-control" name="protein" value="{{ protein }}"
+                                       placeholder="e.g., 3">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fiber (g)</label>
+                                <input type="text" class="form-control" name="fiber" value="{{ fiber }}"
+                                       placeholder="e.g., 3">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-cpu me-2"></i>Analyze with AI
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Column -->
+        <div class="col-lg-6">
+            {% if analysis %}
+            <!-- Health Score -->
+            <div class="card mb-4 border-{% if analysis.health_score >= 70 %}success{% elif analysis.health_score >= 40 %}warning{% else %}danger{% endif %}">
+                <div class="card-header bg-{% if analysis.health_score >= 70 %}success{% elif analysis.health_score >= 40 %}warning{% else %}danger{% endif %} text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Health Analysis</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-1 {% if analysis.health_score >= 70 %}text-success{% elif analysis.health_score >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                        {{ analysis.health_score }}
+                    </h1>
+                    <p class="lead mb-0">Health Score (0-100)</p>
+                    <small class="text-muted">
+                        {% if analysis.health_score >= 70 %}Good choice!
+                        {% elif analysis.health_score >= 40 %}Consider alternatives
+                        {% else %}High health concerns{% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <!-- NOVA Classification -->
+            {% if analysis.ml_results.ml_nova_group %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-robot me-2"></i>AI Processing Level (NOVA)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-{% if analysis.ml_results.ml_nova_group == 1 %}success{% elif analysis.ml_results.ml_nova_group == 2 %}info{% elif analysis.ml_results.ml_nova_group == 3 %}warning{% else %}danger{% endif %} fs-4 p-3">
+                            NOVA {{ analysis.ml_results.ml_nova_group }}
+                        </span>
+                        <span>Confidence: {{ analysis.ml_results.ml_nova_confidence }}%</span>
+                    </div>
+                    <p class="mb-2"><strong>{{ analysis.ml_results.ml_nova_description }}</strong></p>
+                    <div class="progress" style="height: 25px;">
+                        {% for i in range(4) %}
+                        <div class="progress-bar bg-{% if i == 0 %}success{% elif i == 1 %}info{% elif i == 2 %}warning{% else %}danger{% endif %}"
+                             style="width: {{ (analysis.ml_results.ml_nova_probabilities[i] * 100)|round(1) }}%"
+                             title="NOVA {{ i+1 }}: {{ (analysis.ml_results.ml_nova_probabilities[i] * 100)|round(1) }}%">
+                            {% if analysis.ml_results.ml_nova_probabilities[i] > 0.1 %}
+                            {{ i+1 }}
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">NOVA 1 (green) = minimally processed, NOVA 4 (red) = ultra-processed</small>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Health Concerns -->
+            {% if analysis.health_concerns %}
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Health Concerns</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for concern in analysis.health_concerns %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <strong>{{ concern.issue }}</strong>
+                            <br><small class="text-muted">{{ concern.note }}</small>
+                        </div>
+                        <span class="badge bg-danger">{{ concern.value }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Health Positives -->
+            {% if analysis.health_positives %}
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Health Benefits</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for pos in analysis.health_positives %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>{{ pos.benefit }}</strong>
+                        <span class="badge bg-success">{{ pos.value }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Additive Risks -->
+            {% if analysis.ml_results.ml_additive_risks %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Detected Additives</h6>
+                </div>
+                <div class="card-body">
+                    {% if analysis.ml_results.ml_additive_high_risk_count %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        {{ analysis.ml_results.ml_additive_high_risk_count }} high-risk additive(s) detected
+                    </div>
+                    {% endif %}
+                    <ul class="list-group">
+                        {% for additive in analysis.ml_results.ml_additive_risks[:5] %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ additive.name }}</span>
+                            <span class="badge bg-{% if additive.risk_category == 'high' %}danger{% elif additive.risk_category == 'medium' %}warning{% else %}secondary{% endif %}">
+                                Risk: {{ additive.risk_score }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- Instructions when no analysis -->
+            <div class="card border-success">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-camera display-1 text-success mb-4"></i>
+                    <h4>How to Use</h4>
+                    <ol class="text-start">
+                        <li class="mb-2">Take a photo of a nutrition label or have the package handy</li>
+                        <li class="mb-2">Enter the <strong>ingredients list</strong> exactly as shown</li>
+                        <li class="mb-2">Optionally add nutrition facts for a more complete analysis</li>
+                        <li class="mb-2">Click "Analyze with AI" to get your results</li>
+                    </ol>
+                    <hr>
+                    <p class="text-muted small mb-0">
+                        Our AI analyzes ingredients to determine processing level (NOVA 1-4)
+                        and identifies potentially harmful additives.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="card bg-light mt-4">
+        <div class="card-body">
+            <h6><i class="bi bi-info-circle me-2"></i>About This Analysis</h6>
+            <ul class="small mb-0">
+                <li><strong>NOVA Classification:</strong> AI model classifies foods by processing level (1=minimal to 4=ultra-processed)</li>
+                <li><strong>Additive Detection:</strong> Identifies preservatives, colorings, and other additives with risk scores</li>
+                <li><strong>Health Score:</strong> Combined score based on nutrition facts, processing level, and additive content</li>
+                <li>This tool provides educational information and is not a substitute for professional dietary advice</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
