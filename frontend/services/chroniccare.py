@@ -133,7 +133,7 @@ class ChronicCareService:
 
     @classmethod
     def get_intervention_priorities(cls, limit=50):
-        """Get counties prioritized for intervention (cached)"""
+        """Get counties prioritized for intervention (cached) with all ML features"""
         if 'priorities' not in cls._cache:
             df = cls._get_county_health_df()
             if df.empty:
@@ -151,7 +151,8 @@ class ChronicCareService:
                 priorities = []
                 for _, row in df.iterrows():
                     score = row['risk_score']
-                    priorities.append({
+                    # Include all ML-relevant features
+                    priority_data = {
                         'fips': row.get('fips', ''),
                         'county': row.get('county_name', ''),
                         'state': row.get('state_abbr', ''),
@@ -159,8 +160,37 @@ class ChronicCareService:
                         'diabetes': row['diabetes_prev'],
                         'obesity': row['obesity_prev'],
                         'heart_disease': row['heart_prev'],
-                        'priority': 'Critical' if score > 20 else 'High' if score > 18 else 'Medium'
-                    })
+                        'priority': 'Critical' if score > 20 else 'High' if score > 18 else 'Medium',
+                        # ML features - Food environment
+                        'grocery_stores_per_1000': row.get('grocery_stores_per_1000', 0),
+                        'fast_food_restaurants_per_1000': row.get('fast_food_restaurants_per_1000', 0),
+                        'food_environment_index': row.get('food_environment_index', 0),
+                        'food_insecurity_rate': row.get('food_insecurity_rate', 0),
+                        'pct_limited_food_access': row.get('pct_limited_food_access', 0),
+                        # ML features - Healthcare
+                        'pcp_rate': row.get('pcp_rate', 0),
+                        'mental_health_provider_rate': row.get('mental_health_provider_rate', 0),
+                        'pct_uninsured': row.get('pct_uninsured', 0),
+                        'preventable_hospitalizations': row.get('preventable_hospitalizations', 0),
+                        # ML features - Socioeconomic
+                        'median_household_income': row.get('median_household_income', 0),
+                        'child_poverty_rate': row.get('child_poverty_rate', 0),
+                        'income_inequality_ratio': row.get('income_inequality_ratio', 0),
+                        'high_school_graduation_rate': row.get('high_school_graduation_rate', 0),
+                        'pct_some_college': row.get('pct_some_college', 0),
+                        # ML features - Behavioral
+                        'physical_inactivity_prevalence': row.get('physical_inactivity_prevalence', 0),
+                        'excessive_drinking_prevalence': row.get('excessive_drinking_prevalence', 0),
+                        'smoking_prevalence': row.get('smoking_prevalence', 0),
+                        'pct_insufficient_sleep': row.get('pct_insufficient_sleep', 0),
+                        # ML features - Demographics
+                        'pct_rural': row.get('pct_rural', 0),
+                        # Additional for prioritizer
+                        'chronic_disease_burden_score': row.get('chronic_disease_burden_score', 0),
+                        'food_environment_score': row.get('food_environment_score', 50),
+                        'high_bp_prevalence': row.get('high_bp_prevalence', 0),
+                    }
+                    priorities.append(priority_data)
                 cls._cache['priorities'] = priorities
         return cls._cache['priorities'][:limit]
 

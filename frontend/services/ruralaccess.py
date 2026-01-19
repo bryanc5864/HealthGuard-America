@@ -41,12 +41,16 @@ class RuralAccessService:
         return cls._df_cache['counties_df']
 
     @classmethod
-    def get_hpsa_designations(cls, state=None, discipline=None, limit=100):
+    def get_hpsa_designations(cls, state=None, discipline=None, shortage_level=None,
+                               rural_status=None, designation_type=None, limit=100):
         """Get Health Professional Shortage Areas
 
         Args:
             state: Filter by state abbreviation (optional)
             discipline: Filter by discipline type (optional)
+            shortage_level: Filter by shortage severity - 'critical', 'high', 'moderate', 'low' (optional)
+            rural_status: Filter by rural status - 'Rural', 'Non-Rural', 'Partially Rural' (optional)
+            designation_type: Filter by designation type (optional)
             limit: Maximum number of records to return. Use 0 or None for all records.
         """
         df = cls._get_hpsa_df()
@@ -61,6 +65,23 @@ class RuralAccessService:
             disc_col = 'discipline' if 'discipline' in df.columns else 'HPSA Discipline Class'
             df = df[df[disc_col].fillna('').str.lower().str.contains(discipline.lower(), regex=False)]
 
+        if shortage_level and 'hpsa_score' in df.columns:
+            # Critical: 20-25, High: 15-19, Moderate: 10-14, Low: 0-9
+            if shortage_level == 'critical':
+                df = df[df['hpsa_score'] >= 20]
+            elif shortage_level == 'high':
+                df = df[(df['hpsa_score'] >= 15) & (df['hpsa_score'] < 20)]
+            elif shortage_level == 'moderate':
+                df = df[(df['hpsa_score'] >= 10) & (df['hpsa_score'] < 15)]
+            elif shortage_level == 'low':
+                df = df[df['hpsa_score'] < 10]
+
+        if rural_status and 'rural_status' in df.columns:
+            df = df[df['rural_status'] == rural_status]
+
+        if designation_type and 'designation_type' in df.columns:
+            df = df[df['designation_type'] == designation_type]
+
         # If limit is 0 or None, return all records
         if limit is None or limit == 0:
             return df.to_dict('records')
@@ -68,7 +89,8 @@ class RuralAccessService:
         return df.head(limit).to_dict('records')
 
     @classmethod
-    def get_total_hpsa_count(cls, state=None, discipline=None):
+    def get_total_hpsa_count(cls, state=None, discipline=None, shortage_level=None,
+                             rural_status=None, designation_type=None):
         """Get total count of HPSAs (for pagination info)"""
         df = cls._get_hpsa_df()
         if df.empty:
@@ -81,6 +103,22 @@ class RuralAccessService:
         if discipline:
             disc_col = 'discipline' if 'discipline' in df.columns else 'HPSA Discipline Class'
             df = df[df[disc_col].fillna('').str.lower().str.contains(discipline.lower(), regex=False)]
+
+        if shortage_level and 'hpsa_score' in df.columns:
+            if shortage_level == 'critical':
+                df = df[df['hpsa_score'] >= 20]
+            elif shortage_level == 'high':
+                df = df[(df['hpsa_score'] >= 15) & (df['hpsa_score'] < 20)]
+            elif shortage_level == 'moderate':
+                df = df[(df['hpsa_score'] >= 10) & (df['hpsa_score'] < 15)]
+            elif shortage_level == 'low':
+                df = df[df['hpsa_score'] < 10]
+
+        if rural_status and 'rural_status' in df.columns:
+            df = df[df['rural_status'] == rural_status]
+
+        if designation_type and 'designation_type' in df.columns:
+            df = df[df['designation_type'] == designation_type]
 
         return len(df)
 
@@ -244,3 +282,114 @@ class RuralAccessService:
                     })
                 cls._cache['map_data'] = map_data
         return cls._cache['map_data']
+
+    @classmethod
+    def get_analytics(cls):
+        """Get comprehensive analytics data (cached)"""
+        if 'analytics' not in cls._cache:
+            df = cls._get_hpsa_df()
+            if df.empty:
+                cls._cache['analytics'] = {}
+                return cls._cache['analytics']
+
+            analytics = {}
+
+            # Shortage level distribution
+            if 'hpsa_score' in df.columns:
+                def get_level(score):
+                    if score >= 20:
+                        return 'Critical'
+                    elif score >= 15:
+                        return 'High'
+                    elif score >= 10:
+                        return 'Moderate'
+                    else:
+                        return 'Low'
+
+                df['shortage_level'] = df['hpsa_score'].apply(get_level)
+                analytics['by_shortage_level'] = df['shortage_level'].value_counts().to_dict()
+                analytics['avg_hpsa_score'] = round(df['hpsa_score'].mean(), 1)
+                analytics['max_hpsa_score'] = int(df['hpsa_score'].max())
+                analytics['min_hpsa_score'] = int(df['hpsa_score'].min())
+
+                # Score distribution histogram (buckets of 5)
+                analytics['score_distribution'] = {
+                    '0-4': len(df[df['hpsa_score'] < 5]),
+                    '5-9': len(df[(df['hpsa_score'] >= 5) & (df['hpsa_score'] < 10)]),
+                    '10-14': len(df[(df['hpsa_score'] >= 10) & (df['hpsa_score'] < 15)]),
+                    '15-19': len(df[(df['hpsa_score'] >= 15) & (df['hpsa_score'] < 20)]),
+                    '20-25': len(df[df['hpsa_score'] >= 20]),
+                }
+
+            # Rural status distribution
+            if 'rural_status' in df.columns:
+                analytics['by_rural_status'] = df['rural_status'].value_counts().to_dict()
+
+            # Designation type distribution
+            if 'designation_type' in df.columns:
+                analytics['by_designation_type'] = df['designation_type'].value_counts().to_dict()
+
+            # State breakdown with stats
+            if 'state' in df.columns:
+                state_stats = []
+                for state in df['state'].unique():
+                    state_df = df[df['state'] == state]
+                    state_stats.append({
+                        'state': state,
+                        'total_hpsas': len(state_df),
+                        'avg_score': round(state_df['hpsa_score'].mean(), 1) if 'hpsa_score' in state_df.columns else 0,
+                        'critical_count': len(state_df[state_df['hpsa_score'] >= 20]) if 'hpsa_score' in state_df.columns else 0,
+                        'total_population': int(state_df['population'].sum()) if 'population' in state_df.columns else 0,
+                    })
+                # Sort by total HPSAs descending
+                state_stats = sorted(state_stats, key=lambda x: x['total_hpsas'], reverse=True)
+                analytics['by_state'] = state_stats
+
+                # Top 10 states by critical shortage count
+                top_critical = sorted(state_stats, key=lambda x: x['critical_count'], reverse=True)[:10]
+                analytics['top_critical_states'] = top_critical
+
+                # Top 10 states by average score
+                top_avg_score = sorted(state_stats, key=lambda x: x['avg_score'], reverse=True)[:10]
+                analytics['top_avg_score_states'] = top_avg_score
+
+            # Population affected
+            if 'population' in df.columns:
+                analytics['total_population_affected'] = int(df['population'].sum())
+                analytics['avg_population_per_hpsa'] = int(df['population'].mean())
+
+                # Population by shortage level
+                if 'shortage_level' in df.columns:
+                    pop_by_level = df.groupby('shortage_level')['population'].sum().to_dict()
+                    analytics['population_by_shortage_level'] = {k: int(v) for k, v in pop_by_level.items()}
+
+            # Poverty analysis
+            if 'poverty_rate' in df.columns:
+                analytics['avg_poverty_rate'] = round(df['poverty_rate'].mean(), 1)
+                analytics['high_poverty_hpsas'] = len(df[df['poverty_rate'] > 20])
+
+                # Correlation: high poverty areas tend to have higher shortage scores
+                if 'hpsa_score' in df.columns:
+                    high_poverty = df[df['poverty_rate'] > 20]
+                    low_poverty = df[df['poverty_rate'] <= 20]
+                    analytics['avg_score_high_poverty'] = round(high_poverty['hpsa_score'].mean(), 1) if len(high_poverty) > 0 else 0
+                    analytics['avg_score_low_poverty'] = round(low_poverty['hpsa_score'].mean(), 1) if len(low_poverty) > 0 else 0
+
+            cls._cache['analytics'] = analytics
+        return cls._cache['analytics']
+
+    @classmethod
+    def get_designation_types(cls):
+        """Get list of unique designation types"""
+        df = cls._get_hpsa_df()
+        if df.empty or 'designation_type' not in df.columns:
+            return []
+        return sorted(df['designation_type'].dropna().unique().tolist())
+
+    @classmethod
+    def get_rural_statuses(cls):
+        """Get list of unique rural statuses"""
+        df = cls._get_hpsa_df()
+        if df.empty or 'rural_status' not in df.columns:
+            return []
+        return sorted(df['rural_status'].dropna().unique().tolist())

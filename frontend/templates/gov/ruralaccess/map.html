@@ -43,21 +43,49 @@
             <!-- Filters -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Filters</h5>
+                    <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ url_for('gov.ruralaccess_map') }}" method="get">
                         <div class="mb-3">
-                            <label class="form-label">HPSA Type</label>
-                            <select class="form-select" name="discipline" id="disciplineFilter">
+                            <label class="form-label fw-semibold">Shortage Level</label>
+                            <select class="form-select" name="shortage_level" id="shortageLevelFilter">
+                                <option value="">All Levels</option>
+                                <option value="critical" {% if selected_shortage_level == 'critical' %}selected{% endif %}>Critical (20-25)</option>
+                                <option value="high" {% if selected_shortage_level == 'high' %}selected{% endif %}>High (15-19)</option>
+                                <option value="moderate" {% if selected_shortage_level == 'moderate' %}selected{% endif %}>Moderate (10-14)</option>
+                                <option value="low" {% if selected_shortage_level == 'low' %}selected{% endif %}>Low (0-9)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Rural Status</label>
+                            <select class="form-select" name="rural_status" id="ruralStatusFilter">
+                                <option value="">All Areas</option>
+                                {% for status in rural_statuses %}
+                                <option value="{{ status }}" {% if status == selected_rural_status %}selected{% endif %}>{{ status }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Designation Type</label>
+                            <select class="form-select" name="designation_type" id="designationTypeFilter">
                                 <option value="">All Types</option>
+                                {% for dtype in designation_types %}
+                                <option value="{{ dtype }}" {% if dtype == selected_designation_type %}selected{% endif %}>{{ dtype }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">HPSA Discipline</label>
+                            <select class="form-select" name="discipline" id="disciplineFilter">
+                                <option value="">All Disciplines</option>
                                 <option value="Primary Care" {% if selected_discipline == 'Primary Care' %}selected{% endif %}>Primary Care</option>
                                 <option value="Dental Health" {% if selected_discipline == 'Dental Health' %}selected{% endif %}>Dental Health</option>
                                 <option value="Mental Health" {% if selected_discipline == 'Mental Health' %}selected{% endif %}>Mental Health</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">State/Territory</label>
+                            <label class="form-label fw-semibold">State/Territory</label>
                             <select class="form-select" name="state" id="stateFilter">
                                 <option value="">All States + DC + Territories</option>
                                 <optgroup label="US States (50)">
@@ -73,7 +101,7 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Results Limit</label>
+                            <label class="form-label fw-semibold">Results Limit</label>
                             <select class="form-select" name="limit" id="limitFilter">
                                 <option value="500" {% if selected_limit == '500' or not selected_limit %}selected{% endif %}>500 records</option>
                                 <option value="1000" {% if selected_limit == '1000' %}selected{% endif %}>1,000 records</option>
@@ -84,7 +112,7 @@
                             <small class="text-muted">Higher limits may affect performance</small>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                        {% if selected_state or selected_discipline or selected_limit %}
+                        {% if selected_state or selected_discipline or selected_limit or selected_shortage_level or selected_rural_status or selected_designation_type %}
                         <a href="{{ url_for('gov.ruralaccess_map') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
                         {% endif %}
                     </form>
