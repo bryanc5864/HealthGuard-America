@@ -331,9 +331,17 @@ def pricevision_my_price():
             user_price_float = 0
 
         if user_price_float > 0:
+            # Get the actual HCPCS code - either use procedure directly if it looks like a code,
+            # or find the matching procedure's code from search results
+            procedure_code = procedure
+            if procedures and not procedure.isdigit():
+                # User searched by name, get the actual code from first match
+                first_match = procedures[0]
+                procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
+
             # Get market prices for comparison
             prices = PriceVisionService.get_prices(
-                procedure_code=procedure,
+                procedure_code=procedure_code,
                 state=state if state else None,
                 limit=100
             )
@@ -461,32 +469,41 @@ def pricevision_analytics():
         if facility_id in hospitals_with_mrf:
             state_stats[st]['compliant'] += 1
 
-    # ML transparency scoring for displayed hospitals
+    # ML transparency scoring for displayed hospitals - OPTIMIZED with batch query
     suspicious_gaps = []
     try:
+        # Get facility IDs that have MRF data
+        hospital_ids_with_mrf = [
+            str(h.get('Facility ID', ''))
+            for h in hospitals
+            if str(h.get('Facility ID', '')) in hospitals_with_mrf
+        ]
+
+        # Batch fetch transparency data (single query instead of N queries)
+        transparency_data = PriceVisionService.get_batch_transparency_data(hospital_ids_with_mrf)
+
         for h in hospitals:
             facility_id = str(h.get('Facility ID', ''))
-            if facility_id in hospitals_with_mrf:
-                # Get prices for this hospital to calculate transparency
-                prices = PriceVisionService.get_prices(hospital_npi=facility_id, limit=50)
-                h['ml_transparency_score'] = calculate_transparency_score(h, prices)
+            if facility_id in transparency_data:
+                data = transparency_data[facility_id]
+                h['ml_transparency_score'] = data['transparency_score']
 
                 # Flag suspicious pricing gaps
-                if prices:
-                    prices_with_cash = sum(1 for p in prices if p.get('cash_price'))
-                    cash_ratio = prices_with_cash / len(prices) if len(prices) > 0 else 0
-                    if cash_ratio < 0.5 and len(prices) > 10:
-                        suspicious_gaps.append({
-                            'facility_name': h.get('Facility Name', 'Unknown'),
-                            'facility_id': facility_id,
-                            'total_prices': len(prices),
-                            'missing_cash': len(prices) - prices_with_cash,
-                            'gap_ratio': round((1 - cash_ratio) * 100, 1)
-                        })
+                if data['cash_ratio'] < 0.5 and data['total_prices'] > 10:
+                    suspicious_gaps.append({
+                        'facility_name': h.get('Facility Name', 'Unknown'),
+                        'facility_id': facility_id,
+                        'total_prices': data['total_prices'],
+                        'missing_cash': data['total_prices'] - data['prices_with_cash'],
+                        'gap_ratio': round((1 - data['cash_ratio']) * 100, 1)
+                    })
+            elif facility_id in hospitals_with_mrf:
+                h['ml_transparency_score'] = 30  # Base score for having any data
             else:
                 h['ml_transparency_score'] = 0
-    except Exception:
-        pass  # Continue without ML features
+    except Exception as e:
+        import logging
+        logging.warning(f"Analytics transparency scoring failed: {e}")
 
     return render_template('gov/pricevision/analytics.html',
                           stats=stats, hospitals=hospitals, states=states,
