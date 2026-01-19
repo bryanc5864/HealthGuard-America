@@ -29,6 +29,7 @@ def clean_nan_records(records):
 class PriceVisionService:
     _cache = {}
     _price_file = None
+    _hospital_by_id = None  # Fast lookup by facility ID
 
     @classmethod
     def get_procedures(cls, limit=100, search=None):
@@ -49,8 +50,8 @@ class PriceVisionService:
         return procedures[:limit]
 
     @classmethod
-    def get_hospitals(cls, state=None, limit=100):
-        """Get list of hospitals"""
+    def _ensure_hospital_cache(cls):
+        """Ensure hospital data is loaded and indexed"""
         if 'hospitals' not in cls._cache:
             hosp_file = DATA_DIR / 'raw/pricevision/hospital_general_info.csv'
             if hosp_file.exists():
@@ -58,7 +59,30 @@ class PriceVisionService:
                 cls._cache['hospitals'] = clean_nan_records(df.to_dict('records'))
             else:
                 cls._cache['hospitals'] = []
+            # Build fast lookup index
+            cls._hospital_by_id = {
+                str(h.get('Facility ID', '')): h for h in cls._cache['hospitals']
+            }
 
+    @classmethod
+    def get_hospital_info_cache(cls):
+        """Get cached hospital info dict for fast lookups"""
+        cls._ensure_hospital_cache()
+        if 'hospital_info' not in cls._cache:
+            cls._cache['hospital_info'] = {
+                str(h.get('Facility ID', '')): {
+                    'name': h.get('Facility Name', ''),
+                    'city': h.get('City/Town', ''),
+                    'state': h.get('State', '')
+                }
+                for h in cls._cache['hospitals']
+            }
+        return cls._cache['hospital_info']
+
+    @classmethod
+    def get_hospitals(cls, state=None, limit=100):
+        """Get list of hospitals"""
+        cls._ensure_hospital_cache()
         hospitals = cls._cache['hospitals']
         if state:
             hospitals = [h for h in hospitals if h.get('State', '') == state]
@@ -66,12 +90,9 @@ class PriceVisionService:
 
     @classmethod
     def get_hospital(cls, facility_id):
-        """Get single hospital by Facility ID"""
-        hospitals = cls.get_hospitals(limit=10000)
-        for h in hospitals:
-            if str(h.get('Facility ID', '')) == str(facility_id):
-                return h
-        return None
+        """Get single hospital by Facility ID - O(1) lookup"""
+        cls._ensure_hospital_cache()
+        return cls._hospital_by_id.get(str(facility_id))
 
     @classmethod
     def get_prices(cls, hospital_npi=None, procedure_code=None, state=None, limit=50):
@@ -84,62 +105,52 @@ class PriceVisionService:
             return []
 
         try:
+            # Get cached hospital info (fast - reuses cached data)
+            hospital_cache = cls.get_hospital_info_cache()
+            valid_npis = set(hospital_cache.keys())
+
             # If state filter provided, get hospital IDs in that state
             state_hospital_ids = None
             if state:
-                state_hospitals = cls.get_hospitals(state=state, limit=10000)
-                state_hospital_ids = set(str(h.get('Facility ID', '')) for h in state_hospitals)
+                state_hospital_ids = set(
+                    npi for npi, info in hospital_cache.items()
+                    if info.get('state', '') == state
+                )
 
             # Build filter for predicate pushdown
             filters = []
             if procedure_code:
                 filters.append(('procedure_code', '==', str(procedure_code)))
+            if hospital_npi:
+                filters.append(('hospital_npi', '==', str(hospital_npi)))
 
             # Read with filter - only loads matching rows from disk
-            if filters:
-                df = pd.read_parquet(
-                    price_file,
-                    columns=['description', 'procedure_code', 'gross_charge', 'hospital_npi',
-                             'cash_price', 'min_price', 'max_price', 'payer_name'],
-                    filters=filters
-                )
-            else:
-                # For hospital_npi filter (string matching), read sample and filter
-                df = pd.read_parquet(
-                    price_file,
-                    columns=['description', 'procedure_code', 'gross_charge', 'hospital_npi',
-                             'cash_price', 'min_price', 'max_price', 'payer_name']
-                )
-                if len(df) > 10000:
-                    df = df.sample(n=10000, random_state=42)
+            columns = ['description', 'procedure_code', 'gross_charge', 'hospital_npi',
+                       'cash_price', 'min_price', 'max_price', 'payer_name']
 
-            # Additional filtering if needed
-            if hospital_npi:
-                df = df[df['hospital_npi'].astype(str) == str(hospital_npi)]
+            if filters:
+                df = pd.read_parquet(price_file, columns=columns, filters=filters)
+            else:
+                # Fallback - shouldn't happen but handle gracefully
+                df = pd.read_parquet(price_file, columns=columns)
+                if len(df) > 5000:
+                    df = df.sample(n=5000, random_state=42)
 
             # Filter by state if provided
             if state_hospital_ids:
                 df = df[df['hospital_npi'].astype(str).isin(state_hospital_ids)]
+
+            # Filter to only hospitals with valid info (exclude unknown hospitals)
+            df = df[df['hospital_npi'].astype(str).isin(valid_npis)]
 
             # Sort by cash_price for best prices first
             if 'cash_price' in df.columns:
                 df = df.sort_values('cash_price', ascending=True, na_position='last')
 
             # Deduplicate by hospital - keep only the best (lowest) price per hospital
-            df = df.drop_duplicates(subset=['hospital_npi'], keep='first')
-
-            # Build hospital info cache
-            hospital_cache = {}
-            for h in cls.get_hospitals(limit=10000):
-                hospital_cache[str(h.get('Facility ID', ''))] = {
-                    'name': h.get('Facility Name', ''),
-                    'city': h.get('City/Town', ''),
-                    'state': h.get('State', '')
-                }
-
-            # Filter to only hospitals with valid info (exclude unknown hospitals)
-            valid_npis = set(hospital_cache.keys())
-            df = df[df['hospital_npi'].astype(str).isin(valid_npis)]
+            # Only for procedure searches, not for hospital detail pages
+            if procedure_code and not hospital_npi:
+                df = df.drop_duplicates(subset=['hospital_npi'], keep='first')
 
             # Add hospital info to results
             results = clean_nan_records(df.head(limit).to_dict('records'))
@@ -157,14 +168,16 @@ class PriceVisionService:
     @classmethod
     def get_states(cls):
         """Get list of valid US states/territories with hospitals"""
-        hospitals = cls.get_hospitals(limit=10000)
-        states = set()
-        for h in hospitals:
-            state = h.get('State', '')
-            # Filter to only valid US states/territories (50 states + DC + territories)
-            if state and str(state).upper() in VALID_US_STATES:
-                states.add(state)
-        return sorted(states)
+        if 'states_list' not in cls._cache:
+            hospital_info = cls.get_hospital_info_cache()
+            states = set()
+            for info in hospital_info.values():
+                state = info.get('state', '')
+                # Filter to only valid US states/territories (50 states + DC + territories)
+                if state and str(state).upper() in VALID_US_STATES:
+                    states.add(state)
+            cls._cache['states_list'] = sorted(states)
+        return cls._cache['states_list']
 
     @classmethod
     def get_hospitals_with_mrf(cls):
