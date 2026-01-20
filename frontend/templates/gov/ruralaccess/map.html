@@ -1,55 +1,45 @@
 {% extends "gov/base_gov.html" %}
 
-{% block extra_css %}
-{{ super() }}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-    #map {
-        height: 600px;
-        border-radius: 12px;
-    }
-    .legend {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .legend-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 5px;
-    }
-    .legend-color {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
-        margin-right: 8px;
-    }
-</style>
-{% endblock %}
+{% block title %}Interactive Map - RuralAccess{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a></li>
-            <li class="breadcrumb-item active">Map</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header page-header--ruralaccess">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Map</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-map"></i> Interactive HPSA Map
+        </h1>
+        <p class="page-subtitle">
+            Explore healthcare shortage designations across the United States
+        </p>
+    </div>
+</div>
 
-    <div class="row">
-        <div class="col-md-3">
-            <!-- Filters -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters</h5>
+<div class="container container-2xl">
+    <div style="display: grid; grid-template-columns: 320px 1fr; gap: var(--spacing-6); margin-top: -3rem; position: relative; z-index: 10;">
+        <!-- Filters Sidebar -->
+        <div style="display: flex; flex-direction: column; gap: var(--spacing-4);">
+            <!-- Filter Card -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-funnel"></i> Filter Options
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-5);">
                     <form action="{{ url_for('gov.ruralaccess_map') }}" method="get">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Shortage Level</label>
-                            <select class="form-select" name="shortage_level" id="shortageLevelFilter">
+                        <div class="form-group">
+                            <label class="form-label">Shortage Level</label>
+                            <select class="form-control" name="shortage_level">
                                 <option value="">All Levels</option>
                                 <option value="critical" {% if selected_shortage_level == 'critical' %}selected{% endif %}>Critical (20-25)</option>
                                 <option value="high" {% if selected_shortage_level == 'high' %}selected{% endif %}>High (15-19)</option>
@@ -57,36 +47,40 @@
                                 <option value="low" {% if selected_shortage_level == 'low' %}selected{% endif %}>Low (0-9)</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Rural Status</label>
-                            <select class="form-select" name="rural_status" id="ruralStatusFilter">
+
+                        <div class="form-group">
+                            <label class="form-label">Rural Status</label>
+                            <select class="form-control" name="rural_status">
                                 <option value="">All Areas</option>
                                 {% for status in rural_statuses %}
                                 <option value="{{ status }}" {% if status == selected_rural_status %}selected{% endif %}>{{ status }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Designation Type</label>
-                            <select class="form-select" name="designation_type" id="designationTypeFilter">
+
+                        <div class="form-group">
+                            <label class="form-label">Designation Type</label>
+                            <select class="form-control" name="designation_type">
                                 <option value="">All Types</option>
                                 {% for dtype in designation_types %}
                                 <option value="{{ dtype }}" {% if dtype == selected_designation_type %}selected{% endif %}>{{ dtype }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">HPSA Discipline</label>
-                            <select class="form-select" name="discipline" id="disciplineFilter">
+
+                        <div class="form-group">
+                            <label class="form-label">HPSA Discipline</label>
+                            <select class="form-control" name="discipline">
                                 <option value="">All Disciplines</option>
                                 <option value="Primary Care" {% if selected_discipline == 'Primary Care' %}selected{% endif %}>Primary Care</option>
                                 <option value="Dental Health" {% if selected_discipline == 'Dental Health' %}selected{% endif %}>Dental Health</option>
                                 <option value="Mental Health" {% if selected_discipline == 'Mental Health' %}selected{% endif %}>Mental Health</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">State/Territory</label>
-                            <select class="form-select" name="state" id="stateFilter">
+
+                        <div class="form-group">
+                            <label class="form-label">State/Territory</label>
+                            <select class="form-control" name="state">
                                 <option value="">All States + DC + Territories</option>
                                 <optgroup label="US States (50)">
                                 {% for state in states if state not in ['AS', 'DC', 'GU', 'MP', 'PR', 'VI'] %}
@@ -100,72 +94,81 @@
                                 </optgroup>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Results Limit</label>
-                            <select class="form-select" name="limit" id="limitFilter">
+
+                        <div class="form-group">
+                            <label class="form-label">Results Limit</label>
+                            <select class="form-control" name="limit">
                                 <option value="500" {% if selected_limit == '500' or not selected_limit %}selected{% endif %}>500 records</option>
                                 <option value="1000" {% if selected_limit == '1000' %}selected{% endif %}>1,000 records</option>
                                 <option value="2000" {% if selected_limit == '2000' %}selected{% endif %}>2,000 records</option>
                                 <option value="5000" {% if selected_limit == '5000' %}selected{% endif %}>5,000 records</option>
                                 <option value="all" {% if selected_limit == 'all' %}selected{% endif %}>All records</option>
                             </select>
-                            <small class="text-muted">Higher limits may affect performance</small>
+                            <small style="color: var(--neutral-500); font-size: var(--text-xs);">Higher limits may affect performance</small>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+
+                        <button type="submit" class="btn btn-ruralaccess w-full" style="margin-top: var(--spacing-2);">
+                            <i class="bi bi-check2"></i> Apply Filters
+                        </button>
                         {% if selected_state or selected_discipline or selected_limit or selected_shortage_level or selected_rural_status or selected_designation_type %}
-                        <a href="{{ url_for('gov.ruralaccess_map') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                        <a href="{{ url_for('gov.ruralaccess_map') }}" class="btn btn-outline w-full" style="margin-top: var(--spacing-2);">
+                            <i class="bi bi-x-lg"></i> Clear Filters
+                        </a>
                         {% endif %}
                     </form>
                 </div>
             </div>
 
-            <!-- Legend -->
+            <!-- Legend Card -->
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Legend</h5>
+                <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <i class="bi bi-palette" style="color: var(--ruralaccess);"></i> Legend
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #dc3545;"></div>
-                        <span>Critical Shortage (20-25)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #fd7e14;"></div>
-                        <span>High Shortage (15-19)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #ffc107;"></div>
-                        <span>Moderate (10-14)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #28a745;"></div>
-                        <span>Low/None (0-9)</span>
+                <div style="padding: var(--spacing-4);">
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-3);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                            <div style="width: 24px; height: 24px; border-radius: var(--radius-md); background: #dc3545;"></div>
+                            <span style="font-size: var(--text-sm);">Critical Shortage (20-25)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                            <div style="width: 24px; height: 24px; border-radius: var(--radius-md); background: #fd7e14;"></div>
+                            <span style="font-size: var(--text-sm);">High Shortage (15-19)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                            <div style="width: 24px; height: 24px; border-radius: var(--radius-md); background: #ffc107;"></div>
+                            <span style="font-size: var(--text-sm);">Moderate (10-14)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                            <div style="width: 24px; height: 24px; border-radius: var(--radius-md); background: #28a745;"></div>
+                            <span style="font-size: var(--text-sm);">Low/None (0-9)</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-9">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>
-                        <i class="bi bi-geo-alt me-2"></i>
-                        Showing <strong>{{ hpsas|length }}</strong> of <strong>{{ total_hpsas|default(hpsas|length) }}</strong> HPSA designations
+        <!-- Map Section -->
+        <div class="card" style="overflow: hidden;">
+            <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200); display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                    <i class="bi bi-geo-alt" style="color: var(--ruralaccess); font-size: var(--text-xl);"></i>
+                    <span style="font-weight: 600;">
+                        Showing <strong style="color: var(--ruralaccess);">{{ hpsas|length }}</strong> of <strong>{{ total_hpsas|default(hpsas|length) }}</strong> HPSA designations
                     </span>
-                    {% if hpsas|length < total_hpsas|default(hpsas|length) %}
-                    <span class="badge bg-warning text-dark">
-                        <i class="bi bi-exclamation-triangle me-1"></i>
-                        Results limited - increase limit to see all
-                    </span>
-                    {% endif %}
                 </div>
-                <div class="card-body p-0">
-                    <div id="map"></div>
-                </div>
+                {% if hpsas|length < total_hpsas|default(hpsas|length) %}
+                <span class="badge" style="background: var(--warning); color: var(--neutral-900);">
+                    <i class="bi bi-exclamation-triangle"></i> Results limited
+                </span>
+                {% endif %}
             </div>
+            <div id="map" style="height: 650px; width: 100%;"></div>
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -193,26 +196,27 @@
         if (hpsa.latitude && hpsa.longitude) {
             var color = getColor(hpsa.hpsa_score || 0);
             var marker = L.circleMarker([hpsa.latitude, hpsa.longitude], {
-                radius: 6,
+                radius: 7,
                 fillColor: color,
                 color: '#fff',
-                weight: 1,
+                weight: 2,
                 opacity: 1,
-                fillOpacity: 0.8
+                fillOpacity: 0.85
             }).addTo(map);
 
             marker.bindPopup(
-                '<strong>' + (hpsa.hpsa_name || 'Unknown') + '</strong><br>' +
-                '<b>State:</b> ' + (hpsa.state || 'N/A') + '<br>' +
-                '<b>County:</b> ' + (hpsa.county || 'N/A') + '<br>' +
+                '<div style="min-width: 200px;">' +
+                '<strong style="font-size: 14px;">' + (hpsa.hpsa_name || 'Unknown') + '</strong><br>' +
+                '<hr style="margin: 8px 0; border: none; border-top: 1px solid #eee;">' +
+                '<b>Type:</b> ' + (hpsa.designation_type || 'N/A') + '<br>' +
                 '<b>Discipline:</b> ' + (hpsa.discipline || 'N/A') + '<br>' +
-                '<b>HPSA Score:</b> ' + (hpsa.hpsa_score || 'N/A') + '<br>' +
+                '<b>State:</b> ' + (hpsa.state || 'N/A') + '<br>' +
+                '<b>HPSA Score:</b> <span style="color: ' + color + '; font-weight: bold;">' + (hpsa.hpsa_score || 'N/A') + '</span><br>' +
                 '<b>Status:</b> ' + (hpsa.status || 'N/A') + '<br>' +
-                '<a href="{{ url_for("gov.ruralaccess_hpsa", hpsa_id="__ID__") }}'.replace('__ID__', hpsa.hpsa_id) + '">View Details</a>'
+                '<a href="{{ url_for("gov.ruralaccess_hpsa", hpsa_id="__ID__") }}'.replace('__ID__', hpsa.hpsa_id) + '" style="display: inline-block; margin-top: 8px; padding: 4px 12px; background: #6f42c1; color: white; border-radius: 4px; text-decoration: none; font-size: 12px;">View Details →</a>' +
+                '</div>'
             );
         }
     });
-
 </script>
-{% endblock %}
 {% endblock %}

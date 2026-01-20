@@ -54,70 +54,94 @@
     {% set overall_compliance_rate = (compliant_hospitals_count / total_hospitals_count * 100) if total_hospitals_count > 0 else 0 %}
     {% set non_compliant_count = total_hospitals_count - compliant_hospitals_count %}
     {% set non_compliant_rate = (non_compliant_count / total_hospitals_count * 100) if total_hospitals_count > 0 else 0 %}
+
+    <!-- KPI Cards -->
     <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
-                    <h3 class="display-4">{{ "{:.0f}".format(overall_compliance_rate) }}%</h3>
-                    <p class="mb-0">MRF Compliance Rate</p>
+                    <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex p-3 mb-3">
+                        <i class="bi bi-check-circle-fill text-success fs-2"></i>
+                    </div>
+                    <h3 class="display-5 fw-bold text-success">{{ "{:.0f}".format(overall_compliance_rate) }}%</h3>
+                    <p class="text-muted mb-0">MRF Compliance Rate</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
-                    <h3 class="display-4">{{ "{:,}".format(compliant_hospitals_count) }}</h3>
-                    <p class="mb-0">With MRF Data</p>
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex p-3 mb-3">
+                        <i class="bi bi-building-check text-primary fs-2"></i>
+                    </div>
+                    <h3 class="display-5 fw-bold text-primary">{{ "{:,}".format(compliant_hospitals_count) }}</h3>
+                    <p class="text-muted mb-0">With MRF Data</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
-                    <h3 class="display-4">{{ "{:.0f}".format(non_compliant_rate) }}%</h3>
-                    <p class="mb-0">Non-Compliant</p>
+                    <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex p-3 mb-3">
+                        <i class="bi bi-exclamation-triangle text-danger fs-2"></i>
+                    </div>
+                    <h3 class="display-5 fw-bold text-danger">{{ "{:.0f}".format(non_compliant_rate) }}%</h3>
+                    <p class="text-muted mb-0">Non-Compliant</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
-                    <h3 class="display-4">{{ "{:,}".format(total_hospitals_count) }}</h3>
-                    <p class="mb-0">CMS Registered</p>
+                    <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex p-3 mb-3">
+                        <i class="bi bi-hospital text-info fs-2"></i>
+                    </div>
+                    <h3 class="display-5 fw-bold text-info">{{ "{:,}".format(total_hospitals_count) }}</h3>
+                    <p class="text-muted mb-0">CMS Registered</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Hospitals by State</h5>
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-map me-2 text-primary"></i>Compliance by State</h5>
+            {% if state_stats %}
+            <button class="btn btn-sm btn-outline-primary" onclick="exportStateStats()">
+                <i class="bi bi-download me-1"></i>Export CSV
+            </button>
+            {% endif %}
         </div>
         <div class="card-body">
             {% if state_stats %}
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover align-middle" id="stateTable">
+                    <thead class="table-light">
                         <tr>
-                            <th>State</th>
-                            <th>Total Hospitals</th>
-                            <th>With MRF Data</th>
-                            <th>Compliance Rate</th>
+                            <th style="width: 80px;">State</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Compliant</th>
+                            <th class="text-end d-none d-md-table-cell">Non-Compliant</th>
+                            <th style="min-width: 200px;">Compliance Rate</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for state, data in state_stats.items() | sort %}
                         {% set rate = (data.compliant / data.total * 100) if data.total > 0 else 0 %}
-                        <tr>
-                            <td><strong>{{ state }}</strong></td>
-                            <td>{{ data.total }}</td>
-                            <td>{{ data.compliant }}</td>
+                        <tr data-state="{{ state }}" data-total="{{ data.total }}" data-compliant="{{ data.compliant }}" data-rate="{{ rate }}">
+                            <td><span class="badge bg-secondary fs-6">{{ state }}</span></td>
+                            <td class="text-end">{{ "{:,}".format(data.total) }}</td>
+                            <td class="text-end text-success fw-semibold">{{ "{:,}".format(data.compliant) }}</td>
+                            <td class="text-end text-danger d-none d-md-table-cell">{{ "{:,}".format(data.total - data.compliant) }}</td>
                             <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar {% if rate >= 75 %}bg-success{% elif rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
-                                         role="progressbar" style="width: {{ rate }}%;">
-                                        {{ "{:.0f}".format(rate) }}%
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 12px;">
+                                        <div class="progress-bar {% if rate >= 75 %}bg-success{% elif rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                                             role="progressbar" style="width: {{ rate }}%;"></div>
                                     </div>
+                                    <span class="badge {% if rate >= 75 %}bg-success{% elif rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}" style="min-width: 50px;">
+                                        {{ "{:.0f}".format(rate) }}%
+                                    </span>
                                 </div>
                             </td>
                         </tr>
@@ -181,46 +205,68 @@
     {% endif %}
 
     <!-- Hospital List -->
-    <div class="card mt-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">All Hospitals ({{ hospitals | length }})</h5>
+    <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0"><i class="bi bi-building me-2 text-primary"></i>Hospital Directory</h5>
+            <div class="d-flex gap-2 align-items-center">
+                {% if hospitals %}
+                <input type="text" class="form-control form-control-sm" placeholder="Filter hospitals..."
+                       id="hospitalFilter" style="width: 200px;">
+                <button class="btn btn-sm btn-outline-primary" onclick="exportHospitals()">
+                    <i class="bi bi-download me-1"></i>Export
+                </button>
+                {% endif %}
+                <span class="badge bg-primary">{{ hospitals | length }} shown</span>
+            </div>
         </div>
         <div class="card-body">
             {% if hospitals %}
             <div class="table-responsive">
-                <table class="table table-hover table-sm">
-                    <thead>
+                <table class="table table-hover table-sm align-middle" id="hospitalTable">
+                    <thead class="table-light">
                         <tr>
                             <th>Facility Name</th>
-                            <th>City</th>
+                            <th class="d-none d-md-table-cell">City</th>
                             <th>State</th>
-                            <th>Type</th>
-                            <th>Rating</th>
-                            <th>Transparency</th>
+                            <th class="d-none d-lg-table-cell">Type</th>
+                            <th class="text-center">Rating</th>
+                            <th style="min-width: 100px;">Transparency</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="hospitalTableBody">
                         {% for h in hospitals %}
-                        <tr>
+                        {% set score = h.get('ml_transparency_score', 0) %}
+                        <tr data-name="{{ h.get('Facility Name', '') }}" data-transparency="{{ score }}">
                             <td>
-                                <a href="{{ url_for('gov.pricevision_hospital', npi=h.get('Facility ID', '')) }}">
-                                    {{ h.get('Facility Name', 'Unknown') }}
+                                <a href="{{ url_for('gov.pricevision_hospital', npi=h.get('Facility ID', '')) }}" class="text-decoration-none">
+                                    <strong>{{ h.get('Facility Name', 'Unknown') }}</strong>
                                 </a>
+                                <div class="d-md-none small text-muted">{{ h.get('City/Town', '') }}</div>
                             </td>
-                            <td>{{ h.get('City/Town', '') }}</td>
-                            <td>{{ h.get('State', '') }}</td>
-                            <td><span class="badge bg-secondary">{{ h.get('Hospital Type', 'N/A')[:25] }}{% if h.get('Hospital Type', '')|length > 25 %}...{% endif %}</span></td>
-                            <td>{{ h.get('Hospital overall rating', 'N/A') }}</td>
-                            <td>
-                                {% if h.get('ml_transparency_score') is defined %}
-                                <div class="progress" style="height: 20px; min-width: 60px;">
-                                    <div class="progress-bar {% if h.get('ml_transparency_score', 0) >= 70 %}bg-success{% elif h.get('ml_transparency_score', 0) >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
-                                         role="progressbar" style="width: {{ h.get('ml_transparency_score', 0) }}%;">
-                                        {{ h.get('ml_transparency_score', 0) }}
-                                    </div>
-                                </div>
+                            <td class="d-none d-md-table-cell">{{ h.get('City/Town', '') }}</td>
+                            <td><span class="badge bg-secondary">{{ h.get('State', '') }}</span></td>
+                            <td class="d-none d-lg-table-cell"><small class="text-muted">{{ h.get('Hospital Type', 'N/A')[:20] }}{% if h.get('Hospital Type', '')|length > 20 %}...{% endif %}</small></td>
+                            <td class="text-center">
+                                {% set rating = h.get('Hospital overall rating', 'N/A') %}
+                                {% if rating and rating != 'N/A' and rating != 'Not Available' %}
+                                <span class="badge bg-{% if rating|int >= 4 %}success{% elif rating|int >= 3 %}warning{% else %}danger{% endif %}">
+                                    {{ rating }} <i class="bi bi-star-fill"></i>
+                                </span>
                                 {% else %}
                                 <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if score %}
+                                <div class="d-flex align-items-center gap-1">
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar {% if score >= 70 %}bg-success{% elif score >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                             style="width: {{ score }}%;"></div>
+                                    </div>
+                                    <small class="text-muted" style="min-width: 30px;">{{ score }}</small>
+                                </div>
+                                {% else %}
+                                <span class="badge bg-light text-muted">No data</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -237,4 +283,56 @@
         </div>
     </div>
 </div>
+
+<script>
+// Filter hospitals
+document.getElementById('hospitalFilter')?.addEventListener('input', function(e) {
+    const filter = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#hospitalTableBody tr');
+    rows.forEach(row => {
+        const name = row.dataset.name.toLowerCase();
+        row.style.display = name.includes(filter) ? '' : 'none';
+    });
+});
+
+// Export state stats to CSV
+function exportStateStats() {
+    const rows = document.querySelectorAll('#stateTable tbody tr');
+    let csv = ['State,Total,Compliant,Non-Compliant,Compliance Rate'];
+    rows.forEach(row => {
+        const state = row.dataset.state;
+        const total = row.dataset.total;
+        const compliant = row.dataset.compliant;
+        const nonCompliant = parseInt(total) - parseInt(compliant);
+        const rate = row.dataset.rate;
+        csv.push(`${state},${total},${compliant},${nonCompliant},${parseFloat(rate).toFixed(1)}%`);
+    });
+    downloadCSV(csv.join('\n'), 'state_compliance.csv');
+}
+
+// Export hospitals to CSV
+function exportHospitals() {
+    const rows = document.querySelectorAll('#hospitalTableBody tr');
+    let csv = ['Facility Name,State,Transparency Score'];
+    rows.forEach(row => {
+        if (row.style.display !== 'none') {
+            const name = `"${row.dataset.name}"`;
+            const state = row.querySelector('td:nth-child(3) .badge')?.textContent || '';
+            const transparency = row.dataset.transparency || '0';
+            csv.push(`${name},${state},${transparency}`);
+        }
+    });
+    downloadCSV(csv.join('\n'), 'hospital_transparency.csv');
+}
+
+function downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
 {% endblock %}

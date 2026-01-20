@@ -1,82 +1,102 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}DrugWatch - Drug Price Comparison{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item active">DrugWatch</li>
-        </ol>
-    </nav>
-
-    <div class="page-header mb-5">
-        <h1><i class="bi bi-capsule me-2" style="color: #dc3545;"></i>DrugWatch</h1>
-        <p class="lead text-muted">Drug Price Comparison with MFN Analysis</p>
+<!-- Hero Section -->
+<div class="page-header page-header--drugwatch">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>DrugWatch</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-capsule"></i> DrugWatch
+        </h1>
+        <p class="page-subtitle">
+            Drug Price Comparison with MFN Analysis
+        </p>
     </div>
+</div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.drugwatch_search') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-search display-4 text-danger mb-3"></i>
-                    <h5>Search Drugs</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.drugwatch_mfn') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-globe display-4 text-danger mb-3"></i>
-                    <h5>MFN Analysis</h5>
-                    <span class="badge bg-primary">Gov Only</span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.drugwatch_trends') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-graph-up display-4 text-danger mb-3"></i>
-                    <h5>Spending Trends</h5>
-                    <span class="badge bg-primary">Gov Only</span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-file-earmark-arrow-down display-4 text-muted mb-3"></i>
-                    <h5>Export Data</h5>
-                    <button class="btn btn-sm btn-outline-secondary">Download</button>
-                </div>
+<div class="container container-xl">
+    <!-- Stats Section -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">$275.9B</div>
+                <div class="stat-card-label">Medicare Part D</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">75,854</div>
+                <div class="stat-card-label">Drugs Tracked</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">4</div>
+                <div class="stat-card-label">Countries</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">$180B</div>
+                <div class="stat-card-label">MFN Savings Potential</div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card stat-card border-danger">
-                <div class="stat-value text-danger" style="font-size: 1.8rem;">$275.9B</div>
-                <div class="stat-label">Medicare Part D</div>
+    <!-- Quick Actions -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-4);">
+            <a href="{{ url_for('gov.drugwatch_search') }}" class="card" style="padding: var(--spacing-5); text-align: center; text-decoration: none;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--drugwatch-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-search" style="font-size: var(--text-xl); color: var(--drugwatch);"></i>
+                </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; color: var(--neutral-900); margin-bottom: var(--spacing-1);">Search Drugs</h3>
+                <p class="text-muted" style="font-size: var(--text-sm); margin: 0;">Find any medication</p>
+            </a>
+
+            <a href="{{ url_for('gov.drugwatch_mfn') }}" class="card" style="padding: var(--spacing-5); text-align: center; text-decoration: none;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--drugwatch-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-globe" style="font-size: var(--text-xl); color: var(--drugwatch);"></i>
+                </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; color: var(--neutral-900); margin-bottom: var(--spacing-1);">MFN Analysis</h3>
+                <span class="badge" style="background: var(--primary); color: white;">Gov Only</span>
+            </a>
+
+            <a href="{{ url_for('gov.drugwatch_trends') }}" class="card" style="padding: var(--spacing-5); text-align: center; text-decoration: none;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--drugwatch-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-graph-up" style="font-size: var(--text-xl); color: var(--drugwatch);"></i>
+                </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; color: var(--neutral-900); margin-bottom: var(--spacing-1);">Spending Trends</h3>
+                <span class="badge" style="background: var(--primary); color: white;">Gov Only</span>
+            </a>
+
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--neutral-100); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-file-earmark-arrow-down" style="font-size: var(--text-xl); color: var(--neutral-500);"></i>
+                </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; color: var(--neutral-900); margin-bottom: var(--spacing-2);">Export Data</h3>
+                <button class="btn btn-outline" style="font-size: var(--text-sm);">Download</button>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.8rem;">3,598</div>
-                <div class="stat-label">Drugs Tracked</div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="section-sm">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-4); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2);">Most Favored Nation (MFN) Pricing</h4>
+                    <p style="margin: 0;">
+                        MFN pricing would link US drug prices to the lowest prices paid by other developed nations.
+                        DrugWatch provides analysis showing potential savings of up to $180 billion annually by
+                        comparing US Medicare prices with those in Canada, Australia, and other countries.
+                    </p>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.8rem;">4</div>
-                <div class="stat-label">Countries</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card text-success">
-                <div class="stat-value" style="font-size: 1.8rem;">$180B</div>
-                <div class="stat-label">MFN Savings Potential</div>
-            </div>
-        </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

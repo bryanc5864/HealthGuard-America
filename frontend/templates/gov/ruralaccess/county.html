@@ -68,6 +68,7 @@
                 <thead>
                     <tr>
                         <th>HPSA Name</th>
+                        <th>Type</th>
                         <th>Discipline</th>
                         <th>Score</th>
                         <th>Status</th>
@@ -78,6 +79,7 @@
                     {% for hpsa in hpsas %}
                     <tr>
                         <td>{{ hpsa.hpsa_name or 'Unknown' }}</td>
+                        <td><small class="text-muted">{{ hpsa.designation_type or 'N/A' }}</small></td>
                         <td>{{ hpsa.discipline or 'N/A' }}</td>
                         <td>
                             <span class="badge {% if hpsa.hpsa_score >= 20 %}bg-danger{% elif hpsa.hpsa_score >= 15 %}bg-warning{% else %}bg-success{% endif %}">

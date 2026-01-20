@@ -1,89 +1,106 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}PriceVision - Hospital Price Transparency{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item active">PriceVision</li>
-        </ol>
-    </nav>
-
-    <div class="page-header mb-5">
-        <h1><i class="bi bi-currency-dollar me-2" style="color: #fd7e14;"></i>PriceVision</h1>
-        <p class="lead text-muted">Hospital Price Transparency with Compliance Analytics</p>
+<!-- Hero Section -->
+<div class="page-header page-header--pricevision">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>PriceVision</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-currency-dollar"></i> PriceVision
+        </h1>
+        <p class="page-subtitle">
+            Hospital Price Transparency with Compliance Analytics
+        </p>
     </div>
+</div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-2">
-            <a href="{{ url_for('gov.pricevision_search') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-search display-5 text-warning mb-2"></i>
-                    <h6>Search</h6>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-2">
-            <a href="{{ url_for('gov.pricevision_compare') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-bar-chart display-5 text-warning mb-2"></i>
-                    <h6>Compare</h6>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.pricevision_my_price') }}" class="card h-100 text-decoration-none border-warning">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-calculator display-5 text-warning mb-2"></i>
-                    <h6>Check My Price</h6>
-                    <small class="text-muted">Is your quote fair?</small>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.pricevision_analytics') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-graph-up display-5 text-warning mb-2"></i>
-                    <h6>Compliance Analytics</h6>
-                    <span class="badge bg-primary">Gov Only</span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-2">
-            <div class="card h-100">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-file-earmark-arrow-down display-5 text-muted mb-2"></i>
-                    <h6>Export</h6>
-                </div>
+<div class="container container-xl">
+    <!-- Stats Section -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--pricevision">
+                <div class="stat-card-value">{{ "{:,}".format(stats.total_hospitals | default(1002)) }}</div>
+                <div class="stat-card-label">Hospitals</div>
+            </div>
+            <div class="stat-card stat-card--pricevision">
+                <div class="stat-card-value">{{ "{:,}".format(stats.total_procedures | default(30200000)) }}</div>
+                <div class="stat-card-label">Price Records</div>
+            </div>
+            <div class="stat-card stat-card--pricevision">
+                <div class="stat-card-value">{{ stats.states_covered | default(50) }}</div>
+                <div class="stat-card-label">States Covered</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">82%</div>
+                <div class="stat-card-label">ML Match Accuracy</div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">{{ "{:,}".format(stats.total_hospitals | default(0)) }}</div>
-                <div class="stat-label">Hospitals</div>
+    <!-- Quick Actions -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--spacing-3);">
+            <a href="{{ url_for('gov.pricevision_search') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--pricevision-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-search" style="font-size: var(--text-lg); color: var(--pricevision);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Search</h3>
+            </a>
+
+            <a href="{{ url_for('gov.pricevision_compare') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--pricevision-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-bar-chart" style="font-size: var(--text-lg); color: var(--pricevision);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Compare</h3>
+            </a>
+
+            <a href="{{ url_for('gov.pricevision_my_price') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none; border: 2px solid var(--pricevision);">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--pricevision); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-calculator" style="font-size: var(--text-lg); color: white;"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Check My Price</h3>
+                <span class="text-muted" style="font-size: var(--text-xs);">Is your quote fair?</span>
+            </a>
+
+            <a href="{{ url_for('gov.pricevision_analytics') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--pricevision-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-graph-up" style="font-size: var(--text-lg); color: var(--pricevision);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Analytics</h3>
+                <span class="badge" style="background: var(--primary); color: white; font-size: 10px; margin-top: var(--spacing-1);">Gov Only</span>
+            </a>
+
+            <div class="card" style="padding: var(--spacing-4); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--neutral-100); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-file-earmark-arrow-down" style="font-size: var(--text-lg); color: var(--neutral-500);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Export</h3>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">{{ "{:,}".format(stats.total_procedures | default(0)) }}</div>
-                <div class="stat-label">Procedures</div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="section-sm">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-4); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2);">Hospital Price Transparency Rule</h4>
+                    <p style="margin: 0;">
+                        As of January 2021, all hospitals are required to publicly post their prices. PriceVision aggregates this data
+                        and uses machine learning to standardize procedure codes, enabling fair price comparisons across facilities.
+                    </p>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">{{ stats.states_covered | default(0) }}</div>
-                <div class="stat-label">States Covered</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 2rem;">82%</div>
-                <div class="stat-label">ML Match Accuracy</div>
-            </div>
-        </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

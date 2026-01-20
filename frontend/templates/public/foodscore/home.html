@@ -24,7 +24,7 @@
 
 <div class="container container-xl">
     <!-- Stats Section -->
-    <section style="margin-top: calc(-1 * var(--spacing-10)); position: relative; z-index: 10;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
         <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="stat-card stat-card--foodscore">
                 <div class="stat-card-value">50K+</div>
@@ -74,108 +74,108 @@
     </section>
 
     <!-- NOVA Classification -->
-    <section class="section">
-        <div style="text-align: center; margin-bottom: var(--spacing-8);">
-            <h2 style="font-size: var(--text-2xl); font-weight: 700;">NOVA Food Processing Classification</h2>
-            <p class="text-muted">Our ML model classifies foods by processing level with 96.2% accuracy</p>
+    <section class="section-sm">
+        <div style="text-align: center; margin-bottom: var(--spacing-6);">
+            <h2 style="font-size: var(--text-xl); font-weight: 700;">NOVA Food Processing Classification</h2>
+            <p class="text-muted" style="font-size: var(--text-sm);">Our ML model classifies foods by processing level with 96.2% accuracy</p>
         </div>
 
         {% set nova = stats.nova_distribution if stats.nova_distribution else {1: 3943, 2: 625, 3: 4825, 4: 22277} %}
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--spacing-4);">
-            <div class="card" style="border-left: 4px solid var(--success); padding: var(--spacing-6); text-align: center;">
-                <div style="font-size: var(--text-4xl); font-weight: 800; color: var(--success); margin-bottom: var(--spacing-2);">1</div>
-                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Unprocessed</h3>
-                <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Fresh fruits, vegetables, eggs, meat</p>
-                <span class="badge badge-success">{{ "{:,}".format(nova.get(1, 3943)) }} products</span>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-4);">
+            <div class="card" style="border-left: 4px solid var(--success); padding: var(--spacing-4); text-align: center;">
+                <div style="font-size: var(--text-3xl); font-weight: 800; color: var(--success); margin-bottom: var(--spacing-1);">1</div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-1);">Unprocessed</h3>
+                <p style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Fresh fruits, vegetables, eggs</p>
+                <span class="badge badge-success">{{ "{:,}".format(nova.get(1, 3943)) }}</span>
             </div>
 
-            <div class="card" style="border-left: 4px solid var(--info); padding: var(--spacing-6); text-align: center;">
-                <div style="font-size: var(--text-4xl); font-weight: 800; color: var(--info); margin-bottom: var(--spacing-2);">2</div>
-                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Culinary Ingredients</h3>
-                <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Oils, butter, sugar, flour</p>
-                <span class="badge badge-info">{{ "{:,}".format(nova.get(2, 625)) }} products</span>
+            <div class="card" style="border-left: 4px solid var(--info); padding: var(--spacing-4); text-align: center;">
+                <div style="font-size: var(--text-3xl); font-weight: 800; color: var(--info); margin-bottom: var(--spacing-1);">2</div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-1);">Culinary</h3>
+                <p style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Oils, butter, sugar, flour</p>
+                <span class="badge badge-info">{{ "{:,}".format(nova.get(2, 625)) }}</span>
             </div>
 
-            <div class="card" style="border-left: 4px solid var(--warning); padding: var(--spacing-6); text-align: center;">
-                <div style="font-size: var(--text-4xl); font-weight: 800; color: var(--warning); margin-bottom: var(--spacing-2);">3</div>
-                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Processed Foods</h3>
-                <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Canned vegetables, cheese, bread</p>
-                <span class="badge badge-warning">{{ "{:,}".format(nova.get(3, 4825)) }} products</span>
+            <div class="card" style="border-left: 4px solid var(--warning); padding: var(--spacing-4); text-align: center;">
+                <div style="font-size: var(--text-3xl); font-weight: 800; color: var(--warning); margin-bottom: var(--spacing-1);">3</div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-1);">Processed</h3>
+                <p style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Canned vegetables, cheese</p>
+                <span class="badge badge-warning">{{ "{:,}".format(nova.get(3, 4825)) }}</span>
             </div>
 
-            <div class="card" style="border-left: 4px solid var(--error); padding: var(--spacing-6); text-align: center;">
-                <div style="font-size: var(--text-4xl); font-weight: 800; color: var(--error); margin-bottom: var(--spacing-2);">4</div>
-                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Ultra-Processed</h3>
-                <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Sodas, chips, instant noodles</p>
-                <span class="badge badge-danger">{{ "{:,}".format(nova.get(4, 22277)) }} products</span>
+            <div class="card" style="border-left: 4px solid var(--error); padding: var(--spacing-4); text-align: center;">
+                <div style="font-size: var(--text-3xl); font-weight: 800; color: var(--error); margin-bottom: var(--spacing-1);">4</div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-1);">Ultra-Processed</h3>
+                <p style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Sodas, chips, noodles</p>
+                <span class="badge badge-danger">{{ "{:,}".format(nova.get(4, 22277)) }}</span>
             </div>
         </div>
     </section>
 
     <!-- MAHA Score Explanation -->
     <section class="section-sm">
-        <div class="card" style="background: linear-gradient(135deg, var(--foodscore), var(--foodscore-dark)); padding: var(--spacing-8); text-align: center;">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: var(--radius-lg); margin: 0 auto var(--spacing-4);">
-                <i class="bi bi-speedometer2" style="font-size: var(--text-3xl); color: white;"></i>
+        <div class="card" style="background: linear-gradient(135deg, var(--foodscore), var(--foodscore-dark)); padding: var(--spacing-6); text-align: center;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: var(--radius-lg); margin: 0 auto var(--spacing-3);">
+                <i class="bi bi-speedometer2" style="font-size: var(--text-2xl); color: white;"></i>
             </div>
-            <h3 style="color: white; font-size: var(--text-xl); margin-bottom: var(--spacing-2);">
+            <h3 style="color: white; font-size: var(--text-lg); margin-bottom: var(--spacing-2);">
                 MAHA Health Score (0-100)
             </h3>
-            <p style="color: rgba(255,255,255,0.85); margin-bottom: var(--spacing-6); max-width: 600px; margin-left: auto; margin-right: auto;">
+            <p style="color: rgba(255,255,255,0.85); margin-bottom: var(--spacing-4); max-width: 550px; margin-left: auto; margin-right: auto; font-size: var(--text-sm);">
                 Every product gets a MAHA score based on NOVA classification, additive risk assessment,
-                and nutritional content. Higher scores mean healthier choices for your family.
+                and nutritional content. Higher scores mean healthier choices.
             </p>
-            <div style="display: flex; justify-content: center; gap: var(--spacing-4); flex-wrap: wrap;">
-                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-lg);">
-                    <span style="color: #bbf7d0; font-weight: 700;">90-100</span>
-                    <span style="color: white; font-size: var(--text-sm);"> Excellent</span>
+            <div style="display: flex; justify-content: center; gap: var(--spacing-3); flex-wrap: wrap;">
+                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-2) var(--spacing-3); border-radius: var(--radius-lg);">
+                    <span style="color: #bbf7d0; font-weight: 700; font-size: var(--text-sm);">90-100</span>
+                    <span style="color: white; font-size: var(--text-xs);"> Excellent</span>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-lg);">
-                    <span style="color: #fef08a; font-weight: 700;">75-89</span>
-                    <span style="color: white; font-size: var(--text-sm);"> Good</span>
+                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-2) var(--spacing-3); border-radius: var(--radius-lg);">
+                    <span style="color: #fef08a; font-weight: 700; font-size: var(--text-sm);">75-89</span>
+                    <span style="color: white; font-size: var(--text-xs);"> Good</span>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-lg);">
-                    <span style="color: #fed7aa; font-weight: 700;">50-74</span>
-                    <span style="color: white; font-size: var(--text-sm);"> Moderate</span>
+                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-2) var(--spacing-3); border-radius: var(--radius-lg);">
+                    <span style="color: #fed7aa; font-weight: 700; font-size: var(--text-sm);">50-74</span>
+                    <span style="color: white; font-size: var(--text-xs);"> Moderate</span>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-lg);">
-                    <span style="color: #fecaca; font-weight: 700;">&lt;50</span>
-                    <span style="color: white; font-size: var(--text-sm);"> Poor</span>
+                <div style="background: rgba(255,255,255,0.1); padding: var(--spacing-2) var(--spacing-3); border-radius: var(--radius-lg);">
+                    <span style="color: #fecaca; font-weight: 700; font-size: var(--text-sm);">&lt;50</span>
+                    <span style="color: white; font-size: var(--text-xs);"> Poor</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features -->
-    <section class="section">
-        <div style="text-align: center; margin-bottom: var(--spacing-8);">
-            <h2 style="font-size: var(--text-2xl); font-weight: 700;">Make Healthier Choices</h2>
-            <p class="text-muted">AI-powered insights to help you shop smarter</p>
+    <section class="section-sm">
+        <div style="text-align: center; margin-bottom: var(--spacing-6);">
+            <h2 style="font-size: var(--text-xl); font-weight: 700;">Make Healthier Choices</h2>
+            <p class="text-muted" style="font-size: var(--text-sm);">AI-powered insights to help you shop smarter</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-6);">
-            <div class="card" style="padding: var(--spacing-6); text-align: center;">
-                <div style="width: 64px; height: 64px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
-                    <i class="bi bi-speedometer2" style="font-size: var(--text-2xl); color: var(--foodscore);"></i>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-speedometer2" style="font-size: var(--text-xl); color: var(--foodscore);"></i>
                 </div>
-                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Health Scores</h3>
-                <p class="text-muted">Get a 0-100 MAHA score based on ingredients, additives, and nutrition values.</p>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2);">Health Scores</h3>
+                <p class="text-muted" style="font-size: var(--text-sm);">Get a 0-100 MAHA score based on ingredients and additives.</p>
             </div>
 
-            <div class="card" style="padding: var(--spacing-6); text-align: center;">
-                <div style="width: 64px; height: 64px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
-                    <i class="bi bi-exclamation-triangle" style="font-size: var(--text-2xl); color: var(--foodscore);"></i>
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-exclamation-triangle" style="font-size: var(--text-xl); color: var(--foodscore);"></i>
                 </div>
-                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Additive Alerts</h3>
-                <p class="text-muted">Identify potentially harmful additives and understand their health risks.</p>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2);">Additive Alerts</h3>
+                <p class="text-muted" style="font-size: var(--text-sm);">Identify harmful additives and understand their risks.</p>
             </div>
 
-            <div class="card" style="padding: var(--spacing-6); text-align: center;">
-                <div style="width: 64px; height: 64px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
-                    <i class="bi bi-arrow-left-right" style="font-size: var(--text-2xl); color: var(--foodscore);"></i>
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-arrow-left-right" style="font-size: var(--text-xl); color: var(--foodscore);"></i>
                 </div>
-                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Healthier Alternatives</h3>
-                <p class="text-muted">Discover better options in the same product category with higher scores.</p>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2);">Healthier Alternatives</h3>
+                <p class="text-muted" style="font-size: var(--text-sm);">Discover better options in the same category.</p>
             </div>
         </div>
     </section>

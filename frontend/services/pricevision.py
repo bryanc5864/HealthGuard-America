@@ -203,6 +203,71 @@ class PriceVisionService:
         return cls._cache['hospitals_with_mrf']
 
     @classmethod
+    def get_batch_transparency_data(cls, hospital_ids):
+        """Get transparency data for multiple hospitals in one query (avoids N+1)."""
+        if not hospital_ids:
+            return {}
+
+        price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+        if not price_file.exists():
+            return {}
+
+        try:
+            # Read all prices for the specified hospitals in one query
+            df = pd.read_parquet(price_file, columns=[
+                'hospital_npi', 'cash_price', 'gross_charge', 'payer_name', 'description'
+            ])
+
+            # Filter to only requested hospitals
+            hospital_ids_str = set(str(h) for h in hospital_ids)
+            df = df[df['hospital_npi'].astype(str).isin(hospital_ids_str)]
+
+            # Group by hospital and calculate transparency metrics
+            result = {}
+            for npi, group in df.groupby(df['hospital_npi'].astype(str)):
+                total = len(group)
+                if total == 0:
+                    continue
+
+                prices_with_cash = group['cash_price'].notna().sum()
+                prices_with_gross = group['gross_charge'].notna().sum()
+                prices_with_payer = group['payer_name'].notna().sum()
+
+                # Calculate transparency score (same logic as calculate_transparency_score)
+                score = 30  # Base score for having data
+
+                cash_ratio = prices_with_cash / total
+                score += int(cash_ratio * 20)
+
+                gross_ratio = prices_with_gross / total
+                score += int(gross_ratio * 15)
+
+                payer_ratio = prices_with_payer / total
+                score += int(payer_ratio * 15)
+
+                # Volume bonus
+                if total >= 100:
+                    score += 20
+                elif total >= 50:
+                    score += 15
+                elif total >= 20:
+                    score += 10
+                elif total >= 5:
+                    score += 5
+
+                result[npi] = {
+                    'transparency_score': min(score, 100),
+                    'total_prices': total,
+                    'prices_with_cash': int(prices_with_cash),
+                    'cash_ratio': cash_ratio
+                }
+
+            return result
+        except Exception as e:
+            print(f"Error in batch transparency: {e}")
+            return {}
+
+    @classmethod
     def get_stats(cls):
         """Get summary statistics"""
         hospitals = cls.get_hospitals(limit=10000)

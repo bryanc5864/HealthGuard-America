@@ -403,17 +403,26 @@ def foodscore_analyze():
         health_concerns = []
         health_positives = []
 
+        # Helper to safely parse nutrition values
+        def safe_float(val, default=0):
+            if not val:
+                return default
+            try:
+                return float(val.replace('g', '').replace('mg', '').strip())
+            except (ValueError, AttributeError):
+                return default
+
         # Analyze nutrition
-        if sugars and float(sugars.replace('g', '').strip()) > 10:
+        if sugars and safe_float(sugars) > 10:
             health_concerns.append({'issue': 'High Sugar', 'value': sugars, 'note': 'More than 10g per serving'})
-        if sodium and float(sodium.replace('mg', '').strip()) > 500:
+        if sodium and safe_float(sodium) > 500:
             health_concerns.append({'issue': 'High Sodium', 'value': sodium, 'note': 'More than 500mg per serving'})
-        if saturated_fat and float(saturated_fat.replace('g', '').strip()) > 5:
+        if saturated_fat and safe_float(saturated_fat) > 5:
             health_concerns.append({'issue': 'High Saturated Fat', 'value': saturated_fat, 'note': 'More than 5g per serving'})
 
-        if fiber and float(fiber.replace('g', '').strip()) >= 3:
+        if fiber and safe_float(fiber) >= 3:
             health_positives.append({'benefit': 'Good Fiber Source', 'value': fiber})
-        if protein and float(protein.replace('g', '').strip()) >= 5:
+        if protein and safe_float(protein) >= 5:
             health_positives.append({'benefit': 'Good Protein Source', 'value': protein})
 
         # Calculate a simple health score (0-100)
@@ -465,3 +474,189 @@ def foodscore_additives():
     return render_template('gov/foodscore/additives.html',
                           additives=additives, stats=stats, search=search,
                           high_risk=high_risk_additives, medium_risk=medium_risk, low_risk=low_risk)
+
+
+@gov_bp.route('/api/foodscore/ocr', methods=['POST'])
+@gov_required
+def api_foodscore_ocr():
+    """API: OCR nutrition label from uploaded image."""
+    import re
+    import io
+
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'error': 'No image file provided'})
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No image file selected'})
+
+    # Check file type
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    if ext not in allowed_extensions:
+        return jsonify({'success': False, 'error': 'Invalid image format'})
+
+    try:
+        # Read image data
+        image_data = file.read()
+
+        ocr_text = None
+        ocr_method = None
+
+        # Method 1: Try pytesseract (requires Tesseract installed)
+        try:
+            from PIL import Image
+            import pytesseract
+
+            image = Image.open(io.BytesIO(image_data))
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+
+            ocr_text = pytesseract.image_to_string(image)
+            ocr_method = 'pytesseract'
+            logger.info(f"pytesseract OCR extracted {len(ocr_text)} characters")
+        except ImportError:
+            logger.warning("pytesseract not available")
+        except Exception as e:
+            logger.warning(f"pytesseract failed: {e}")
+
+        # Method 2: Try Windows OCR (built-in on Windows 10/11)
+        if (not ocr_text or len(ocr_text.strip()) < 10) and sys.platform == 'win32':
+            try:
+                ocr_text = windows_ocr(image_data)
+                if ocr_text and len(ocr_text.strip()) >= 10:
+                    ocr_method = 'windows_ocr'
+                    logger.info(f"Windows OCR extracted {len(ocr_text)} characters")
+            except Exception as e:
+                logger.warning(f"Windows OCR failed: {e}")
+
+        # Method 3: Try easyocr (pure Python, no system dependencies)
+        if not ocr_text or len(ocr_text.strip()) < 10:
+            try:
+                import easyocr
+                from PIL import Image
+                import numpy as np
+
+                # Create reader (this will download models on first use)
+                reader = easyocr.Reader(['en'], gpu=False, verbose=False)
+
+                # Convert image data to numpy array
+                image = Image.open(io.BytesIO(image_data))
+                if image.mode != 'RGB':
+                    image = image.convert('RGB')
+                image_np = np.array(image)
+
+                # Run OCR
+                results = reader.readtext(image_np)
+                ocr_text = ' '.join([text for _, text, _ in results])
+                ocr_method = 'easyocr'
+                logger.info(f"easyocr OCR extracted {len(ocr_text)} characters")
+            except ImportError:
+                logger.warning("easyocr not available")
+            except Exception as e:
+                logger.error(f"easyocr failed: {e}")
+
+        if not ocr_text or len(ocr_text.strip()) < 10:
+            return jsonify({
+                'success': False,
+                'error': 'OCR processing unavailable. Please enter nutrition information manually.'
+            })
+
+        # Parse the OCR text
+        result = parse_nutrition_label(ocr_text)
+        result['success'] = True
+        result['raw_text'] = ocr_text[:500]
+        result['ocr_method'] = ocr_method
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Image processing error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+
+def windows_ocr(image_data):
+    """Use Windows 10/11 built-in OCR via winocr package."""
+    import asyncio
+    import io
+    from PIL import Image
+
+    try:
+        import winocr
+
+        # Load image from bytes
+        image = Image.open(io.BytesIO(image_data))
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        async def do_ocr():
+            result = await winocr.recognize_pil(image, 'en')
+            return result.text
+
+        # Run async OCR
+        return asyncio.run(do_ocr())
+
+    except ImportError:
+        logger.warning("winocr not installed, Windows OCR unavailable")
+        return None
+
+
+def parse_nutrition_label(text):
+    """Parse OCR text to extract nutrition facts."""
+    import re
+
+    result = {}
+    text = text.replace('\n', ' ').replace('\r', ' ')
+    text_lower = text.lower()
+
+    # Extract serving size
+    serving_match = re.search(r'serving\s*size[:\s]*([^\d]*\d+[^\n,]*)', text_lower)
+    if serving_match:
+        result['serving_size'] = serving_match.group(1).strip()[:50]
+
+    # Extract calories
+    cal_match = re.search(r'calories[:\s]*(\d+)', text_lower)
+    if cal_match:
+        result['calories'] = cal_match.group(1)
+
+    # Extract total fat
+    fat_match = re.search(r'total\s*fat[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if fat_match:
+        result['total_fat'] = fat_match.group(1)
+
+    # Extract saturated fat
+    sat_fat_match = re.search(r'saturated\s*fat[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if sat_fat_match:
+        result['saturated_fat'] = sat_fat_match.group(1)
+
+    # Extract sodium
+    sodium_match = re.search(r'sodium[:\s]*(\d+)\s*m?g', text_lower)
+    if sodium_match:
+        result['sodium'] = sodium_match.group(1)
+
+    # Extract total carbohydrates
+    carb_match = re.search(r'total\s*carb(?:ohydrate)?s?[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if carb_match:
+        result['total_carbs'] = carb_match.group(1)
+
+    # Extract sugars
+    sugar_match = re.search(r'(?:total\s*)?sugars?[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if sugar_match:
+        result['sugars'] = sugar_match.group(1)
+
+    # Extract protein
+    protein_match = re.search(r'protein[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if protein_match:
+        result['protein'] = protein_match.group(1)
+
+    # Extract fiber
+    fiber_match = re.search(r'(?:dietary\s*)?fiber[:\s]*(\d+\.?\d*)\s*g', text_lower)
+    if fiber_match:
+        result['fiber'] = fiber_match.group(1)
+
+    # Extract ingredients
+    ing_match = re.search(r'ingredients[:\s]*([^\.]+\.)', text_lower)
+    if ing_match:
+        result['ingredients'] = ing_match.group(1).strip()[:500]
+
+    return result

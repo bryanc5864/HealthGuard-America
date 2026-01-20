@@ -5,8 +5,11 @@ Hospital price transparency with analytics
 from flask import render_template, request, jsonify
 from . import gov_bp, gov_required
 import sys
+import logging
 from pathlib import Path
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 # Add project root to path for ML imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
@@ -25,9 +28,51 @@ def get_procedure_matching_service():
         try:
             from ml.procedure_encoder.inference import ProcedureMatchingService
             _procedure_matching_service = ProcedureMatchingService.load()
-        except Exception:
-            pass
+            logger.info("ProcedureMatchingService loaded successfully")
+        except Exception as e:
+            logger.warning(f"Failed to load ProcedureMatchingService: {e}")
     return _procedure_matching_service
+
+
+# CPT/HCPCS code specialty mapping (more accurate than first-digit heuristic)
+CPT_SPECIALTY_RANGES = {
+    (99000, 99999): 'Evaluation & Management',
+    (0, 1999): 'Anesthesia',
+    (10000, 19999): 'Integumentary Surgery',
+    (20000, 29999): 'Musculoskeletal Surgery',
+    (30000, 32999): 'Respiratory Surgery',
+    (33000, 37999): 'Cardiovascular Surgery',
+    (38000, 39999): 'Hemic/Lymphatic Surgery',
+    (40000, 49999): 'Digestive Surgery',
+    (50000, 53999): 'Urinary Surgery',
+    (54000, 55999): 'Male Genital Surgery',
+    (56000, 58999): 'Female Genital Surgery',
+    (59000, 59999): 'Maternity Care',
+    (60000, 60999): 'Endocrine Surgery',
+    (61000, 64999): 'Nervous System Surgery',
+    (65000, 68999): 'Eye Surgery',
+    (69000, 69999): 'Auditory Surgery',
+    (70000, 79999): 'Imaging/Radiology',
+    (80000, 89999): 'Laboratory/Pathology',
+    (90000, 98999): 'Medicine/Therapy',
+}
+
+
+def get_specialty_from_code(code):
+    """Get specialty category from CPT/HCPCS code using range lookup."""
+    if not code:
+        return None
+    try:
+        numeric = ''.join(c for c in str(code) if c.isdigit())
+        if not numeric:
+            return None
+        code_num = int(numeric)
+        for (start, end), specialty in CPT_SPECIALTY_RANGES.items():
+            if start <= code_num <= end:
+                return specialty
+        return 'Other'
+    except (ValueError, TypeError):
+        return None
 
 
 def analyze_price_fairness(prices):
@@ -86,20 +131,13 @@ def analyze_hospital_pricing(prices):
     markup_std = np.std(markups)
     pricing_consistency = max(0, 100 - markup_std)  # Higher consistency = lower std
 
-    # Identify specialties based on procedure codes
+    # Identify specialties based on procedure codes using accurate range lookup
     procedure_codes = [p.get('procedure_code', '') for p in prices if p.get('procedure_code')]
     specialties = set()
     for code in procedure_codes:
-        if code.startswith('7'):
-            specialties.add('Imaging/Radiology')
-        elif code.startswith('2'):
-            specialties.add('Surgery')
-        elif code.startswith('9'):
-            specialties.add('Evaluation & Management')
-        elif code.startswith('8'):
-            specialties.add('Laboratory')
-        elif code.startswith('3') or code.startswith('4'):
-            specialties.add('Diagnostic')
+        specialty = get_specialty_from_code(code)
+        if specialty:
+            specialties.add(specialty)
 
     return {
         'avg_markup': round(avg_markup, 1),
@@ -197,19 +235,25 @@ def pricevision_search():
                             'ml_matched_description': desc
                         }
 
-                    # Enhance results with ML scores
+                    # Enhance results with ML scores (limit individual calls to first 10)
+                    individual_calls = 0
+                    max_individual_calls = 10
                     for r in results:
                         code = r.get('hcpcs_code', '')
                         if code in ml_scores:
                             r['ml_match_confidence'] = ml_scores[code]['ml_match_confidence']
                             r['ml_matched_description'] = ml_scores[code]['ml_matched_description']
-                        else:
-                            # Get individual score for this procedure
+                        elif individual_calls < max_individual_calls:
+                            # Get individual score for this procedure (limited)
                             try:
                                 match = service.match(r.get('canonical_description', ''))
                                 r['ml_match_confidence'] = round(match.confidence * 100, 1)
-                            except Exception:
+                                individual_calls += 1
+                            except Exception as e:
+                                logger.debug(f"ML match failed for procedure: {e}")
                                 r['ml_match_confidence'] = None
+                        else:
+                            r['ml_match_confidence'] = None
 
                     # Sort by ML confidence (highest first)
                     results_with_ml = [r for r in results if r.get('ml_match_confidence') is not None]
@@ -222,8 +266,8 @@ def pricevision_search():
                         {'code': code, 'description': desc, 'confidence': round(conf * 100, 1)}
                         for code, desc, conf in similar[:5]
                     ]
-            except Exception:
-                pass  # Continue without ML features
+            except Exception as e:
+                logger.warning(f"ML semantic matching failed: {e}")
 
     states = PriceVisionService.get_states()
     return render_template('gov/pricevision/search.html',
@@ -244,7 +288,14 @@ def pricevision_compare():
     procedures = PriceVisionService.get_procedures(search=procedure if procedure else None, limit=20)
     prices = []
     if procedure:
-        prices = PriceVisionService.get_prices(procedure_code=procedure, state=state if state else None, limit=50)
+        # Get the actual HCPCS code - either use procedure directly if it looks like a code,
+        # or find the matching procedure's code from search results
+        procedure_code = procedure
+        if procedures and not procedure.isdigit():
+            # User searched by name, get the actual code from first match
+            first_match = procedures[0]
+            procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
+        prices = PriceVisionService.get_prices(procedure_code=procedure_code, state=state if state else None, limit=50)
 
         # ML price fairness analysis
         try:
@@ -270,8 +321,8 @@ def pricevision_compare():
                 if prices_with_cash:
                     best = min(prices_with_cash, key=lambda x: x.get('cash_price', float('inf')))
                     best_value_npi = best.get('hospital_npi')
-        except Exception:
-            pass  # Continue without ML features
+        except Exception as e:
+            logger.warning(f"ML price fairness analysis failed: {e}")
 
     states = PriceVisionService.get_states()
     return render_template('gov/pricevision/compare.html',
@@ -293,8 +344,8 @@ def pricevision_hospital(npi):
     try:
         pricing_analysis = analyze_hospital_pricing(prices)
         transparency_score = calculate_transparency_score(hospital, prices)
-    except Exception:
-        pass  # Continue without ML features
+    except Exception as e:
+        logger.warning(f"Hospital pricing analysis failed: {e}")
 
     return render_template('gov/pricevision/hospital.html',
                           hospital=hospital or {}, npi=npi, prices=prices,
@@ -324,9 +375,17 @@ def pricevision_my_price():
             user_price_float = 0
 
         if user_price_float > 0:
+            # Get the actual HCPCS code - either use procedure directly if it looks like a code,
+            # or find the matching procedure's code from search results
+            procedure_code = procedure
+            if procedures and not procedure.isdigit():
+                # User searched by name, get the actual code from first match
+                first_match = procedures[0]
+                procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
+
             # Get market prices for comparison
             prices = PriceVisionService.get_prices(
-                procedure_code=procedure,
+                procedure_code=procedure_code,
                 state=state if state else None,
                 limit=100
             )
@@ -454,32 +513,41 @@ def pricevision_analytics():
         if facility_id in hospitals_with_mrf:
             state_stats[st]['compliant'] += 1
 
-    # ML transparency scoring for displayed hospitals
+    # ML transparency scoring for displayed hospitals - OPTIMIZED with batch query
     suspicious_gaps = []
     try:
+        # Get facility IDs that have MRF data
+        hospital_ids_with_mrf = [
+            str(h.get('Facility ID', ''))
+            for h in hospitals
+            if str(h.get('Facility ID', '')) in hospitals_with_mrf
+        ]
+
+        # Batch fetch transparency data (single query instead of N queries)
+        transparency_data = PriceVisionService.get_batch_transparency_data(hospital_ids_with_mrf)
+
         for h in hospitals:
             facility_id = str(h.get('Facility ID', ''))
-            if facility_id in hospitals_with_mrf:
-                # Get prices for this hospital to calculate transparency
-                prices = PriceVisionService.get_prices(hospital_npi=facility_id, limit=50)
-                h['ml_transparency_score'] = calculate_transparency_score(h, prices)
+            if facility_id in transparency_data:
+                data = transparency_data[facility_id]
+                h['ml_transparency_score'] = data['transparency_score']
 
                 # Flag suspicious pricing gaps
-                if prices:
-                    prices_with_cash = sum(1 for p in prices if p.get('cash_price'))
-                    cash_ratio = prices_with_cash / len(prices) if len(prices) > 0 else 0
-                    if cash_ratio < 0.5 and len(prices) > 10:
-                        suspicious_gaps.append({
-                            'facility_name': h.get('Facility Name', 'Unknown'),
-                            'facility_id': facility_id,
-                            'total_prices': len(prices),
-                            'missing_cash': len(prices) - prices_with_cash,
-                            'gap_ratio': round((1 - cash_ratio) * 100, 1)
-                        })
+                if data['cash_ratio'] < 0.5 and data['total_prices'] > 10:
+                    suspicious_gaps.append({
+                        'facility_name': h.get('Facility Name', 'Unknown'),
+                        'facility_id': facility_id,
+                        'total_prices': data['total_prices'],
+                        'missing_cash': data['total_prices'] - data['prices_with_cash'],
+                        'gap_ratio': round((1 - data['cash_ratio']) * 100, 1)
+                    })
+            elif facility_id in hospitals_with_mrf:
+                h['ml_transparency_score'] = 30  # Base score for having any data
             else:
                 h['ml_transparency_score'] = 0
-    except Exception:
-        pass  # Continue without ML features
+    except Exception as e:
+        import logging
+        logging.warning(f"Analytics transparency scoring failed: {e}")
 
     return render_template('gov/pricevision/analytics.html',
                           stats=stats, hospitals=hospitals, states=states,

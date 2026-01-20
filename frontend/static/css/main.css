@@ -217,7 +217,13 @@ a:hover {
 }
 
 .section-lg {
-  padding: var(--spacing-24) 0;
+  padding: var(--spacing-16) 0;
+}
+
+/* Main content area after page header */
+.container.container-xl {
+  padding-top: var(--spacing-6);
+  padding-bottom: var(--spacing-12);
 }
 
 /* ============================================
@@ -305,16 +311,19 @@ a:hover {
 }
 
 .navbar-gov .nav-link {
-  color: var(--primary-200);
+  color: var(--white);
+  opacity: 0.85;
 }
 
 .navbar-gov .nav-link:hover {
   color: var(--white);
+  opacity: 1;
   background: rgba(255, 255, 255, 0.1);
 }
 
 .navbar-gov .nav-link.active {
   color: var(--white);
+  opacity: 1;
   background: rgba(255, 255, 255, 0.15);
 }
 
@@ -331,7 +340,11 @@ a:hover {
 
 .hero-landing {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary-900) 0%, var(--primary-700) 50%, var(--primary-800) 100%);
+  background: linear-gradient(135deg, rgba(15, 30, 60, 0.95) 0%, rgba(20, 40, 75, 0.95) 60%, rgba(120, 30, 30, 0.93) 100%),
+              url('/static/images/trump-healthcare.jpeg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
 
 .hero-overlay {
@@ -363,33 +376,33 @@ a:hover {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(3rem, 6vw, 4.5rem);
   font-weight: 800;
   color: var(--white);
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
   line-height: 1.1;
 }
 
 .hero-title span {
   display: block;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .hero-subtitle {
-  font-size: var(--text-xl);
-  color: var(--primary-100);
-  max-width: 600px;
-  margin-bottom: var(--spacing-8);
-  line-height: 1.6;
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 550px;
+  margin-bottom: var(--spacing-6);
+  line-height: 1.5;
 }
 
 .hero-stats {
   display: flex;
-  gap: var(--spacing-8);
-  margin-top: var(--spacing-12);
+  gap: var(--spacing-10);
+  margin-top: var(--spacing-2);
 }
 
 .hero-stat {
@@ -398,15 +411,15 @@ a:hover {
 
 .hero-stat-value {
   font-size: var(--text-4xl);
-  font-weight: 800;
+  font-weight: 700;
   color: var(--white);
 }
 
 .hero-stat-label {
-  font-size: var(--text-sm);
-  color: var(--primary-200);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 /* ============================================
@@ -562,16 +575,19 @@ a:hover {
    ============================================ */
 .portal-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: var(--spacing-8);
-  margin-top: var(--spacing-12);
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-6);
+  margin-top: var(--spacing-10);
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .portal-card {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-2xl);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-8);
   text-align: center;
   transition: all var(--transition-base);
@@ -580,51 +596,56 @@ a:hover {
 }
 
 .portal-card:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-4px);
 }
 
 .portal-card-icon {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   margin: 0 auto var(--spacing-4);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--text-4xl);
-  color: var(--white);
+  font-size: var(--text-3xl);
+  color: white;
 }
 
 .portal-card-title {
-  font-size: var(--text-2xl);
-  font-weight: 700;
+  font-size: var(--text-xl);
+  font-weight: 600;
   color: var(--white);
-  margin-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 .portal-card-description {
-  color: var(--primary-200);
-  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
   margin-bottom: var(--spacing-4);
+  line-height: 1.5;
 }
 
 .portal-card-modules {
   display: flex;
   justify-content: center;
-  gap: var(--spacing-2);
+  gap: var(--spacing-1);
   flex-wrap: wrap;
+  margin-bottom: var(--spacing-4);
 }
 
 .portal-card-badge {
-  display: inline-block;
-  padding: var(--spacing-1) var(--spacing-3);
-  font-size: var(--text-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-size: 12px;
   font-weight: 500;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--white);
 }
 
@@ -730,22 +751,29 @@ a:hover {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-6);
+  gap: var(--spacing-5);
 }
 
 .stat-card {
   background: var(--white);
   border-radius: var(--radius-xl);
   padding: var(--spacing-6);
-  box-shadow: var(--shadow-md);
-  border-left: 4px solid var(--primary-700);
+  box-shadow: var(--shadow-lg);
+  border-left: 5px solid var(--primary-700);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-xl);
 }
 
 .stat-card-value {
-  font-size: var(--text-3xl);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 800;
   color: var(--neutral-900);
-  margin-bottom: var(--spacing-1);
+  margin-bottom: var(--spacing-2);
+  line-height: 1;
 }
 
 .stat-card-label {
@@ -753,13 +781,23 @@ a:hover {
   color: var(--neutral-500);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 .stat-card--pricevision { border-left-color: var(--pricevision); }
+.stat-card--pricevision .stat-card-value { color: var(--pricevision-dark); }
+
 .stat-card--drugwatch { border-left-color: var(--drugwatch); }
+.stat-card--drugwatch .stat-card-value { color: var(--drugwatch-dark); }
+
 .stat-card--foodscore { border-left-color: var(--foodscore); }
+.stat-card--foodscore .stat-card-value { color: var(--foodscore-dark); }
+
 .stat-card--ruralaccess { border-left-color: var(--ruralaccess); }
+.stat-card--ruralaccess .stat-card-value { color: var(--ruralaccess-dark); }
+
 .stat-card--chroniccare { border-left-color: var(--chroniccare); }
+.stat-card--chroniccare .stat-card-value { color: var(--chroniccare-dark); }
 
 /* ============================================
    Forms
@@ -943,51 +981,98 @@ a:hover {
    ============================================ */
 .page-header {
   background: linear-gradient(135deg, var(--primary-900), var(--primary-700));
-  padding: var(--spacing-12) 0;
-  margin-bottom: var(--spacing-8);
+  padding: var(--spacing-20) 0 var(--spacing-24);
+  margin-bottom: 0;
 }
 
 .page-header-content {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--spacing-6);
+  padding: 0 var(--spacing-8);
 }
 
 .page-title {
-  font-size: var(--text-4xl);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 800;
   color: var(--white);
-  margin-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.page-title i {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  opacity: 0.9;
 }
 
 .page-subtitle {
-  font-size: var(--text-lg);
-  color: var(--primary-200);
+  font-size: var(--text-xl);
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 700px;
 }
 
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--text-sm);
-  color: var(--primary-300);
-  margin-bottom: var(--spacing-4);
+  gap: var(--spacing-3);
+  font-size: var(--text-base);
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: var(--spacing-6);
 }
 
 .breadcrumb a {
-  color: var(--primary-200);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .breadcrumb a:hover {
   color: var(--white);
 }
 
-/* Module-specific page headers */
-.page-header--pricevision { background: linear-gradient(135deg, #92400e, var(--pricevision)); }
-.page-header--drugwatch { background: linear-gradient(135deg, #991b1b, var(--drugwatch)); }
-.page-header--foodscore { background: linear-gradient(135deg, #166534, var(--foodscore)); }
-.page-header--ruralaccess { background: linear-gradient(135deg, #5b21b6, var(--ruralaccess)); }
-.page-header--chroniccare { background: linear-gradient(135deg, #164e63, var(--chroniccare)); }
+.breadcrumb i {
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+/* Module-specific page headers with image backgrounds */
+.page-header--pricevision {
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.88) 0%, rgba(180, 83, 9, 0.85) 50%, rgba(245, 158, 11, 0.82) 100%),
+              url('/static/images/pricevision/UF-Health-Shands-Hospital-North-Tower.jpg');
+  background-size: cover;
+  background-position: center;
+}
+.page-header--drugwatch {
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.85) 0%, rgba(185, 28, 44, 0.82) 50%, rgba(239, 68, 68, 0.78) 100%),
+              url('/static/images/drugwatch/angled-pharmacy-shelves-gravity-feed-systems.jpg');
+  background-size: cover;
+  background-position: center top;
+}
+.page-header--foodscore {
+  background: linear-gradient(135deg, rgba(20, 83, 45, 0.88) 0%, rgba(22, 101, 52, 0.85) 50%, rgba(34, 197, 94, 0.82) 100%),
+              url('/static/images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.jpg');
+  background-size: cover;
+  background-position: center;
+}
+.page-header--ruralaccess {
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.88) 0%, rgba(109, 40, 217, 0.85) 50%, rgba(139, 92, 246, 0.82) 100%),
+              url('/static/images/ruralaccess/rural-hospitals.jpg');
+  background-size: cover;
+  background-position: center;
+}
+.page-header--chroniccare {
+  background: linear-gradient(135deg, rgba(22, 78, 99, 0.88) 0%, rgba(8, 145, 178, 0.85) 50%, rgba(6, 182, 212, 0.82) 100%),
+              url('/static/images/chroniccare/healthcare.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Public Portal header with patient image */
+.page-header--public {
+  background: linear-gradient(135deg, rgba(22, 101, 52, 0.88) 0%, rgba(34, 197, 94, 0.82) 50%, rgba(74, 222, 128, 0.78) 100%),
+              url('/static/images/chroniccare/provider-holding-hand-of-senior-patient.jpg');
+  background-size: 120%;
+  background-position: center 30%;
+}
 
 /* ============================================
    Footer
