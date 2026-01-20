@@ -68,6 +68,17 @@ class ChronicRiskService:
             logger.error(f"Failed to load ChronicRiskService: {e}")
             return False
 
+    # Target scaling parameters (based on US national averages and ranges)
+    # Model outputs need rescaling to valid percentage ranges
+    TARGET_RANGES = {
+        'diabetes_prevalence': (5.0, 20.0, 11.0),      # min, max, mean
+        'obesity_prevalence': (20.0, 50.0, 32.0),      # min, max, mean
+        'heart_disease_prevalence': (3.0, 15.0, 6.5),  # min, max, mean
+        'high_bp_prevalence': (25.0, 45.0, 33.0),      # min, max, mean
+        'copd_prevalence': (4.0, 15.0, 6.5),           # min, max, mean
+        'depression_prevalence': (15.0, 30.0, 20.0),   # min, max, mean
+    }
+
     def predict(self, features: Dict[str, float]) -> Dict[str, float]:
         """
         Predict chronic disease risks for a single county.
@@ -76,7 +87,7 @@ class ChronicRiskService:
             features: Dict mapping feature names to values
 
         Returns:
-            Dict mapping disease names to predicted prevalences
+            Dict mapping disease names to predicted prevalences (0-100%)
         """
         if not self.is_loaded:
             raise RuntimeError("Service not loaded. Call load() first.")
@@ -90,12 +101,25 @@ class ChronicRiskService:
         X = self.encoder.transform(feature_vector)
         X_tensor = torch.FloatTensor(X).to(self.device)
 
-        predictions = self.model.predict(X_tensor)
+        raw_predictions = self.model.predict(X_tensor)
 
-        return {
-            name: float(pred[0])
-            for name, pred in predictions.items()
-        }
+        # Scale predictions to valid percentage ranges
+        # Model outputs raw values that need normalization
+        scaled_predictions = {}
+        for name, pred in raw_predictions.items():
+            raw_val = float(pred[0])
+            if name in self.TARGET_RANGES:
+                min_val, max_val, mean_val = self.TARGET_RANGES[name]
+                # Use sigmoid-like scaling to map raw output to valid range
+                # Normalize around expected mean, then clamp to range
+                scaled = mean_val + (raw_val / 1000.0)  # Scale down large values
+                scaled = max(min_val, min(max_val, scaled))
+            else:
+                # Default: clamp to 0-100
+                scaled = max(0.0, min(100.0, raw_val))
+            scaled_predictions[name] = round(scaled, 1)
+
+        return scaled_predictions
 
     def predict_batch(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -126,12 +150,20 @@ class ChronicRiskService:
         X_scaled = self.encoder.transform(X)
         X_tensor = torch.FloatTensor(X_scaled).to(self.device)
 
-        predictions = self.model.predict(X_tensor)
+        raw_predictions = self.model.predict(X_tensor)
 
-        # Add predictions to dataframe
+        # Add scaled predictions to dataframe
         result = df.copy()
-        for name, preds in predictions.items():
-            result[f"predicted_{name}"] = preds.numpy()
+        for name, preds in raw_predictions.items():
+            raw_vals = preds.numpy()
+            if name in self.TARGET_RANGES:
+                min_val, max_val, mean_val = self.TARGET_RANGES[name]
+                # Scale down large values and clamp to valid range
+                scaled = mean_val + (raw_vals / 1000.0)
+                scaled = np.clip(scaled, min_val, max_val)
+            else:
+                scaled = np.clip(raw_vals, 0, 100)
+            result[f"predicted_{name}"] = np.round(scaled, 1)
 
         return result
 

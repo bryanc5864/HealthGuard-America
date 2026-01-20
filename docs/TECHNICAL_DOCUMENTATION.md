@@ -14,16 +14,17 @@
 4. [Data Layer](#4-data-layer)
 5. [Machine Learning Models](#5-machine-learning-models)
 6. [Frontend Application](#6-frontend-application)
-7. [Service Layer](#7-service-layer)
-8. [API Reference](#8-api-reference)
-9. [Configuration](#9-configuration)
-10. [Security & Authentication](#10-security--authentication)
-11. [Deployment Guide](#11-deployment-guide)
-12. [Development Guide](#12-development-guide)
-13. [Testing](#13-testing)
-14. [Performance Optimization](#14-performance-optimization)
-15. [Troubleshooting](#15-troubleshooting)
-16. [Appendices](#16-appendices)
+7. [Complete Module Functionality Reference](#7-complete-module-functionality-reference)
+8. [Service Layer](#8-service-layer)
+9. [API Reference](#9-api-reference)
+10. [Configuration](#10-configuration)
+11. [Security & Authentication](#11-security--authentication)
+12. [Deployment Guide](#12-deployment-guide)
+13. [Development Guide](#13-development-guide)
+14. [Testing](#14-testing)
+15. [Performance Optimization](#15-performance-optimization)
+16. [Troubleshooting](#16-troubleshooting)
+17. [Appendices](#17-appendices)
 
 ---
 
@@ -1333,7 +1334,404 @@ frontend/static/
 
 ---
 
-## 7. Service Layer
+## 7. Complete Module Functionality Reference
+
+This section provides a comprehensive reference of all pages, routes, features, and capabilities for each module in the HealthGuard platform.
+
+### 7.1 PriceVision Module
+
+**Purpose:** Hospital price transparency with ML-powered analytics and fairness scoring
+
+#### Page Routes - Government Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/gov/pricevision/` | Module overview dashboard | Statistics cards, top hospitals by volume, top procedures, quick search |
+| Search | `/gov/pricevision/search` | Search procedures and hospitals | ML semantic matching, state filter, procedure discovery, hospital lookup |
+| Compare | `/gov/pricevision/compare` | Compare prices across hospitals | ML fairness analysis, best value detection, price clustering, outlier detection |
+| Hospital Detail | `/gov/pricevision/hospital/<npi>` | Single hospital analysis | Pricing patterns, specialty breakdown, transparency score, procedure list |
+| My Price | `/gov/pricevision/my-price` | Price fairness checker | User-submitted price vs market rates, percentile ranking, fairness score |
+| Analytics | `/gov/pricevision/analytics` | Compliance analytics | State compliance rates, suspicious pricing gaps, batch transparency scoring |
+
+#### Page Routes - Public Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/public/pricevision/` | Module overview | Statistics, featured hospitals, procedure search |
+| Search | `/public/pricevision/search` | Procedure/hospital search | Same ML semantic matching as gov version |
+| Compare | `/public/pricevision/compare` | Price comparison tool | Same fairness analysis (without compliance features) |
+| Hospital Detail | `/public/pricevision/hospital/<npi>` | Hospital pricing details | Pricing analysis, procedure breakdown |
+| My Price | `/public/pricevision/my-price` | Consumer price checker | Market comparison, fairness scoring |
+
+#### API Endpoints
+
+| Method | Endpoint | Parameters | Response |
+|--------|----------|------------|----------|
+| GET | `/public/api/pricevision/procedures` | `q`, `limit` | List of procedures with HCPCS codes |
+| GET | `/public/api/pricevision/hospitals` | `state`, `limit` | List of hospitals with pricing data |
+| GET | `/gov/api/pricevision/compliance` | `state` | State-level compliance metrics |
+
+#### ML Integration
+
+**ProcedureMatchingService:**
+- Semantic procedure matching using BioClinicalBERT embeddings
+- Returns top-K similar procedures with confidence scores
+- Used for intelligent procedure discovery during search
+- Handles misspellings and alternative descriptions
+
+**Fairness Analysis Engine:**
+- Z-score normalization of cash prices against state/procedure baselines
+- Price clustering: Overpriced (z > 1.5), Fair (-1.5 ≤ z ≤ 1.5), Discount (z < -1.5)
+- Outlier detection for anomalous pricing (z > 2)
+- Fairness score calculation (0-100 scale)
+
+**Transparency Scoring (Gov-only):**
+- Data completeness assessment: cash price presence, gross charges, payer info
+- Volume metrics: procedures per hospital
+- Scoring weights: data presence (30pts), cash completeness (20pts), gross charge completeness (15pts), payer info (15pts), procedure volume (20pts)
+
+#### Key Data Fields
+- Hospital: `facility_id`, `npi`, `facility_name`, `city`, `state`
+- Pricing: `cash_price`, `gross_charge`, `min_negotiated`, `max_negotiated`, `payer_name`
+- Procedure: `hcpcs_code`, `code`, `canonical_description`, `description`
+
+---
+
+### 7.2 FoodScore Module
+
+**Purpose:** Food product health scoring with NOVA classification, additive risk assessment, and OCR label scanning
+
+#### Page Routes - Government Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/gov/foodscore/` | Module overview | Statistics, high-risk products, category breakdown, NOVA distribution |
+| Search | `/gov/foodscore/search` | Product search | ML additive risk scores, category filtering, MAHA score display |
+| Product Detail | `/gov/foodscore/product/<barcode>` | Product analysis | ML NOVA classification, additive risks, nutrition breakdown, health concerns |
+| SNAP Analysis | `/gov/foodscore/snap` | SNAP eligibility health analysis | Batch NOVA classification (up to 100 products), additive pattern analysis, policy insights |
+| Analyze Label | `/gov/foodscore/analyze` | Manual nutrition analysis | Image upload with OCR, camera capture, health score calculation, ML analysis |
+| Additives | `/gov/foodscore/additives` | Additive risk catalog | Risk categorization (high/medium/low), regulatory status, search functionality |
+
+#### Page Routes - Public Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/public/foodscore/` | Module overview | Statistics, featured products, categories |
+| Search | `/public/foodscore/search` | Product search | Basic search without gov-level ML enrichment |
+| Scan | `/public/foodscore/scan` | Barcode scanner | QR/barcode scanning via camera, product lookup |
+| Product Detail | `/public/foodscore/product/<barcode>` | Product details | Full ML NOVA & additive enrichment |
+| Additives | `/public/foodscore/additives` | Additive search | Basic search functionality |
+| Analyze Label | `/public/foodscore/analyze` | Nutrition analyzer | Same OCR and health score as gov version |
+
+#### API Endpoints
+
+| Method | Endpoint | Parameters | Response |
+|--------|----------|------------|----------|
+| GET | `/api/foodscore/products` | `q`, `category`, `limit` | Product list with health scores |
+| GET | `/api/foodscore/product/<barcode>` | - | Full product with ML analysis |
+| GET | `/api/foodscore/additives` | `q`, `limit` | Additive database entries |
+| GET | `/api/foodscore/stats` | - | Module statistics |
+| POST | `/api/foodscore/ocr` | `image` (file) | OCR extracted nutrition data |
+
+#### ML Integration
+
+**NOVA Classification Service:**
+- Classifies food processing levels (NOVA 1-4)
+- Input: `ingredients_text`
+- Output: `nova_group`, `confidence`, `description`, `probabilities`, `is_confident`
+- Detects disagreement with stored NOVA values
+- Batch classification for SNAP analysis
+
+**Additive Risk Service:**
+- Scores additives on 0-100 risk scale
+- Risk categories: low (<30), moderate (30-60), high (>60)
+- Provides FDA & EU regulatory status
+- Identifies artificial vs natural additives
+- Methods: `score_additive()`, `score_batch()`, `score_product_ingredients()`
+
+**Health Score Calculation:**
+```
+Base Score: 70 points
+NOVA Penalties: Group 1 (0), Group 2 (-5), Group 3 (-15), Group 4 (-30)
+Nutrition Concerns (-10 each): Sugar >10g, Sodium >500mg, Saturated Fat >5g
+Nutrition Benefits (+5 each): Fiber ≥3g, Protein ≥5g
+Final Range: 10-100
+```
+
+#### OCR Capabilities (3 fallback methods)
+1. **pytesseract** - Requires Tesseract OCR installation
+2. **Windows OCR** - Built-in on Windows 10/11 via winocr package
+3. **easyocr** - Pure Python fallback with automatic model download
+
+#### Nutrition Label Parsing
+Extracts via regex: serving size, calories, total fat, saturated fat, sodium, total carbs, sugars, protein, fiber, ingredients list
+
+#### Key Data Fields
+- Product: `code` (barcode), `product_name`, `brands`, `ingredients_text`, `categories_en`
+- Nutrition: `energy_kcal_100g`, `fat_100g`, `sugars_100g`, `sodium_100g`, `fiber_100g`, `proteins_100g`
+- Scores: `nova_group`, `nutriscore_grade`, `maha_score`, `health_score`
+- Additives: `additives_tags`, `risk_score`, `risk_category`, `fda_status`, `eu_status`
+
+---
+
+### 7.3 DrugWatch Module
+
+**Purpose:** Drug pricing comparison with international benchmarking and MFN (Most Favored Nation) analysis
+
+#### Page Routes - Government Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/gov/drugwatch/` | Module overview | Statistics, top expensive drugs, spending trends |
+| Search | `/gov/drugwatch/search` | Drug search | Search by brand/generic name, manufacturer filter |
+| Drug Detail | `/gov/drugwatch/drug/<drug_id>` | Drug details | International price comparison, cost breakdown |
+| Compare | `/gov/drugwatch/compare/<drug_id>` | Price comparison | Side-by-side international pricing |
+| MFN Analysis | `/gov/drugwatch/mfn` | Most Favored Nation analysis | Savings potential calculation (30% estimate), policy impact |
+| Trends | `/gov/drugwatch/trends` | Spending trends | Time-series analysis, pagination, year-over-year comparison |
+
+#### Page Routes - Public Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/public/drugwatch/` | Module overview | Statistics, top drugs by spending |
+| Search | `/public/drugwatch/search` | Drug search | Same search as gov version |
+| Drug Detail | `/public/drugwatch/drug/<drug_id>` | Drug details | International price comparison |
+| Compare | `/public/drugwatch/compare` or `/compare/<drug_id>` | Price comparison | Supports both URL patterns |
+
+#### API Endpoints
+
+| Method | Endpoint | Parameters | Response |
+|--------|----------|------------|----------|
+| GET | `/api/drugwatch/drugs` | `q`, `limit` | Drug list with pricing |
+| GET | `/api/drugwatch/compare/<drug_name>` | - | US vs international prices |
+| GET | `/gov/api/drugwatch/mfn` | `q`, `limit` | MFN savings analysis |
+| GET | `/gov/api/drugwatch/trends` | `year`, `limit` | Spending trend data |
+
+#### Key Features
+
+**MFN Analysis (Gov-only):**
+- Compares US spending against international benchmark prices
+- Estimated savings calculation: 30% potential reduction
+- Supports search filtering for specific drugs
+- Pagination for large result sets
+
+**International Price Comparison:**
+- Supported countries: Australia (PBS), Canada (DPD), UK (NHS), Germany
+- Currency conversion to USD
+- Percentage difference calculation
+
+**Spending Analytics:**
+- Total spending by drug (2023 data)
+- Brand name and generic name tracking
+- Top expensive drugs ranking by total_spending_2023
+
+#### Key Data Fields
+- Drug: `brand_name`, `generic_name`, `drug_id`, `ndc`, `manufacturer`
+- Pricing: `total_spending_2023`, `avg_cost_per_claim`, `price_per_unit`
+- International: `country`, `price_usd`, `price_local`, `currency`
+
+---
+
+### 7.4 RuralAccess Module
+
+**Purpose:** Healthcare access mapping and HPSA (Health Professional Shortage Area) analysis
+
+**Note:** This module is **Government Portal only** - no public access.
+
+#### Page Routes - Government Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/gov/ruralaccess/` | Module overview | Statistics, state breakdown, HPSA type explanation, recent facility closures |
+| Interactive Map | `/gov/ruralaccess/map` | HPSA shortage map | Leaflet.js map, multi-filter support, color-coded markers by severity |
+| Analytics | `/gov/ruralaccess/analytics` | Shortage analytics | State-by-state breakdown, discipline analysis, trend insights |
+| County Detail | `/gov/ruralaccess/county/<fips>` | County profile | All HPSAs in county, FQHC locations, shortage summary |
+| HPSA Detail | `/gov/ruralaccess/hpsa/<hpsa_id>` | HPSA designation details | Individual designation info, population served, score breakdown |
+
+#### API Endpoints
+
+| Method | Endpoint | Parameters | Response |
+|--------|----------|------------|----------|
+| GET | `/gov/api/ruralaccess/hpsas` | `state`, `discipline`, `shortage_level`, `rural_status`, `designation_type`, `limit` | HPSA list with filters |
+| GET | `/gov/api/ruralaccess/analytics` | - | Comprehensive analytics data |
+| GET | `/gov/api/ruralaccess/counties` | `state`, `limit` | County shortage summaries |
+| GET | `/gov/api/ruralaccess/map-data` | - | GeoJSON for map visualization |
+| GET | `/gov/api/ruralaccess/stats` | - | Module statistics |
+
+#### HPSA Designation Types
+HPSAs are **not just counties** - they include multiple designation types:
+- **Population Groups** - Low-income populations, migrant workers, homeless
+- **Health Centers** - FQHCs, Rural Health Clinics, FQHC Look-Alikes
+- **Geographic Areas** - Counties, census tracts, service areas
+- **Facilities** - Correctional facilities, Indian Health Service, Tribal clinics
+
+#### Filter Options
+
+**Shortage Level (by HPSA Score):**
+- Critical: Score 20-25
+- High: Score 15-19
+- Moderate: Score 10-14
+- Low: Score 0-9
+
+**Disciplines:**
+- Primary Care
+- Dental Health
+- Mental Health
+
+**Rural Status:**
+- Rural
+- Non-Rural
+- Partially Rural
+
+**Limit Options:** 100, 500, 1000, "all" (unlimited)
+
+#### Key Data Fields
+- HPSA: `hpsa_id`, `hpsa_name`, `designation_type`, `discipline`, `hpsa_score`, `status`
+- Location: `state`, `county`, `county_fips`, `latitude`, `longitude`
+- Demographics: `population`, `poverty_rate`, `rural_status`
+
+---
+
+### 7.5 ChronicCare Module
+
+**Purpose:** Chronic disease analytics with ML-powered risk prediction and intervention prioritization
+
+**Note:** This module is **Government Portal only** - no public access.
+
+#### Page Routes - Government Portal
+
+| Route | Endpoint | Description | Key Features |
+|-------|----------|-------------|--------------|
+| Home | `/gov/chroniccare/` | Module overview | National statistics, disease trends, intervention priority summary |
+| Dashboard | `/gov/chroniccare/dashboard` | MAHA metrics dashboard | County map with ML hotspots, risk factor aggregation, state filtering |
+| Correlations | `/gov/chroniccare/correlations` | Food-disease correlation | Interactive scatter plots, state filtering, correlation coefficients |
+| Interventions | `/gov/chroniccare/interventions` | ML intervention targets | Priority tiers, MAHA index, confidence scores, recommended actions |
+| Analytics | `/gov/chroniccare/analytics` | State-by-state analytics | State comparison, county-level charts, disease prevalence maps |
+| County Detail | `/gov/chroniccare/county/<fips>` | County chronic disease profile | ML predictions, risk breakdown, top recommendations, comparison to state/national |
+| ML Simulator | `/gov/chroniccare/simulator` | Interactive feature simulator | 20+ adjustable inputs, real-time disease predictions, intervention recommendations |
+
+#### API Endpoints
+
+| Method | Endpoint | Parameters | Response |
+|--------|----------|------------|----------|
+| GET | `/gov/api/chroniccare/counties` | `state`, `limit` | County health data list |
+| GET | `/gov/api/chroniccare/correlations` | - | Food-disease correlation data |
+| GET | `/gov/api/chroniccare/interventions` | `limit` | ML-ranked intervention priorities |
+| GET | `/gov/api/chroniccare/stats` | - | National statistics |
+| GET | `/gov/api/chroniccare/state-stats` | - | Per-state aggregated statistics |
+
+#### ML Integration
+
+**ChronicCareMLService (Primary):**
+- Loads 3 sub-services: risk_service, prioritization_service, county analyzer
+- Graceful degradation if ML dependencies unavailable
+- Model confidence: 93.9% accuracy
+
+**Chronic Risk Predictor:**
+- Multi-task neural network predicting 6 disease prevalences
+- Diseases: Diabetes, Obesity, Heart Disease, High Blood Pressure, COPD, Depression
+- Input: 19 county-level features
+- Output: Prevalence percentages (0-100%)
+
+**Intervention Prioritizer:**
+- Calculates MAHA (Make America Healthy Again) index
+- Priority tiers based on composite risk score:
+  - **Critical:** score > 22
+  - **High:** score > 19 and ≤ 22
+  - **Medium:** score > 16 and ≤ 19
+  - **Low:** score ≤ 16
+- Returns confidence score (0-1)
+
+#### 19 Input Features for ML Models
+
+**Food Environment (5):**
+- `grocery_stores_per_1000`
+- `fast_food_restaurants_per_1000`
+- `food_environment_index`
+- `food_insecurity_rate`
+- `pct_limited_food_access`
+
+**Healthcare Access (4):**
+- `pcp_rate` (primary care physicians per 100K)
+- `mental_health_provider_rate`
+- `pct_uninsured`
+- `preventable_hospitalizations`
+
+**Socioeconomic (5):**
+- `median_household_income`
+- `child_poverty_rate`
+- `income_inequality_ratio`
+- `high_school_graduation_rate`
+- `pct_some_college`
+
+**Behavioral (4):**
+- `physical_inactivity_prevalence`
+- `excessive_drinking_prevalence`
+- `smoking_prevalence`
+- `pct_insufficient_sleep`
+
+**Demographics (1):**
+- `pct_rural`
+
+#### Risk Factor Analysis (12 factors)
+
+| Factor | Threshold | Weight | Direction |
+|--------|-----------|--------|-----------|
+| Food Insecurity | 15% | 0.12 | Higher = worse |
+| Limited Food Access | 10% | 0.08 | Higher = worse |
+| Low Grocery Access | 0.2/1000 | 0.06 | Lower = worse |
+| High Fast Food Density | 0.8/1000 | 0.07 | Higher = worse |
+| Physical Inactivity | 28% | 0.15 | Higher = worse |
+| Smoking | 18% | 0.10 | Higher = worse |
+| Excessive Drinking | 20% | 0.05 | Higher = worse |
+| Insufficient Sleep | 35% | 0.06 | Higher = worse |
+| Lack of Insurance | 12% | 0.10 | Higher = worse |
+| Low PCP Access | 50/100K | 0.08 | Lower = worse |
+| Child Poverty | 20% | 0.08 | Higher = worse |
+| Low Education | 85% grad | 0.05 | Lower = worse |
+
+#### Intervention Recommendations
+
+| Risk Factor | Intervention | Impact | Reduction | Cost |
+|-------------|-------------|--------|-----------|------|
+| Physical Inactivity | Community fitness programs | High | 10-15% | Medium |
+| Smoking | Tobacco cessation programs | High | 12-18% | Low |
+| Food Insecurity | SNAP expansion & food banks | High | 8-12% | Medium |
+| Lack of Insurance | ACA enrollment assistance | High | 15-20% | High |
+| Low PCP Access | Telehealth expansion | Medium | 5-10% | Medium |
+| Fast Food Density | Healthy food incentives | Medium | 5-8% | Low |
+
+#### Dashboard ML Insights
+
+**Emerging Hotspots Detection:**
+- Identifies counties with predicted risk increase > 1.5 points
+- Compares ML-predicted vs actual disease prevalence
+- Ranks top 5 hotspots by risk increase magnitude
+
+**Aggregated Risk Factors:**
+- Counts frequency of each risk factor across analyzed counties
+- Shows average contribution to composite risk score
+
+#### Key Data Fields
+- County: `fips`, `county_name`, `state_abbr`, `state`, `population`
+- Disease Prevalence: `diabetes_prevalence`, `obesity_prevalence`, `heart_disease_prevalence`, `high_bp_prevalence`, `copd_prevalence`, `depression_prevalence`
+- ML Output: `risk_score`, `priority_tier`, `maha_index`, `confidence`, `predictions`
+
+---
+
+### 7.6 Module Access Summary
+
+| Module | Public Portal | Government Portal | ML Models | Primary Use Case |
+|--------|---------------|-------------------|-----------|------------------|
+| **PriceVision** | ✅ Full access | ✅ + Analytics | Procedure Matching, Fairness | Consumer price transparency |
+| **FoodScore** | ✅ Full access | ✅ + SNAP Analysis | NOVA Classifier, Additive Scorer | Product health scoring |
+| **DrugWatch** | ✅ Basic access | ✅ + MFN/Trends | None | Drug price comparison |
+| **RuralAccess** | ❌ None | ✅ Full access | None | Healthcare access mapping |
+| **ChronicCare** | ❌ None | ✅ Full access | Risk Predictor, Prioritizer | Disease prevention planning |
+
+---
+
+## 8. Service Layer
 
 ### 7.1 Service Architecture
 
@@ -1460,9 +1858,9 @@ class BaseService:
 
 ---
 
-## 8. API Reference
+## 9. API Reference
 
-### 8.1 Public API Endpoints
+### 9.1 Public API Endpoints
 
 #### PriceVision
 
@@ -1487,7 +1885,7 @@ class BaseService:
 | GET | `/public/api/foodscore/additives` | `q`, `limit` | `[{name, risk_score, ...}]` |
 | GET | `/public/api/foodscore/stats` | - | `{total_products, ...}` |
 
-### 8.2 Government API Endpoints
+### 9.2 Government API Endpoints
 
 #### RuralAccess (Gov Only)
 
@@ -1508,7 +1906,7 @@ class BaseService:
 | GET | `/gov/api/chroniccare/stats` | - | `{total_counties, avg_diabetes, ...}` |
 | GET | `/gov/api/chroniccare/state-stats` | - | `{state: {total_counties, ...}}` |
 
-### 8.3 Response Formats
+### 9.3 Response Formats
 
 **Success Response:**
 ```json
@@ -1530,9 +1928,9 @@ class BaseService:
 
 ---
 
-## 9. Configuration
+## 10. Configuration
 
-### 9.1 Frontend Configuration
+### 10.1 Frontend Configuration
 
 **File:** `frontend/config.py`
 
@@ -1606,7 +2004,7 @@ class Config:
     }
 ```
 
-### 9.2 ML Configuration
+### 10.2 ML Configuration
 
 **File:** `ml/config.py`
 
@@ -1682,7 +2080,7 @@ class ChronicRiskPredictorConfig:
     scaler_path: Path = WEIGHTS_DIR / 'chronic_feature_scaler.pkl'
 ```
 
-### 9.3 Environment Variables
+### 10.3 Environment Variables
 
 ```bash
 # .env file (not committed to git)
@@ -1708,9 +2106,9 @@ OPENAI_API_KEY=your-key-here
 
 ---
 
-## 10. Security & Authentication
+## 11. Security & Authentication
 
-### 10.1 Authentication Flow
+### 11.1 Authentication Flow
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -1748,7 +2146,7 @@ OPENAI_API_KEY=your-key-here
                            └────────────┘
 ```
 
-### 10.2 Session Management
+### 11.2 Session Management
 
 ```python
 # Authentication in blueprints/gov/__init__.py
@@ -1793,7 +2191,7 @@ def logout():
     return redirect(url_for('landing'))
 ```
 
-### 10.3 Security Best Practices
+### 11.3 Security Best Practices
 
 **Input Validation:**
 ```python
@@ -1830,9 +2228,9 @@ csrf = CSRFProtect(app)
 
 ---
 
-## 11. Deployment Guide
+## 12. Deployment Guide
 
-### 11.1 Local Development
+### 12.1 Local Development
 
 ```bash
 # Clone repository
@@ -1859,7 +2257,7 @@ python scripts/train_models.py --all
 python frontend/app.py
 ```
 
-### 11.2 Production Deployment
+### 12.2 Production Deployment
 
 **Using Gunicorn (Linux):**
 ```bash
@@ -1932,7 +2330,7 @@ services:
     restart: unless-stopped
 ```
 
-### 11.3 Cloud Deployment
+### 12.3 Cloud Deployment
 
 **AWS (EC2 + S3):**
 ```bash
@@ -1951,9 +2349,9 @@ az webapp up --name healthguard --resource-group rg-healthguard --runtime PYTHON
 
 ---
 
-## 12. Development Guide
+## 13. Development Guide
 
-### 12.1 Adding a New Module
+### 13.1 Adding a New Module
 
 1. **Create service class:**
 ```python
@@ -2010,7 +2408,7 @@ MODULES = {
 }
 ```
 
-### 12.2 Adding a New ML Model
+### 13.2 Adding a New ML Model
 
 1. **Create model architecture:**
 ```python
@@ -2088,7 +2486,7 @@ class NewModelConfig:
     output_model: Path = WEIGHTS_DIR / 'newmodel.pt'
 ```
 
-### 12.3 Code Style Guidelines
+### 13.3 Code Style Guidelines
 
 **Python Style:**
 - Follow PEP 8
@@ -2128,9 +2526,9 @@ def get_hospital(self, facility_id: str) -> Optional[Dict]:
 
 ---
 
-## 13. Testing
+## 14. Testing
 
-### 13.1 Service Testing
+### 14.1 Service Testing
 
 ```python
 # tests/test_services.py
@@ -2172,7 +2570,7 @@ class TestDrugWatchService:
         assert 'international' in result
 ```
 
-### 13.2 Route Testing
+### 14.2 Route Testing
 
 ```python
 # tests/test_routes.py
@@ -2215,7 +2613,7 @@ class TestGovRoutes:
         assert b'Login' in response.data
 ```
 
-### 13.3 ML Model Testing
+### 14.3 ML Model Testing
 
 ```python
 # tests/test_ml.py
@@ -2262,9 +2660,9 @@ class TestAdditiveScorer:
 
 ---
 
-## 14. Performance Optimization
+## 15. Performance Optimization
 
-### 14.1 Data Layer Optimization
+### 15.1 Data Layer Optimization
 
 **Parquet Predicate Pushdown:**
 ```python
@@ -2302,7 +2700,7 @@ class HospitalService:
         return cls._hospital_by_id.get(facility_id)
 ```
 
-### 14.2 ML Inference Optimization
+### 15.2 ML Inference Optimization
 
 **Model Caching:**
 ```python
@@ -2333,7 +2731,7 @@ model = model.to(device)
 inputs = inputs.to(device)
 ```
 
-### 14.3 Response Optimization
+### 15.3 Response Optimization
 
 **Pagination:**
 ```python
@@ -2365,9 +2763,9 @@ compress.init_app(app)
 
 ---
 
-## 15. Troubleshooting
+## 16. Troubleshooting
 
-### 15.1 Common Issues
+### 16.1 Common Issues
 
 **Issue: Model not loading**
 ```
@@ -2399,7 +2797,7 @@ jinja2.exceptions.TemplateNotFound: public/module/page.html
 ```
 **Solution:** Check template path and ensure file exists.
 
-### 15.2 Debugging
+### 16.2 Debugging
 
 **Enable Flask debug mode:**
 ```python
@@ -2435,9 +2833,9 @@ stats.print_stats(10)
 
 ---
 
-## 16. Appendices
+## 17. Appendices
 
-### 16.1 Glossary
+### 17.1 Glossary
 
 | Term | Definition |
 |------|------------|
@@ -2452,7 +2850,7 @@ stats.print_stats(10)
 | **PBS** | Pharmaceutical Benefits Scheme (Australia) |
 | **NADAC** | National Average Drug Acquisition Cost |
 
-### 16.2 Data Source URLs
+### 17.2 Data Source URLs
 
 | Source | URL |
 |--------|-----|
@@ -2463,7 +2861,7 @@ stats.print_stats(10)
 | HRSA HPSA | https://data.hrsa.gov/ |
 | USDA Food Atlas | https://www.ers.usda.gov/data-products/food-environment-atlas/ |
 
-### 16.3 Model Performance Summary
+### 17.3 Model Performance Summary
 
 | Model | Metric | Value | Date Trained |
 |-------|--------|-------|--------------|
@@ -2476,7 +2874,7 @@ stats.print_stats(10)
 | Procedure Encoder | MRR | 0.85 | Jan 2026 |
 | Procedure Encoder | Hits@5 | 0.92 | Jan 2026 |
 
-### 16.4 File Size Reference
+### 17.4 File Size Reference
 
 | Category | Files | Total Size |
 |----------|-------|------------|
@@ -2486,7 +2884,7 @@ stats.print_stats(10)
 | ML Weights | 10 files | ~104 MB |
 | Templates | 40+ files | ~200 KB |
 
-### 16.5 Version History
+### 17.5 Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
