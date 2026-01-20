@@ -59,7 +59,10 @@ def drugwatch_drug(drug_id):
 def drugwatch_mfn():
     """Most Favored Nation pricing analysis (gov-only)"""
     search = request.args.get('q', '')
-    limit = int(request.args.get('limit', 50))
+    try:
+        limit = int(request.args.get('limit', 50) or 50)
+    except (ValueError, TypeError):
+        limit = 50
 
     stats = DrugWatchService.get_stats()
 
@@ -97,8 +100,17 @@ def drugwatch_mfn():
 def drugwatch_trends():
     """Drug spending trends analysis (gov-only)"""
     search = request.args.get('q', '')
-    limit = int(request.args.get('limit', 50))
-    page = int(request.args.get('page', 1))
+    try:
+        limit = int(request.args.get('limit', 50) or 50)
+    except (ValueError, TypeError):
+        limit = 50
+    try:
+        page = int(request.args.get('page', 1) or 1)
+    except (ValueError, TypeError):
+        page = 1
+    # Ensure limit and page are at least 1 to avoid division by zero
+    limit = max(1, limit)
+    page = max(1, page)
 
     stats = DrugWatchService.get_stats()
 

@@ -16,46 +16,50 @@
     <p class="text-muted mb-4">Enter a procedure and the price you were quoted to see how it compares to market rates.</p>
 
     <!-- Input Form -->
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-sm border-0">
         <div class="card-body">
-            <form action="{{ url_for('gov.pricevision_my_price') }}" method="get">
+            <form action="{{ url_for('gov.pricevision_my_price') }}" method="get" id="priceForm">
                 <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Procedure Code <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="procedure" value="{{ query }}"
-                               placeholder="e.g., 70551" required>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-semibold">Procedure Code <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-clipboard2-pulse"></i></span>
+                            <input type="text" class="form-control form-control-lg" name="procedure" value="{{ query }}"
+                                   placeholder="e.g., 70551" required>
+                        </div>
                         <small class="text-muted">HCPCS code or search term</small>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Your Quoted Price <span class="text-danger">*</span></label>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label fw-semibold">Your Quoted Price <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="text" class="form-control" name="price" value="{{ user_price }}"
-                                   placeholder="e.g., 1500" required>
+                            <span class="input-group-text bg-success text-white">$</span>
+                            <input type="text" class="form-control form-control-lg" name="price" value="{{ user_price }}"
+                                   placeholder="e.g., 1500" required id="priceInput">
                         </div>
                         <small class="text-muted">The price you were quoted</small>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">State (Optional)</label>
-                        <select name="state" class="form-select">
+                    <div class="col-6 col-lg-3">
+                        <label class="form-label fw-semibold">State</label>
+                        <select name="state" class="form-select form-select-lg">
                             <option value="">All States</option>
                             {% for s in states %}
                             <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
                             {% endfor %}
                         </select>
-                        <small class="text-muted">Compare within your state</small>
+                        <small class="text-muted">Filter by state</small>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Hospital Name (Optional)</label>
-                        <input type="text" class="form-control" name="hospital" value="{{ hospital_name }}"
-                               placeholder="e.g., General Hospital">
-                        <small class="text-muted">For your reference</small>
+                    <div class="col-6 col-lg-3">
+                        <label class="form-label fw-semibold">Hospital</label>
+                        <input type="text" class="form-control form-control-lg" name="hospital" value="{{ hospital_name }}"
+                               placeholder="Optional">
+                        <small class="text-muted">For reference</small>
                     </div>
                 </div>
-                <div class="row mt-3">
+                <div class="row mt-4">
                     <div class="col-12">
-                        <button class="btn btn-warning btn-lg" type="submit">
-                            <i class="bi bi-search me-2"></i>Check My Price
+                        <button class="btn btn-warning btn-lg px-5" type="submit" id="checkBtn">
+                            <span class="spinner-border spinner-border-sm d-none me-2" id="checkSpinner"></span>
+                            <i class="bi bi-search me-2" id="checkIcon"></i>Check My Price
                         </button>
                     </div>
                 </div>
@@ -254,17 +258,34 @@
     {% endif %}
 
     <!-- Info Card -->
-    <div class="card bg-light mt-4">
+    <div class="card bg-light mt-4 border-0">
         <div class="card-body">
             <h6><i class="bi bi-info-circle me-2"></i>About Price Comparison</h6>
-            <ul class="mb-0 small">
-                <li><strong>Data Source:</strong> Hospital price transparency files required by CMS</li>
-                <li><strong>Fair Price:</strong> Within 0.5 standard deviations of the market average</li>
-                <li><strong>Overpriced:</strong> More than 1.5 standard deviations above average</li>
-                <li><strong>Discount:</strong> More than 1.5 standard deviations below average</li>
-                <li>Prices shown are cash/self-pay rates - insurance negotiated rates may differ</li>
-            </ul>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="mb-0 small">
+                        <li><strong>Data Source:</strong> Hospital price transparency files required by CMS</li>
+                        <li><strong>Fair Price:</strong> Within 0.5 standard deviations of the market average</li>
+                        <li><strong>Good Price:</strong> Below average but not significantly discounted</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="mb-0 small">
+                        <li><strong>Overpriced:</strong> More than 1.5 standard deviations above average</li>
+                        <li><strong>Great Deal:</strong> More than 1.5 standard deviations below average</li>
+                        <li>Prices shown are cash/self-pay rates - insurance rates may differ</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('priceForm').addEventListener('submit', function() {
+    document.getElementById('checkSpinner').classList.remove('d-none');
+    document.getElementById('checkIcon').classList.add('d-none');
+    document.getElementById('checkBtn').disabled = true;
+});
+</script>
 {% endblock %}
