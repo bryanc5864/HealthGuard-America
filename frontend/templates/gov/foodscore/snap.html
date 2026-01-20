@@ -138,52 +138,6 @@
                 </div>
             </div>
 
-            <!-- Disagreements Alert -->
-            {% if ml_nova_analysis.disagreement_count > 0 %}
-            <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                <strong>{{ ml_nova_analysis.disagreement_count }} classification disagreements</strong> detected between stored values and ML predictions.
-            </div>
-
-            {% if ml_nova_analysis.disagreements %}
-            <h6 class="mt-3">Sample Disagreements:</h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Stored NOVA</th>
-                            <th>ML NOVA</th>
-                            <th>Confidence</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in ml_nova_analysis.disagreements[:5] %}
-                        <tr>
-                            <td>{{ d.product_name[:40] }}{% if d.product_name|length > 40 %}...{% endif %}</td>
-                            <td>
-                                <span class="badge {% if d.stored_nova == 4 %}bg-danger{% elif d.stored_nova == 3 %}bg-warning text-dark{% elif d.stored_nova == 2 %}bg-info{% else %}bg-success{% endif %}">
-                                    {{ d.stored_nova }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge {% if d.ml_nova == 4 %}bg-danger{% elif d.ml_nova == 3 %}bg-warning text-dark{% elif d.ml_nova == 2 %}bg-info{% else %}bg-success{% endif %}">
-                                    {{ d.ml_nova }}
-                                </span>
-                            </td>
-                            <td>{{ d.confidence }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endif %}
-            {% else %}
-            <div class="alert alert-success mb-0">
-                <i class="bi bi-check-circle me-2"></i>
-                No significant disagreements between stored values and ML predictions.
-            </div>
-            {% endif %}
         </div>
     </div>
     {% endif %}
