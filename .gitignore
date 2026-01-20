@@ -44,3 +44,6 @@ temp_*.parquet
 # Claude temporary files
 .claude/
 tmpclaude-*
+
+# IDE files
+.idea/
