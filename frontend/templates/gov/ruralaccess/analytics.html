@@ -1,341 +1,281 @@
 {% extends "gov/base_gov.html" %}
 
-{% block extra_css %}
-{{ super() }}
-<style>
-    .stat-card {
-        transition: transform 0.2s;
-    }
-    .stat-card:hover {
-        transform: translateY(-2px);
-    }
-    .chart-container {
-        position: relative;
-        height: 300px;
-    }
-    .chart-container-lg {
-        position: relative;
-        height: 400px;
-    }
-    .insight-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-    }
-</style>
-{% endblock %}
+{% block title %}Healthcare Shortage Analytics - RuralAccess{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a></li>
-            <li class="breadcrumb-item active">Analytics</li>
-        </ol>
-    </nav>
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1">Healthcare Shortage Analytics</h2>
-            <p class="text-muted mb-0">Comprehensive analysis of Health Professional Shortage Areas (HPSAs)</p>
+<!-- Page Header -->
+<div class="page-header page-header--ruralaccess">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Analytics</span>
         </div>
-        <div>
-            <a href="{{ url_for('gov.ruralaccess_map') }}" class="btn btn-outline-primary">
-                <i class="bi bi-map me-1"></i> View Map
-            </a>
-        </div>
+        <h1 class="page-title">
+            <i class="bi bi-graph-up"></i> Healthcare Shortage Analytics
+        </h1>
+        <p class="page-subtitle">
+            Comprehensive analysis of Health Professional Shortage Areas (HPSAs)
+        </p>
     </div>
+</div>
 
+<div class="container container-2xl">
     <!-- Key Metrics Row -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card stat-card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-2">Total HPSAs</h6>
-                            <h2 class="mb-0">{{ "{:,}".format(stats.total_hpsas) }}</h2>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                            <i class="bi bi-geo-alt text-primary fs-4"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted">Across {{ stats.states_covered }} states/territories</small>
-                </div>
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--ruralaccess">
+                <div class="stat-card-value">{{ "{:,}".format(stats.total_hpsas) }}</div>
+                <div class="stat-card-label">Total HPSAs</div>
+                <small style="color: var(--neutral-500);">Across {{ stats.states_covered }} states/territories</small>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">{{ analytics.get('avg_hpsa_score', 0) }}</div>
+                <div class="stat-card-label">Avg HPSA Score</div>
+                <small style="color: var(--neutral-500);">Range: {{ analytics.get('min_hpsa_score', 0) }} - {{ analytics.get('max_hpsa_score', 25) }}</small>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--info);">
+                <div class="stat-card-value" style="color: var(--info);">{{ "{:,.0f}".format((analytics.get('total_population_affected', 0)) / 1000000) }}M</div>
+                <div class="stat-card-label">Population Affected</div>
+                <small style="color: var(--neutral-500);">{{ "{:,}".format(analytics.get('avg_population_per_hpsa', 0)) }} avg per HPSA</small>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">{{ "{:,}".format(analytics.get('by_shortage_level', {}).get('Critical', 0)) }}</div>
+                <div class="stat-card-label">Critical Shortages</div>
+                <small style="color: var(--neutral-500);">Score 20-25 (most severe)</small>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-2">Avg HPSA Score</h6>
-                            <h2 class="mb-0">{{ analytics.avg_hpsa_score|default(0) }}</h2>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 rounded-3 p-3">
-                            <i class="bi bi-speedometer2 text-warning fs-4"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted">Range: {{ analytics.min_hpsa_score|default(0) }} - {{ analytics.max_hpsa_score|default(25) }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-2">Population Affected</h6>
-                            <h2 class="mb-0">{{ "{:,.0f}".format((analytics.total_population_affected|default(0)) / 1000000) }}M</h2>
-                        </div>
-                        <div class="bg-info bg-opacity-10 rounded-3 p-3">
-                            <i class="bi bi-people text-info fs-4"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted">{{ "{:,}".format(analytics.avg_population_per_hpsa|default(0)) }} avg per HPSA</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-2">Critical Shortages</h6>
-                            <h2 class="mb-0 text-danger">{{ "{:,}".format(analytics.by_shortage_level.get('Critical', 0)) }}</h2>
-                        </div>
-                        <div class="bg-danger bg-opacity-10 rounded-3 p-3">
-                            <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted">Score 20-25 (most severe)</small>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- Charts Row 1 -->
-    <div class="row g-4 mb-4">
-        <!-- Shortage Level Distribution -->
-        <div class="col-md-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Shortage Level Distribution</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <!-- Shortage Level Distribution -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-pie-chart" style="color: var(--ruralaccess);"></i> Shortage Level Distribution
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div style="padding: var(--spacing-5);">
+                    <div style="height: 300px;">
                         <canvas id="shortageLevelChart"></canvas>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Score Distribution Histogram -->
-        <div class="col-md-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>HPSA Score Distribution</h5>
+            <!-- Score Distribution Histogram -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-bar-chart" style="color: var(--ruralaccess);"></i> HPSA Score Distribution
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div style="padding: var(--spacing-5);">
+                    <div style="height: 300px;">
                         <canvas id="scoreDistributionChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Charts Row 2 -->
-    <div class="row g-4 mb-4">
-        <!-- Rural Status -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-tree me-2"></i>By Rural Status</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: var(--spacing-6);">
+            <!-- Rural Status -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-tree" style="color: var(--ruralaccess);"></i> By Rural Status
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div style="padding: var(--spacing-5);">
+                    <div style="height: 300px;">
                         <canvas id="ruralStatusChart"></canvas>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Designation Type -->
-        <div class="col-md-8">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-tags me-2"></i>By Designation Type</h5>
+            <!-- Designation Type -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-tags" style="color: var(--ruralaccess);"></i> By Designation Type
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div style="padding: var(--spacing-5);">
+                    <div style="height: 300px;">
                         <canvas id="designationTypeChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Top States Charts -->
-    <div class="row g-4 mb-4">
-        <!-- Top States by Critical Count -->
-        <div class="col-md-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Top 10 States: Critical Shortages</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <!-- Top States by Critical Count -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--error); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-geo-alt-fill"></i> Top 10 States: Critical Shortages
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container-lg">
+                <div style="padding: var(--spacing-5);">
+                    <div style="height: 400px;">
                         <canvas id="topCriticalStatesChart"></canvas>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Top States by Average Score -->
-        <div class="col-md-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart-fill text-warning me-2"></i>Top 10 States: Average HPSA Score</h5>
+            <!-- Top States by Average Score -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--warning); padding: var(--spacing-4);">
+                    <h3 style="color: var(--neutral-900); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-bar-chart-fill"></i> Top 10 States: Average HPSA Score
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container-lg">
+                <div style="padding: var(--spacing-5);">
+                    <div style="height: 400px;">
                         <canvas id="topAvgScoreStatesChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Population Impact -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Population by Shortage Level</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-people-fill" style="color: var(--info);"></i> Population by Shortage Level
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div style="padding: var(--spacing-5);">
+                    <div style="height: 300px;">
                         <canvas id="populationByLevelChart"></canvas>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Poverty Analysis -->
-        <div class="col-md-6">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Poverty & Healthcare Access</h5>
+            <!-- Poverty Analysis -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-cash-coin" style="color: var(--warning);"></i> Poverty & Healthcare Access
+                    </h3>
                 </div>
-                <div class="card-body">
-                    {% if analytics.avg_poverty_rate %}
-                    <div class="row text-center mb-4">
-                        <div class="col-6">
-                            <div class="p-3 bg-light rounded">
-                                <h4 class="mb-1">{{ analytics.avg_poverty_rate }}%</h4>
-                                <small class="text-muted">Avg Poverty Rate in HPSAs</small>
-                            </div>
+                <div style="padding: var(--spacing-5);">
+                    {% if analytics.get('avg_poverty_rate') %}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4); margin-bottom: var(--spacing-4);">
+                        <div style="background: var(--neutral-50); padding: var(--spacing-3); border-radius: var(--radius-md); text-align: center;">
+                            <div style="font-size: var(--text-2xl); font-weight: 700;">{{ analytics.get('avg_poverty_rate', 0) }}%</div>
+                            <small style="color: var(--neutral-500);">Avg Poverty Rate in HPSAs</small>
                         </div>
-                        <div class="col-6">
-                            <div class="p-3 bg-light rounded">
-                                <h4 class="mb-1">{{ "{:,}".format(analytics.high_poverty_hpsas|default(0)) }}</h4>
-                                <small class="text-muted">High Poverty HPSAs (>20%)</small>
-                            </div>
+                        <div style="background: var(--neutral-50); padding: var(--spacing-3); border-radius: var(--radius-md); text-align: center;">
+                            <div style="font-size: var(--text-2xl); font-weight: 700;">{{ "{:,}".format(analytics.get('high_poverty_hpsas', 0)) }}</div>
+                            <small style="color: var(--neutral-500);">High Poverty HPSAs (>20%)</small>
                         </div>
                     </div>
-                    <div class="chart-container" style="height: 200px;">
+                    <div style="height: 200px;">
                         <canvas id="povertyComparisonChart"></canvas>
                     </div>
                     {% else %}
-                    <div class="text-center text-muted py-5">
-                        <i class="bi bi-info-circle fs-1"></i>
-                        <p class="mt-2">Poverty data not available</p>
+                    <div style="text-align: center; padding: var(--spacing-8); color: var(--neutral-500);">
+                        <i class="bi bi-info-circle" style="font-size: 3rem; display: block; margin-bottom: var(--spacing-3);"></i>
+                        <p style="margin: 0;">Poverty data not available</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- State Data Table -->
-    <div class="row g-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>State-by-State Breakdown</h5>
-                    <input type="text" id="stateSearch" class="form-control form-control-sm w-auto" placeholder="Search state...">
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                        <table class="table table-hover" id="stateTable">
-                            <thead class="sticky-top bg-white">
-                                <tr>
-                                    <th>State</th>
-                                    <th class="text-end">Total HPSAs</th>
-                                    <th class="text-end">Avg Score</th>
-                                    <th class="text-end">Critical</th>
-                                    <th class="text-end">Population</th>
-                                    <th>Severity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for state in analytics.by_state|default([]) %}
-                                <tr>
-                                    <td><strong>{{ state.state }}</strong></td>
-                                    <td class="text-end">{{ "{:,}".format(state.total_hpsas) }}</td>
-                                    <td class="text-end">{{ state.avg_score }}</td>
-                                    <td class="text-end">
-                                        {% if state.critical_count > 0 %}
-                                        <span class="badge bg-danger">{{ state.critical_count }}</span>
-                                        {% else %}
-                                        <span class="text-muted">0</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end">{{ "{:,}".format(state.total_population) }}</td>
-                                    <td>
-                                        {% if state.avg_score >= 18 %}
-                                        <span class="badge bg-danger">Critical</span>
-                                        {% elif state.avg_score >= 15 %}
-                                        <span class="badge bg-warning text-dark">High</span>
-                                        {% elif state.avg_score >= 12 %}
-                                        <span class="badge bg-info">Moderate</span>
-                                        {% else %}
-                                        <span class="badge bg-success">Low</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-table" style="color: var(--ruralaccess);"></i> State-by-State Breakdown
+                </h3>
+                <input type="text" id="stateSearch" class="form-control" placeholder="Search state..." style="width: 200px;">
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div class="table-container" style="max-height: 500px;">
+                    <table class="table" id="stateTable">
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th style="text-align: right;">Total HPSAs</th>
+                                <th style="text-align: right;">Avg Score</th>
+                                <th style="text-align: right;">Critical</th>
+                                <th style="text-align: right;">Population</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for state in analytics.get('by_state', []) %}
+                            <tr>
+                                <td><strong style="color: var(--neutral-900);">{{ state.state }}</strong></td>
+                                <td style="text-align: right;">{{ "{:,}".format(state.total_hpsas) }}</td>
+                                <td style="text-align: right;">{{ state.avg_score }}</td>
+                                <td style="text-align: right;">
+                                    {% if state.critical_count > 0 %}
+                                    <span class="badge badge-error">{{ state.critical_count }}</span>
+                                    {% else %}
+                                    <span style="color: var(--neutral-400);">0</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">{{ "{:,}".format(state.total_population) }}</td>
+                                <td>
+                                    {% if state.avg_score >= 18 %}
+                                    <span class="badge badge-error">Critical</span>
+                                    {% elif state.avg_score >= 15 %}
+                                    <span class="badge badge-warning">High</span>
+                                    {% elif state.avg_score >= 12 %}
+                                    <span class="badge" style="background: var(--info); color: white;">Moderate</span>
+                                    {% else %}
+                                    <span class="badge badge-success">Low</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Chart.js default configuration
-    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
     Chart.defaults.plugins.legend.position = 'bottom';
 
     // Color palette
     const colors = {
-        critical: '#dc3545',
-        high: '#fd7e14',
-        moderate: '#ffc107',
-        low: '#28a745',
-        primary: '#0d6efd',
-        info: '#0dcaf0',
-        secondary: '#6c757d'
+        critical: '#dc2626',
+        high: '#f97316',
+        moderate: '#eab308',
+        low: '#22c55e',
+        primary: '#3b82f6',
+        info: '#06b6d4',
+        secondary: '#6b7280',
+        ruralaccess: '#6f42c1'
     };
 
     // 1. Shortage Level Pie Chart
-    const shortageLevelData = {{ analytics.by_shortage_level|default({})|tojson }};
+    const shortageLevelData = {{ analytics.get('by_shortage_level', {})|tojson }};
     new Chart(document.getElementById('shortageLevelChart'), {
         type: 'doughnut',
         data: {
@@ -362,7 +302,7 @@
     });
 
     // 2. Score Distribution Histogram
-    const scoreDistData = {{ analytics.score_distribution|default({})|tojson }};
+    const scoreDistData = {{ analytics.get('score_distribution', {})|tojson }};
     new Chart(document.getElementById('scoreDistributionChart'), {
         type: 'bar',
         data: {
@@ -394,14 +334,14 @@
     });
 
     // 3. Rural Status Pie Chart
-    const ruralData = {{ analytics.by_rural_status|default({})|tojson }};
+    const ruralData = {{ analytics.get('by_rural_status', {})|tojson }};
     new Chart(document.getElementById('ruralStatusChart'), {
         type: 'pie',
         data: {
             labels: Object.keys(ruralData),
             datasets: [{
                 data: Object.values(ruralData),
-                backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#6c757d', '#dc3545'],
+                backgroundColor: [colors.low, colors.info, colors.moderate, colors.secondary, colors.critical],
                 borderWidth: 2,
                 borderColor: '#fff'
             }]
@@ -413,7 +353,7 @@
     });
 
     // 4. Designation Type Horizontal Bar
-    const designationData = {{ analytics.by_designation_type|default({})|tojson }};
+    const designationData = {{ analytics.get('by_designation_type', {})|tojson }};
     const sortedDesignation = Object.entries(designationData).sort((a, b) => b[1] - a[1]);
     new Chart(document.getElementById('designationTypeChart'), {
         type: 'bar',
@@ -422,7 +362,7 @@
             datasets: [{
                 label: 'Count',
                 data: sortedDesignation.map(d => d[1]),
-                backgroundColor: colors.primary,
+                backgroundColor: colors.ruralaccess,
                 borderRadius: 4
             }]
         },
@@ -440,7 +380,7 @@
     });
 
     // 5. Top Critical States
-    const topCritical = {{ analytics.top_critical_states|default([])|tojson }};
+    const topCritical = {{ analytics.get('top_critical_states', [])|tojson }};
     new Chart(document.getElementById('topCriticalStatesChart'), {
         type: 'bar',
         data: {
@@ -465,7 +405,7 @@
     });
 
     // 6. Top Avg Score States
-    const topAvgScore = {{ analytics.top_avg_score_states|default([])|tojson }};
+    const topAvgScore = {{ analytics.get('top_avg_score_states', [])|tojson }};
     new Chart(document.getElementById('topAvgScoreStatesChart'), {
         type: 'bar',
         data: {
@@ -490,7 +430,7 @@
     });
 
     // 7. Population by Level
-    const popByLevel = {{ analytics.population_by_shortage_level|default({})|tojson }};
+    const popByLevel = {{ analytics.get('population_by_shortage_level', {})|tojson }};
     new Chart(document.getElementById('populationByLevelChart'), {
         type: 'doughnut',
         data: {
@@ -524,14 +464,14 @@
     });
 
     // 8. Poverty Comparison Bar
-    {% if analytics.avg_score_high_poverty %}
+    {% if analytics.get('avg_score_high_poverty') %}
     new Chart(document.getElementById('povertyComparisonChart'), {
         type: 'bar',
         data: {
             labels: ['High Poverty Areas (>20%)', 'Low Poverty Areas (<=20%)'],
             datasets: [{
                 label: 'Average HPSA Score',
-                data: [{{ analytics.avg_score_high_poverty }}, {{ analytics.avg_score_low_poverty }}],
+                data: [{{ analytics.get('avg_score_high_poverty', 0) }}, {{ analytics.get('avg_score_low_poverty', 0) }}],
                 backgroundColor: [colors.critical, colors.low],
                 borderRadius: 4
             }]

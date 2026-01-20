@@ -1,355 +1,418 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}SNAP Analysis - FoodScore{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.foodscore_home') }}">FoodScore</a></li>
-            <li class="breadcrumb-item active">SNAP Analysis</li>
-        </ol>
-    </nav>
-
-    <h2 class="mb-4">
-        <i class="bi bi-credit-card me-2"></i>SNAP Eligibility Health Analysis
-        <span class="badge bg-primary ms-2">Government Only</span>
-    </h2>
-
-    <!-- What is this analysis -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>About This Analysis</h5>
+<!-- Page Header -->
+<div class="page-header page-header--foodscore">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.foodscore_home') }}">FoodScore</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>SNAP Analysis</span>
         </div>
-        <div class="card-body">
-            <p>
-                <strong>SNAP (Supplemental Nutrition Assistance Program)</strong> provides nutrition assistance to
-                low-income individuals and families. This analysis examines the health quality of foods currently
-                eligible for purchase with SNAP benefits.
-            </p>
-            <p class="mb-0">
-                Using the NOVA food classification system and MAHA health scores, we identify opportunities to
-                improve nutritional outcomes for SNAP beneficiaries through policy reform.
-            </p>
-        </div>
+        <h1 class="page-title">
+            <i class="bi bi-credit-card"></i> SNAP Eligibility Health Analysis
+        </h1>
+        <p class="page-subtitle">
+            Government-only analysis of food health quality in SNAP-eligible products
+        </p>
     </div>
+</div>
 
+<div class="container container-xl">
     <!-- Key Finding Alert -->
     {% set nova_total = nova_dist.get(1, 0) + nova_dist.get(2, 0) + nova_dist.get(3, 0) + nova_dist.get(4, 0) %}
     {% set nova4_pct = ((nova_dist.get(4, 0) / nova_total * 100) | round(1)) if nova_total > 0 else 0 %}
-    <div class="alert alert-danger mb-4">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <strong>Key Finding:</strong> {{ nova4_pct }}% of analyzed products are classified as ultra-processed (NOVA 4).
-        These foods are linked to increased risk of obesity, diabetes, and cardiovascular disease.
-    </div>
+    <section style="margin-top: -2rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="alert alert-error" style="margin: 0; padding: var(--spacing-4);">
+            <div style="display: flex; gap: var(--spacing-3); align-items: center;">
+                <i class="bi bi-exclamation-triangle" style="font-size: var(--text-2xl); flex-shrink: 0;"></i>
+                <div>
+                    <strong>Key Finding:</strong> {{ nova4_pct }}% of analyzed products are classified as ultra-processed (NOVA 4).
+                    These foods are linked to increased risk of obesity, diabetes, and cardiovascular disease.
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- NOVA Distribution Stats -->
-    <div class="row g-4 mb-4">
+    <section style="margin-bottom: var(--spacing-6);">
         {% set total = nova_total %}
         {% set n1 = nova_dist.get(1, 0) %}
         {% set n2 = nova_dist.get(2, 0) %}
         {% set n3 = nova_dist.get(3, 0) %}
         {% set n4 = nova_dist.get(4, 0) %}
-        <div class="col-md-3">
-            <div class="card stat-card border-success h-100">
-                <div class="stat-value text-success" style="font-size: 2rem;">{{ "{:,}".format(n1) }}</div>
-                <div class="stat-label">NOVA 1 - Unprocessed</div>
-                <div class="text-muted small">{{ ((n1 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">{{ "{:,}".format(n1) }}</div>
+                <div class="stat-card-label">NOVA 1 - Unprocessed</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500);">{{ ((n1 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--info);">
+                <div class="stat-card-value" style="color: var(--info);">{{ "{:,}".format(n2) }}</div>
+                <div class="stat-card-label">NOVA 2 - Ingredients</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500);">{{ ((n2 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">{{ "{:,}".format(n3) }}</div>
+                <div class="stat-card-label">NOVA 3 - Processed</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500);">{{ ((n3 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">{{ "{:,}".format(n4) }}</div>
+                <div class="stat-card-label">NOVA 4 - Ultra-Processed</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500);">{{ ((n4 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-info h-100">
-                <div class="stat-value text-info" style="font-size: 2rem;">{{ "{:,}".format(n2) }}</div>
-                <div class="stat-label">NOVA 2 - Ingredients</div>
-                <div class="text-muted small">{{ ((n2 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
+    </section>
+
+    <!-- About SNAP Analysis -->
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-3); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <strong>About This Analysis:</strong>
+                    <p style="margin: var(--spacing-2) 0 0 0;">
+                        <strong>SNAP (Supplemental Nutrition Assistance Program)</strong> provides nutrition assistance to
+                        low-income individuals and families. This analysis examines the health quality of foods currently
+                        eligible for purchase with SNAP benefits using the NOVA food classification system and MAHA health scores.
+                    </p>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-warning h-100">
-                <div class="stat-value text-warning" style="font-size: 2rem;">{{ "{:,}".format(n3) }}</div>
-                <div class="stat-label">NOVA 3 - Processed</div>
-                <div class="text-muted small">{{ ((n3 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-danger h-100">
-                <div class="stat-value text-danger" style="font-size: 2rem;">{{ "{:,}".format(n4) }}</div>
-                <div class="stat-label">NOVA 4 - Ultra-Processed</div>
-                <div class="text-muted small">{{ ((n4 / total * 100) | round(1)) if total > 0 else 0 }}% of products</div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- ML NOVA Classification Comparison -->
     {% if ml_nova_analysis %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML NOVA Classification Analysis</h5>
-        </div>
-        <div class="card-body">
-            <p class="text-muted mb-3">
-                Real-time ML classification of {{ ml_nova_analysis.classified_count }} products with ingredient data.
-                Compares ML predictions against stored NOVA values.
-            </p>
-
-            <!-- ML vs Stored Distribution Comparison -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h6 class="text-center mb-3">Stored NOVA Distribution</h6>
-                    <div class="d-flex justify-content-around">
-                        <div class="text-center">
-                            <span class="badge bg-success fs-6">{{ n1 }}</span>
-                            <div class="small text-muted">NOVA 1</div>
-                        </div>
-                        <div class="text-center">
-                            <span class="badge bg-info fs-6">{{ n2 }}</span>
-                            <div class="small text-muted">NOVA 2</div>
-                        </div>
-                        <div class="text-center">
-                            <span class="badge bg-warning text-dark fs-6">{{ n3 }}</span>
-                            <div class="small text-muted">NOVA 3</div>
-                        </div>
-                        <div class="text-center">
-                            <span class="badge bg-danger fs-6">{{ n4 }}</span>
-                            <div class="small text-muted">NOVA 4</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <h6 class="text-center mb-3">ML Predicted Distribution</h6>
-                    {% set ml_dist = ml_nova_analysis.ml_nova_distribution %}
-                    <div class="d-flex justify-content-around">
-                        <div class="text-center">
-                            <span class="badge bg-success fs-6">{{ ml_dist.get(1, 0) }}</span>
-                            <div class="small text-muted">NOVA 1</div>
-                        </div>
-                        <div class="text-center">
-                            <span class="badge bg-info fs-6">{{ ml_dist.get(2, 0) }}</span>
-                            <div class="small text-muted">NOVA 2</div>
-                        </div>
-                        <div class="text-center">
-                            <span class="badge bg-warning text-dark fs-6">{{ ml_dist.get(3, 0) }}</span>
-                            <div class="small text-muted">NOVA 3</div>
-                        </div>
-                        <div class="text-center">
-                            <span class="badge bg-danger fs-6">{{ ml_dist.get(4, 0) }}</span>
-                            <div class="small text-muted">NOVA 4</div>
-                        </div>
-                    </div>
-                </div>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--primary); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-cpu"></i> ML NOVA Classification Analysis
+                </h3>
             </div>
+            <div style="padding: var(--spacing-5);">
+                <p style="color: var(--neutral-600); margin-bottom: var(--spacing-4);">
+                    Real-time ML classification of {{ ml_nova_analysis.classified_count }} products with ingredient data.
+                    Compares ML predictions against stored NOVA values.
+                </p>
 
+                <!-- ML vs Stored Distribution Comparison -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6); margin-bottom: var(--spacing-4);">
+                    <div>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; text-align: center; margin-bottom: var(--spacing-3);">Stored NOVA Distribution</h4>
+                        <div style="display: flex; justify-content: space-around;">
+                            <div style="text-align: center;">
+                                <span class="badge badge-success" style="font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ n1 }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 1</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span class="badge" style="background: var(--info); color: white; font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ n2 }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 2</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span class="badge badge-warning" style="font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ n3 }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 3</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span class="badge badge-error" style="font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ n4 }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 4</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; text-align: center; margin-bottom: var(--spacing-3);">ML Predicted Distribution</h4>
+                        {% set ml_dist = ml_nova_analysis.ml_nova_distribution %}
+                        <div style="display: flex; justify-content: space-around;">
+                            <div style="text-align: center;">
+                                <span class="badge badge-success" style="font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ ml_dist.get(1, 0) }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 1</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span class="badge" style="background: var(--info); color: white; font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ ml_dist.get(2, 0) }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 2</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span class="badge badge-warning" style="font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ ml_dist.get(3, 0) }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 3</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <span class="badge badge-error" style="font-size: var(--text-lg); padding: var(--spacing-2) var(--spacing-3);">{{ ml_dist.get(4, 0) }}</span>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--spacing-1);">NOVA 4</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disagreements Alert -->
+                {% if ml_nova_analysis.disagreement_count > 0 %}
+                <div class="alert alert-warning" style="margin-bottom: var(--spacing-4);">
+                    <i class="bi bi-exclamation-triangle" style="margin-right: var(--spacing-2);"></i>
+                    <strong>{{ ml_nova_analysis.disagreement_count }} classification disagreements</strong> detected between stored values and ML predictions.
+                </div>
+
+                {% if ml_nova_analysis.disagreements %}
+                <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">Sample Disagreements:</h4>
+                <div class="table-container">
+                    <table class="table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Stored NOVA</th>
+                                <th>ML NOVA</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in ml_nova_analysis.disagreements[:5] %}
+                            <tr>
+                                <td>{{ d.product_name[:40] }}{% if d.product_name|length > 40 %}...{% endif %}</td>
+                                <td>
+                                    <span class="badge {% if d.stored_nova == 4 %}badge-error{% elif d.stored_nova == 3 %}badge-warning{% elif d.stored_nova == 2 %}{% else %}badge-success{% endif %}" style="{% if d.stored_nova == 2 %}background: var(--info); color: white;{% endif %}">
+                                        {{ d.stored_nova }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if d.ml_nova == 4 %}badge-error{% elif d.ml_nova == 3 %}badge-warning{% elif d.ml_nova == 2 %}{% else %}badge-success{% endif %}" style="{% if d.ml_nova == 2 %}background: var(--info); color: white;{% endif %}">
+                                        {{ d.ml_nova }}
+                                    </span>
+                                </td>
+                                <td>{{ d.confidence }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="alert alert-success" style="margin: 0;">
+                    <i class="bi bi-check-circle" style="margin-right: var(--spacing-2);"></i>
+                    No significant disagreements between stored values and ML predictions.
+                </div>
+                {% endif %}
+            </div>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- ML Additive Risk Patterns -->
     {% if ml_additive_patterns %}
-    <div class="card mb-5">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0"><i class="bi bi-exclamation-octagon me-2"></i>ML Additive Risk Pattern Analysis</h5>
-        </div>
-        <div class="card-body">
-            <p class="text-muted mb-3">
-                Analysis of {{ ml_additive_patterns.total_unique_additives }} unique additives across the product set.
-                Identifies high-risk additives that appear frequently.
-            </p>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--error); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-exclamation-octagon"></i> ML Additive Risk Pattern Analysis
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <p style="color: var(--neutral-600); margin-bottom: var(--spacing-4);">
+                    Analysis of {{ ml_additive_patterns.total_unique_additives }} unique additives across the product set.
+                    Identifies high-risk additives that appear frequently.
+                </p>
 
-            <!-- Summary Stats -->
-            <div class="row mb-4">
-                <div class="col-md-4 text-center">
-                    <div class="fs-3 fw-bold text-primary">{{ ml_additive_patterns.total_unique_additives }}</div>
-                    <small class="text-muted">Unique Additives</small>
+                <!-- Summary Stats -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4); margin-bottom: var(--spacing-4);">
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--primary);">{{ ml_additive_patterns.total_unique_additives }}</div>
+                        <div style="font-size: var(--text-xs); color: var(--neutral-500);">Unique Additives</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--error);">{{ ml_additive_patterns.high_risk_additive_count }}</div>
+                        <div style="font-size: var(--text-xs); color: var(--neutral-500);">High Risk Additives</div>
+                    </div>
+                    <div style="text-align: center;">
+                        {% set hr_pct = ((ml_additive_patterns.high_risk_additive_count / ml_additive_patterns.total_unique_additives * 100) | round(1)) if ml_additive_patterns.total_unique_additives > 0 else 0 %}
+                        <div style="font-size: var(--text-2xl); font-weight: 700; {% if hr_pct > 20 %}color: var(--error);{% elif hr_pct > 10 %}color: var(--warning);{% else %}color: var(--success);{% endif %}">{{ hr_pct }}%</div>
+                        <div style="font-size: var(--text-xs); color: var(--neutral-500);">High Risk Rate</div>
+                    </div>
                 </div>
-                <div class="col-md-4 text-center">
-                    <div class="fs-3 fw-bold text-danger">{{ ml_additive_patterns.high_risk_additive_count }}</div>
-                    <small class="text-muted">High Risk Additives</small>
-                </div>
-                <div class="col-md-4 text-center">
-                    {% set hr_pct = ((ml_additive_patterns.high_risk_additive_count / ml_additive_patterns.total_unique_additives * 100) | round(1)) if ml_additive_patterns.total_unique_additives > 0 else 0 %}
-                    <div class="fs-3 fw-bold {% if hr_pct > 20 %}text-danger{% elif hr_pct > 10 %}text-warning{% else %}text-success{% endif %}">{{ hr_pct }}%</div>
-                    <small class="text-muted">High Risk Rate</small>
-                </div>
-            </div>
 
-            <!-- Most Common High Risk Additives -->
-            {% if ml_additive_patterns.most_common_high_risk %}
-            <h6 class="mb-3">Most Common High-Risk Additives:</h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead>
-                        <tr>
-                            <th>Additive</th>
-                            <th>Risk Score</th>
-                            <th>Products</th>
-                            <th>Example Products</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for add in ml_additive_patterns.most_common_high_risk[:8] %}
-                        <tr>
-                            <td><strong>{{ add.name }}</strong></td>
-                            <td><span class="badge bg-danger">{{ add.risk_score }}</span></td>
-                            <td>{{ add.count }}</td>
-                            <td><small class="text-muted">{{ add.example_products | join(', ') }}</small></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <!-- Most Common High Risk Additives -->
+                {% if ml_additive_patterns.most_common_high_risk %}
+                <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">Most Common High-Risk Additives:</h4>
+                <div class="table-container">
+                    <table class="table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Additive</th>
+                                <th>Risk Score</th>
+                                <th>Products</th>
+                                <th>Example Products</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for add in ml_additive_patterns.most_common_high_risk[:8] %}
+                            <tr>
+                                <td><strong style="color: var(--neutral-900);">{{ add.name }}</strong></td>
+                                <td><span class="badge badge-error">{{ add.risk_score }}</span></td>
+                                <td>{{ add.count }}</td>
+                                <td><span style="font-size: var(--text-xs); color: var(--neutral-500);">{{ add.example_products | join(', ') }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success" style="margin: 0;">
+                    <i class="bi bi-check-circle" style="margin-right: var(--spacing-2);"></i>
+                    No high-risk additives detected in the analyzed products.
+                </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="alert alert-success mb-0">
-                <i class="bi bi-check-circle me-2"></i>
-                No high-risk additives detected in the analyzed products.
-            </div>
-            {% endif %}
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- Summary Stats -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <h3 class="text-primary">{{ "{:,}".format(snap_analysis.total_products) }}</h3>
-                    <p class="mb-0">Products Analyzed</p>
-                </div>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--primary);">{{ "{:,}".format(snap_analysis.total_products) }}</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-600);">Products Analyzed</div>
+            </div>
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="font-size: var(--text-2xl); font-weight: 700; {% if snap_analysis.avg_health_score >= 60 %}color: var(--success);{% elif snap_analysis.avg_health_score >= 40 %}color: var(--warning);{% else %}color: var(--error);{% endif %}">{{ snap_analysis.avg_health_score }}</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-600);">Average Health Score</div>
+            </div>
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--error);">{{ "{:,}".format(snap_analysis.high_risk_count) }}</div>
+                <div style="font-size: var(--text-sm); color: var(--neutral-600);">High-Risk Products (Score &lt; 40)</div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <h3 class="{% if snap_analysis.avg_health_score >= 60 %}text-success{% elif snap_analysis.avg_health_score >= 40 %}text-warning{% else %}text-danger{% endif %}">{{ snap_analysis.avg_health_score }}</h3>
-                    <p class="mb-0">Average Health Score</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <h3 class="text-danger">{{ "{:,}".format(snap_analysis.high_risk_count) }}</h3>
-                    <p class="mb-0">High-Risk Products (Score &lt; 40)</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- High Risk Products -->
     {% if high_risk %}
-    <div class="card mb-4">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0"><i class="bi bi-exclamation-octagon me-2"></i>Lowest Scoring Products</h5>
-        </div>
-        <div class="card-body">
-            <p class="text-muted mb-3">These products have the lowest MAHA health scores and may warrant policy attention:</p>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Brand</th>
-                            <th>NOVA</th>
-                            <th>Health Score</th>
-                            <th>Additives</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in high_risk[:15] %}
-                        <tr>
-                            <td>{{ (p.get('product_name') or 'Unknown')[:40] }}{% if (p.get('product_name') or '')|length > 40 %}...{% endif %}</td>
-                            <td><small>{{ (p.get('brands') or 'N/A')[:20] }}</small></td>
-                            <td>
-                                {% set nova = (p.get('nova_group') or '0') | string %}
-                                {% if nova == '4' or 'en:4' in nova %}
-                                <span class="badge bg-danger">4</span>
-                                {% elif nova == '3' or 'en:3' in nova %}
-                                <span class="badge bg-warning text-dark">3</span>
-                                {% else %}
-                                <span class="badge bg-secondary">{{ (nova or '?')[:1] }}</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% set score = p.get('maha_score', 50) | int %}
-                                <span class="badge {% if score < 30 %}bg-danger{% elif score < 50 %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ score }}</span>
-                            </td>
-                            <td>{{ p.get('flagged_additive_count', p.get('additives_n', 0)) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--error); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-exclamation-octagon"></i> Lowest Scoring Products
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <p style="color: var(--neutral-600); margin-bottom: var(--spacing-4);">
+                    These products have the lowest MAHA health scores and may warrant policy attention:
+                </p>
+                <div class="table-container">
+                    <table class="table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>NOVA</th>
+                                <th>Health Score</th>
+                                <th>Additives</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in high_risk[:15] %}
+                            <tr>
+                                <td>{{ (p.get('product_name') or 'Unknown')[:40] }}{% if (p.get('product_name') or '')|length > 40 %}...{% endif %}</td>
+                                <td><span style="font-size: var(--text-sm); color: var(--neutral-600);">{{ (p.get('brands') or 'N/A')[:20] }}</span></td>
+                                <td>
+                                    {% set nova = (p.get('nova_group') or '0') | string %}
+                                    {% if nova == '4' or 'en:4' in nova %}
+                                    <span class="badge badge-error">4</span>
+                                    {% elif nova == '3' or 'en:3' in nova %}
+                                    <span class="badge badge-warning">3</span>
+                                    {% else %}
+                                    <span class="badge" style="background: var(--neutral-300); color: var(--neutral-700);">{{ (nova or '?')[:1] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set score = p.get('maha_score', 50) | int %}
+                                    <span class="badge {% if score < 30 %}badge-error{% elif score < 50 %}badge-warning{% else %}badge-success{% endif %}">{{ score }}</span>
+                                </td>
+                                <td>{{ p.get('flagged_additive_count', p.get('additives_n', 0)) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- Policy Recommendations -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Policy Recommendations</h5>
+    <section class="section-sm">
+        <div style="margin-bottom: var(--spacing-4);">
+            <h3 style="font-size: var(--text-lg); font-weight: 700;">
+                <i class="bi bi-clipboard-check"></i> Policy Recommendations
+            </h3>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card border-danger h-100">
-                        <div class="card-header bg-danger text-white">
-                            <h6 class="mb-0"><i class="bi bi-x-circle me-2"></i>Consider Removing</h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="mb-0">
-                                <li>Sugary sodas and energy drinks</li>
-                                <li>Candy and confectionery</li>
-                                <li>Products with MAHA score &lt; 25</li>
-                                <li>Items with &gt; 10 flagged additives</li>
-                            </ul>
-                        </div>
-                    </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--error); padding: var(--spacing-3);">
+                    <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <i class="bi bi-x-circle"></i> Consider Removing
+                    </h4>
                 </div>
-                <div class="col-md-4">
-                    <div class="card border-warning h-100">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0"><i class="bi bi-exclamation-circle me-2"></i>Consider Limiting</h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="mb-0">
-                                <li>NOVA 4 ultra-processed foods</li>
-                                <li>High-sodium snack foods</li>
-                                <li>Sweetened breakfast cereals</li>
-                                <li>Frozen prepared meals</li>
-                            </ul>
-                        </div>
-                    </div>
+                <div style="padding: var(--spacing-4);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li style="margin-bottom: var(--spacing-2);">Sugary sodas and energy drinks</li>
+                        <li style="margin-bottom: var(--spacing-2);">Candy and confectionery</li>
+                        <li style="margin-bottom: var(--spacing-2);">Products with MAHA score &lt; 25</li>
+                        <li style="margin: 0;">Items with &gt; 10 flagged additives</li>
+                    </ul>
                 </div>
-                <div class="col-md-4">
-                    <div class="card border-success h-100">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Incentivize</h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="mb-0">
-                                <li>Fresh fruits and vegetables</li>
-                                <li>NOVA 1 unprocessed foods</li>
-                                <li>Whole grains and legumes</li>
-                                <li>Products with MAHA score &gt; 70</li>
-                            </ul>
-                        </div>
-                    </div>
+            </div>
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--warning); padding: var(--spacing-3);">
+                    <h4 style="color: var(--neutral-900); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <i class="bi bi-exclamation-circle"></i> Consider Limiting
+                    </h4>
+                </div>
+                <div style="padding: var(--spacing-4);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li style="margin-bottom: var(--spacing-2);">NOVA 4 ultra-processed foods</li>
+                        <li style="margin-bottom: var(--spacing-2);">High-sodium snack foods</li>
+                        <li style="margin-bottom: var(--spacing-2);">Sweetened breakfast cereals</li>
+                        <li style="margin: 0;">Frozen prepared meals</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--success); padding: var(--spacing-3);">
+                    <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <i class="bi bi-check-circle"></i> Incentivize
+                    </h4>
+                </div>
+                <div style="padding: var(--spacing-4);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li style="margin-bottom: var(--spacing-2);">Fresh fruits and vegetables</li>
+                        <li style="margin-bottom: var(--spacing-2);">NOVA 1 unprocessed foods</li>
+                        <li style="margin-bottom: var(--spacing-2);">Whole grains and legumes</li>
+                        <li style="margin: 0;">Products with MAHA score &gt; 70</li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Methodology -->
-    <div class="card bg-light">
-        <div class="card-body">
-            <h6><i class="bi bi-info-circle me-2"></i>Methodology</h6>
-            <p class="small mb-0">
-                This analysis uses the NOVA food classification system (Groups 1-4) and MAHA health scores (0-100)
-                derived from nutritional content, additive presence, and processing level. Products are analyzed
-                from the Open Food Facts database, filtered for US market availability. MAHA scores below 40 are
-                considered high-risk. Policy recommendations are based on public health research linking
-                ultra-processed food consumption to adverse health outcomes.
-            </p>
+    <section class="section-sm">
+        <div class="card" style="background: var(--neutral-100); border: none;">
+            <div style="padding: var(--spacing-4);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-2);">
+                    <i class="bi bi-info-circle"></i> Methodology
+                </h4>
+                <p style="font-size: var(--text-sm); color: var(--neutral-600); margin: 0;">
+                    This analysis uses the NOVA food classification system (Groups 1-4) and MAHA health scores (0-100)
+                    derived from nutritional content, additive presence, and processing level. Products are analyzed
+                    from the Open Food Facts database, filtered for US market availability. MAHA scores below 40 are
+                    considered high-risk. Policy recommendations are based on public health research linking
+                    ultra-processed food consumption to adverse health outcomes.
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

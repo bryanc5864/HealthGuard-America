@@ -1,132 +1,161 @@
 {% extends "gov/base_gov.html" %}
 
-{% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.foodscore_home') }}">FoodScore</a></li>
-            <li class="breadcrumb-item active">Additive Alerts</li>
-        </ol>
-    </nav>
+{% block title %}Additive Alerts - FoodScore{% endblock %}
 
-    <h2 class="mb-4">
-        <i class="bi bi-exclamation-triangle me-2"></i>Food Additive Risk Analysis
-        <span class="badge bg-primary ms-2">Government Only</span>
-    </h2>
+{% block content %}
+<!-- Page Header -->
+<div class="page-header page-header--foodscore">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.foodscore_home') }}">FoodScore</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Additive Alerts</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-exclamation-triangle"></i> Food Additive Risk Analysis
+        </h1>
+        <p class="page-subtitle">
+            Government-only additive risk scoring and policy recommendations
+        </p>
+    </div>
+</div>
+
+<div class="container container-xl">
+    <!-- Summary Stats -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--foodscore">
+                <div class="stat-card-value">{{ stats.total_additives }}</div>
+                <div class="stat-card-label">Total Additives Tracked</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">{{ high_risk | length }}</div>
+                <div class="stat-card-label">High Risk (Score 70+)</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">{{ medium_risk | length }}</div>
+                <div class="stat-card-label">Medium Risk (40-69)</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">{{ low_risk | length }}</div>
+                <div class="stat-card-label">Low Risk (&lt;40)</div>
+            </div>
+        </div>
+    </section>
 
     <!-- About -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About Additive Risk Scoring</h5>
+    <section style="margin-bottom: var(--spacing-4);">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-3); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <strong>About Additive Risk Scoring:</strong>
+                    <p style="margin: var(--spacing-2) 0 0 0;">
+                        Food additives are substances added to foods during processing. While many are safe, some have been linked
+                        to health concerns including hyperactivity in children, allergic reactions, and potential carcinogenic effects.
+                        Our ML-powered Additive Scorer (85.71% accuracy) analyzes additives and assigns risk scores based on
+                        scientific literature, regulatory status across countries, and known health effects.
+                    </p>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <p>
-                Food additives are substances added to foods during processing. While many are safe, some have been linked
-                to health concerns including hyperactivity in children, allergic reactions, and potential carcinogenic effects.
-            </p>
-            <p class="mb-0">
-                Our ML-powered Additive Scorer (85.71% accuracy) analyzes additives and assigns risk scores based on
-                scientific literature, regulatory status across countries, and known health effects.
-            </p>
-        </div>
-    </div>
+    </section>
 
     <!-- Search -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('gov.foodscore_additives') }}" method="get">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="q" value="{{ search }}"
-                           placeholder="Search additives (e.g., E621, aspartame, BHT)...">
-                    <button class="btn btn-success" type="submit">Search</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Summary Stats -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card bg-light h-100">
-                <div class="card-body text-center">
-                    <h3 class="text-primary">{{ stats.total_additives }}</h3>
-                    <p class="mb-0">Total Additives Tracked</p>
-                </div>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--foodscore); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-search"></i> Search Additives
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('gov.foodscore_additives') }}" method="get">
+                    <div style="display: flex; gap: var(--spacing-3);">
+                        <input type="text" class="form-control" name="q" value="{{ search }}"
+                               placeholder="Search additives (e.g., E621, aspartame, BHT)..." style="flex: 1;">
+                        <button class="btn btn-foodscore" type="submit">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        {% if search %}
+                        <a href="{{ url_for('gov.foodscore_additives') }}" class="btn btn-outline">
+                            <i class="bi bi-x-lg"></i> Clear
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body text-center">
-                    <h3>{{ high_risk | length }}</h3>
-                    <p class="mb-0">High Risk (Score 70+)</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body text-center">
-                    <h3>{{ medium_risk | length }}</h3>
-                    <p class="mb-0">Medium Risk (40-69)</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body text-center">
-                    <h3>{{ low_risk | length }}</h3>
-                    <p class="mb-0">Low Risk (&lt;40)</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- High Risk Additives -->
     {% if high_risk %}
-    <div class="card mb-4">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0"><i class="bi bi-exclamation-octagon me-2"></i>High Risk Additives</h5>
-        </div>
-        <div class="card-body">
-            <p class="text-muted mb-3">These additives have been associated with potential health concerns and may warrant policy attention:</p>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Risk Score</th>
-                            <th>FDA Status</th>
-                            <th>EU Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for a in high_risk[:20] %}
-                        <tr>
-                            <td><strong>{{ a.get('name', 'Unknown') }}</strong>{% if a.get('is_artificial') %} <span class="badge bg-warning text-dark">Artificial</span>{% endif %}</td>
-                            <td>{{ a.get('type', 'N/A') }}</td>
-                            <td><span class="badge bg-danger">{{ a.get('risk_score', 'N/A') }}</span></td>
-                            <td><small>{{ a.get('fda_status', 'N/A') }}</small></td>
-                            <td><small class="{% if a.get('eu_status') == 'banned' %}text-danger{% elif a.get('eu_status') == 'restricted' %}text-warning{% endif %}">{{ a.get('eu_status', 'N/A') }}</small></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--error); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-exclamation-octagon"></i> High Risk Additives
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <p style="color: var(--neutral-600); margin-bottom: var(--spacing-4);">
+                    These additives have been associated with potential health concerns and may warrant policy attention:
+                </p>
+                <div class="table-container">
+                    <table class="table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Risk Score</th>
+                                <th>FDA Status</th>
+                                <th>EU Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in high_risk[:20] %}
+                            <tr>
+                                <td>
+                                    <strong style="color: var(--neutral-900);">{{ a.get('name', 'Unknown') }}</strong>
+                                    {% if a.get('is_artificial') %}
+                                    <span class="badge badge-warning" style="margin-left: var(--spacing-1);">Artificial</span>
+                                    {% endif %}
+                                </td>
+                                <td><span style="color: var(--neutral-600);">{{ a.get('type', 'N/A') }}</span></td>
+                                <td><span class="badge badge-error">{{ a.get('risk_score', 'N/A') }}</span></td>
+                                <td><span style="font-size: var(--text-sm);">{{ a.get('fda_status', 'N/A') }}</span></td>
+                                <td>
+                                    <span style="font-size: var(--text-sm); {% if a.get('eu_status') == 'banned' %}color: var(--error); font-weight: 700;{% elif a.get('eu_status') == 'restricted' %}color: var(--warning);{% endif %}">
+                                        {{ a.get('eu_status', 'N/A') }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- All Additives -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-list me-2"></i>All Additives ({{ additives | length }})</h5>
-        </div>
-        <div class="card-body">
-            {% if additives %}
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--foodscore); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-list"></i> All Additives
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">{{ additives | length }} additives</span>
+            </div>
+            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                {% if additives %}
+                <table class="table" style="margin: 0;">
+                    <thead style="position: sticky; top: 0; background: var(--neutral-50); z-index: 1;">
                         <tr>
                             <th>Name</th>
                             <th>Type</th>
@@ -139,96 +168,105 @@
                         {% for a in additives %}
                         {% set score = a.get('risk_score', 50) | float %}
                         <tr>
-                            <td>{{ a.get('name', 'Unknown') }}{% if a.get('is_artificial') %} <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Artificial</span>{% endif %}</td>
-                            <td><small>{{ a.get('type', 'N/A') }}</small></td>
-                            <td><small>{{ a.get('fda_status', 'N/A') }}</small></td>
-                            <td><small class="{% if a.get('eu_status') == 'banned' %}text-danger fw-bold{% elif a.get('eu_status') == 'restricted' %}text-warning{% endif %}">{{ a.get('eu_status', 'N/A') }}</small></td>
+                            <td>
+                                {{ a.get('name', 'Unknown') }}
+                                {% if a.get('is_artificial') %}
+                                <span class="badge badge-warning" style="font-size: 10px; margin-left: var(--spacing-1);">Artificial</span>
+                                {% endif %}
+                            </td>
+                            <td><span style="font-size: var(--text-sm); color: var(--neutral-600);">{{ a.get('type', 'N/A') }}</span></td>
+                            <td><span style="font-size: var(--text-sm);">{{ a.get('fda_status', 'N/A') }}</span></td>
+                            <td>
+                                <span style="font-size: var(--text-sm); {% if a.get('eu_status') == 'banned' %}color: var(--error); font-weight: 700;{% elif a.get('eu_status') == 'restricted' %}color: var(--warning);{% endif %}">
+                                    {{ a.get('eu_status', 'N/A') }}
+                                </span>
+                            </td>
                             <td>
                                 {% if score >= 70 %}
-                                <span class="badge bg-danger">{{ score | int }}</span>
+                                <span class="badge badge-error">{{ score | int }}</span>
                                 {% elif score >= 40 %}
-                                <span class="badge bg-warning text-dark">{{ score | int }}</span>
+                                <span class="badge badge-warning">{{ score | int }}</span>
                                 {% else %}
-                                <span class="badge bg-success">{{ score | int }}</span>
+                                <span class="badge badge-success">{{ score | int }}</span>
                                 {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <div style="text-align: center; padding: var(--spacing-6); color: var(--neutral-500);">
+                    No additives found{% if search %} matching "{{ search }}"{% endif %}.
+                </div>
+                {% endif %}
             </div>
-            {% else %}
-            <p class="text-muted text-center py-4">No additives found{% if search %} matching "{{ search }}"{% endif %}.</p>
-            {% endif %}
         </div>
-    </div>
+    </section>
 
     <!-- Policy Recommendations -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Policy Considerations</h5>
+    <section class="section-sm">
+        <div style="margin-bottom: var(--spacing-4);">
+            <h3 style="font-size: var(--text-lg); font-weight: 700;">
+                <i class="bi bi-clipboard-check"></i> Policy Considerations
+            </h3>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card border-danger h-100">
-                        <div class="card-header bg-danger text-white">
-                            <h6 class="mb-0">Consider Banning</h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="small mb-0">
-                                <li>Artificial colors (especially Red 40, Yellow 5, Yellow 6)</li>
-                                <li>BHA and BHT preservatives</li>
-                                <li>Brominated vegetable oil (BVO)</li>
-                                <li>Potassium bromate</li>
-                            </ul>
-                        </div>
-                    </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--error); padding: var(--spacing-3);">
+                    <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">Consider Banning</h4>
                 </div>
-                <div class="col-md-4">
-                    <div class="card border-warning h-100">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0">Require Warning Labels</h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="small mb-0">
-                                <li>Artificial sweeteners</li>
-                                <li>MSG and related glutamates</li>
-                                <li>Sodium nitrite/nitrate</li>
-                                <li>Carrageenan</li>
-                            </ul>
-                        </div>
-                    </div>
+                <div style="padding: var(--spacing-4);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li style="margin-bottom: var(--spacing-2);">Artificial colors (especially Red 40, Yellow 5, Yellow 6)</li>
+                        <li style="margin-bottom: var(--spacing-2);">BHA and BHT preservatives</li>
+                        <li style="margin-bottom: var(--spacing-2);">Brominated vegetable oil (BVO)</li>
+                        <li style="margin: 0;">Potassium bromate</li>
+                    </ul>
                 </div>
-                <div class="col-md-4">
-                    <div class="card border-info h-100">
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0">Align with EU Standards</h6>
-                        </div>
-                        <div class="card-body">
-                            <ul class="small mb-0">
-                                <li>EU bans 1,300+ additives allowed in US</li>
-                                <li>Titanium dioxide (E171) - banned in EU 2022</li>
-                                <li>Many artificial colors require warning labels in EU</li>
-                            </ul>
-                        </div>
-                    </div>
+            </div>
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--warning); padding: var(--spacing-3);">
+                    <h4 style="color: var(--neutral-900); font-size: var(--text-sm); font-weight: 600; margin: 0;">Require Warning Labels</h4>
+                </div>
+                <div style="padding: var(--spacing-4);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li style="margin-bottom: var(--spacing-2);">Artificial sweeteners</li>
+                        <li style="margin-bottom: var(--spacing-2);">MSG and related glutamates</li>
+                        <li style="margin-bottom: var(--spacing-2);">Sodium nitrite/nitrate</li>
+                        <li style="margin: 0;">Carrageenan</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--info); padding: var(--spacing-3);">
+                    <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">Align with EU Standards</h4>
+                </div>
+                <div style="padding: var(--spacing-4);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li style="margin-bottom: var(--spacing-2);">EU bans 1,300+ additives allowed in US</li>
+                        <li style="margin-bottom: var(--spacing-2);">Titanium dioxide (E171) - banned in EU 2022</li>
+                        <li style="margin: 0;">Many artificial colors require warning labels in EU</li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Methodology -->
-    <div class="card bg-light">
-        <div class="card-body">
-            <h6><i class="bi bi-info-circle me-2"></i>Risk Scoring Methodology</h6>
-            <p class="small mb-0">
-                Additive risk scores (0-100) are calculated based on: regulatory status across countries, published toxicology studies,
-                known allergenic potential, carcinogenicity classifications (IARC), and reported adverse effects.
-                Scores above 70 indicate additives with documented health concerns. This tool is for policy analysis
-                and should not replace professional medical or regulatory advice.
-            </p>
+    <section class="section-sm">
+        <div class="card" style="background: var(--neutral-100); border: none;">
+            <div style="padding: var(--spacing-4);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-2);">
+                    <i class="bi bi-info-circle"></i> Risk Scoring Methodology
+                </h4>
+                <p style="font-size: var(--text-sm); color: var(--neutral-600); margin: 0;">
+                    Additive risk scores (0-100) are calculated based on: regulatory status across countries, published toxicology studies,
+                    known allergenic potential, carcinogenicity classifications (IARC), and reported adverse effects.
+                    Scores above 70 indicate additives with documented health concerns. This tool is for policy analysis
+                    and should not replace professional medical or regulatory advice.
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

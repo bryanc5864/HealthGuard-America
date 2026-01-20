@@ -1,186 +1,273 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}{{ drug.get('brand_name', drug_id) if drug else drug_id }} - DrugWatch{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a></li>
-            <li class="breadcrumb-item active">{{ drug_id }}</li>
-        </ol>
-    </nav>
-
-    {% if drug %}
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2 class="mb-2">
-                <i class="bi bi-capsule me-2 text-danger"></i>{{ drug.get('brand_name', drug_id) }}
-            </h2>
-            <p class="lead text-muted">{{ drug.get('generic_name', 'Generic name not available') }}</p>
+<!-- Page Header -->
+<div class="page-header page-header--drugwatch">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>{{ drug_id }}</span>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ url_for('gov.drugwatch_search') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back to Search
-            </a>
-        </div>
+        {% if drug %}
+        <h1 class="page-title">
+            <i class="bi bi-capsule"></i> {{ drug.get('brand_name', drug_id) }}
+        </h1>
+        <p class="page-subtitle">
+            {{ drug.get('generic_name', 'Generic name not available') }}
+        </p>
+        {% else %}
+        <h1 class="page-title">
+            <i class="bi bi-capsule"></i> Drug Not Found
+        </h1>
+        {% endif %}
     </div>
+</div>
 
-    <!-- Drug Info Card -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Drug Information</h5>
+<div class="container container-xl">
+    {% if drug %}
+    <!-- Quick Stats -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</div>
+                <div class="stat-card-label">Medicare Spending (2023)</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">${{ "%.2f" | format(drug.get('avg_price_per_unit_2023', 0) | float) }}</div>
+                <div class="stat-card-label">Avg Price/Unit</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">{{ "{:,}".format(drug.get('total_beneficiaries_2023', 0) | int) }}</div>
+                <div class="stat-card-label">Beneficiaries</div>
+            </div>
+            <div class="stat-card stat-card--drugwatch">
+                <div class="stat-card-value">{{ "{:,}".format(drug.get('total_claims_2023', 0) | int) }}</div>
+                <div class="stat-card-label">Total Claims</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Drug Info & Pricing -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+            <!-- Drug Information -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--drugwatch); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-info-circle"></i> Drug Information
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <table class="table table-borderless">
+                <div style="padding: var(--spacing-5);">
+                    <table class="table" style="margin: 0;">
                         <tr>
-                            <th width="40%">Brand Name:</th>
-                            <td>{{ drug.get('brand_name', 'N/A') }}</td>
+                            <th style="width: 40%; border-top: none;">Brand Name</th>
+                            <td style="border-top: none;"><strong>{{ drug.get('brand_name', 'N/A') }}</strong></td>
                         </tr>
                         <tr>
-                            <th>Generic Name:</th>
+                            <th>Generic Name</th>
                             <td>{{ drug.get('generic_name', 'N/A') }}</td>
                         </tr>
                         <tr>
-                            <th>Manufacturer:</th>
+                            <th>Manufacturer</th>
                             <td>{{ drug.get('manufacturer', 'N/A') }}</td>
                         </tr>
                         <tr>
-                            <th>Source:</th>
+                            <th>Source</th>
                             <td>{{ drug.get('source', 'Medicare Part D') }}</td>
                         </tr>
                     </table>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>US Pricing (Medicare Part D 2023)</h5>
+
+            <!-- US Pricing -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--error); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-currency-dollar"></i> US Pricing (Medicare Part D 2023)
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <table class="table table-borderless">
+                <div style="padding: var(--spacing-5);">
+                    <table class="table" style="margin: 0;">
                         <tr>
-                            <th width="50%">Total Medicare Spending:</th>
-                            <td class="text-danger fw-bold">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
+                            <th style="width: 50%; border-top: none;">Total Medicare Spending</th>
+                            <td style="border-top: none;">
+                                <strong style="color: var(--error);">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</strong>
+                            </td>
                         </tr>
                         <tr>
-                            <th>Avg Price Per Unit:</th>
+                            <th>Avg Price Per Unit</th>
                             <td>${{ "%.2f" | format(drug.get('avg_price_per_unit_2023', 0) | float) }}</td>
                         </tr>
                         <tr>
-                            <th>Total Beneficiaries:</th>
+                            <th>Total Beneficiaries</th>
                             <td>{{ "{:,.0f}".format(drug.get('total_beneficiaries_2023', 0) | float) }}</td>
                         </tr>
                         <tr>
-                            <th>Total Claims:</th>
+                            <th>Total Claims</th>
                             <td>{{ "{:,.0f}".format(drug.get('total_claims_2023', 0) | float) }}</td>
                         </tr>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- International Price Comparison -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="bi bi-globe me-2"></i>International Price Comparison</h5>
-        </div>
-        <div class="card-body">
-            {% if comparison and comparison.international %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Country</th>
-                            <th>Drug Name</th>
-                            <th>Price</th>
-                            <th>Savings vs US</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="table-light">
-                            <td><span class="fi fi-us me-2"></span><strong>United States</strong></td>
-                            <td>{{ drug.get('brand_name', drug_id) }}</td>
-                            <td class="text-danger fw-bold">${{ "%.2f" | format(drug.get('avg_price_per_unit_2023', 0) | float) }}/unit</td>
-                            <td>-</td>
-                        </tr>
-                        {% for intl in comparison.international[:5] %}
-                        {% set us_price = drug.get('avg_price_per_unit_2023', 1) | float %}
-                        {% set intl_price = intl.get('price', intl.get('price_per_unit_usd', 0)) | float %}
-                        {% set savings = ((us_price - intl_price) / us_price * 100) if us_price > 0 else 0 %}
-                        <tr>
-                            <td>
-                                {% if intl.get('country') == 'Canada' %}
-                                <span class="fi fi-ca me-2"></span>
-                                {% elif intl.get('country') == 'Australia' %}
-                                <span class="fi fi-au me-2"></span>
-                                {% elif intl.get('country') == 'UK' %}
-                                <span class="fi fi-gb me-2"></span>
-                                {% endif %}
-                                {{ intl.get('country', 'International') }}
-                            </td>
-                            <td>{{ intl.get('drug_name', intl.get('brand_name', 'N/A')) }}</td>
-                            <td class="text-success">${{ "%.2f" | format(intl_price) }}</td>
-                            <td>
-                                {% if savings > 0 %}
-                                <span class="badge bg-success">{{ "%.0f" | format(savings) }}% less</span>
-                                {% else %}
-                                <span class="badge bg-secondary">N/A</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--primary); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-globe"></i> International Price Comparison
+                </h3>
             </div>
-            {% else %}
-            <div class="text-center py-4">
-                <i class="bi bi-globe display-4 text-muted mb-3"></i>
-                <p class="text-muted">No international price data available for this drug.</p>
-                <p class="small text-muted">International comparisons are available for select drugs where pricing data is published by Canada, Australia, or the UK.</p>
+            <div style="padding: 0;">
+                {% if comparison and comparison.international %}
+                <div class="table-container">
+                    <table class="table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Drug Name</th>
+                                <th>Price</th>
+                                <th>Savings vs US</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: var(--error-light);">
+                                <td>
+                                    <span class="fi fi-us" style="margin-right: var(--spacing-2);"></span>
+                                    <strong>United States</strong>
+                                </td>
+                                <td>{{ drug.get('brand_name', drug_id) }}</td>
+                                <td>
+                                    <strong style="color: var(--error);">${{ "%.2f" | format(drug.get('avg_price_per_unit_2023', 0) | float) }}/unit</strong>
+                                </td>
+                                <td>-</td>
+                            </tr>
+                            {% for intl in comparison.international[:5] %}
+                            {% set us_price = drug.get('avg_price_per_unit_2023', 1) | float %}
+                            {% set intl_price = intl.get('price', intl.get('price_per_unit_usd', 0)) | float %}
+                            {% set savings = ((us_price - intl_price) / us_price * 100) if us_price > 0 else 0 %}
+                            <tr>
+                                <td>
+                                    {% if intl.get('country') == 'Canada' %}
+                                    <span class="fi fi-ca" style="margin-right: var(--spacing-2);"></span>
+                                    {% elif intl.get('country') == 'Australia' %}
+                                    <span class="fi fi-au" style="margin-right: var(--spacing-2);"></span>
+                                    {% elif intl.get('country') == 'UK' %}
+                                    <span class="fi fi-gb" style="margin-right: var(--spacing-2);"></span>
+                                    {% endif %}
+                                    {{ intl.get('country', 'International') }}
+                                </td>
+                                <td>{{ intl.get('drug_name', intl.get('brand_name', 'N/A')) }}</td>
+                                <td style="color: var(--success);">${{ "%.2f" | format(intl_price) }}</td>
+                                <td>
+                                    {% if savings > 0 %}
+                                    <span class="badge badge-success">{{ "%.0f" | format(savings) }}% less</span>
+                                    {% else %}
+                                    <span class="badge" style="background: var(--neutral-200); color: var(--neutral-600);">N/A</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: var(--spacing-8); color: var(--neutral-500);">
+                    <i class="bi bi-globe" style="font-size: var(--text-4xl); display: block; margin-bottom: var(--spacing-3);"></i>
+                    <p style="margin: 0 0 var(--spacing-2) 0;">No international price data available for this drug.</p>
+                    <p style="margin: 0; font-size: var(--text-sm);">
+                        International comparisons are available for select drugs where pricing data is published by Canada, Australia, or the UK.
+                    </p>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
-    </div>
+    </section>
 
-    <!-- MFN Analysis (Gov Only) -->
+    <!-- MFN Analysis -->
     {% set us_spending = drug.get('total_spending_2023', 0) | float %}
     {% if us_spending > 0 %}
-    <div class="card mb-4">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0"><i class="bi bi-piggy-bank me-2"></i>MFN Savings Analysis <span class="badge bg-light text-success">Gov Only</span></h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 text-center">
-                    <h6>Current US Spending</h6>
-                    <h3 class="text-danger">${{ "{:,.0f}".format(us_spending) }}</h3>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--success); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-piggy-bank"></i> MFN Savings Analysis
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">Gov Only</span>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4); text-align: center;">
+                    <div>
+                        <div style="font-size: var(--text-sm); color: var(--neutral-600); margin-bottom: var(--spacing-2);">Current US Spending</div>
+                        <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--error);">
+                            ${{ "{:,.0f}".format(us_spending) }}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: var(--text-sm); color: var(--neutral-600); margin-bottom: var(--spacing-2);">Est. MFN Spending (35%)</div>
+                        <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--warning);">
+                            ${{ "{:,.0f}".format(us_spending * 0.35) }}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: var(--text-sm); color: var(--neutral-600); margin-bottom: var(--spacing-2);">Potential Savings</div>
+                        <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--success);">
+                            ${{ "{:,.0f}".format(us_spending * 0.65) }}
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4 text-center">
-                    <h6>Est. MFN Spending (35%)</h6>
-                    <h3 class="text-warning">${{ "{:,.0f}".format(us_spending * 0.35) }}</h3>
-                </div>
-                <div class="col-md-4 text-center">
-                    <h6>Potential Savings</h6>
-                    <h3 class="text-success">${{ "{:,.0f}".format(us_spending * 0.65) }}</h3>
+                <div style="margin-top: var(--spacing-4); padding-top: var(--spacing-4); border-top: 1px solid var(--neutral-200);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                        <div style="flex: 1; height: 24px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
+                            <div style="height: 100%; width: 35%; background: var(--success);"></div>
+                        </div>
+                        <span style="font-size: var(--text-sm); color: var(--neutral-600); min-width: 100px;">65% savings</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
     {% endif %}
+
+    <!-- Actions -->
+    <section class="section-sm">
+        <div style="display: flex; gap: var(--spacing-3);">
+            <a href="{{ url_for('gov.drugwatch_compare', drug_id=drug.get('brand_name', '')) }}" class="btn btn-drugwatch">
+                <i class="bi bi-globe"></i> Full International Comparison
+            </a>
+            <a href="{{ url_for('gov.drugwatch_search') }}" class="btn btn-outline">
+                <i class="bi bi-arrow-left"></i> Back to Search
+            </a>
+        </div>
+    </section>
 
     {% else %}
     <!-- Drug not found -->
-    <div class="alert alert-warning">
-        <h5><i class="bi bi-exclamation-triangle me-2"></i>Drug Not Found</h5>
-        <p class="mb-0">No data found for "{{ drug_id }}". This drug may not be in our Medicare Part D database.</p>
-    </div>
-    <a href="{{ url_for('gov.drugwatch_search') }}" class="btn btn-primary">
-        <i class="bi bi-search me-1"></i>Search for Another Drug
-    </a>
+    <section style="margin-top: var(--spacing-6);">
+        <div class="alert alert-warning" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-4); align-items: flex-start;">
+                <i class="bi bi-exclamation-triangle" style="font-size: var(--text-2xl);"></i>
+                <div>
+                    <h4 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-2);">Drug Not Found</h4>
+                    <p style="margin: 0;">No data found for "{{ drug_id }}". This drug may not be in our Medicare Part D database.</p>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: var(--spacing-4);">
+            <a href="{{ url_for('gov.drugwatch_search') }}" class="btn btn-drugwatch">
+                <i class="bi bi-search"></i> Search for Another Drug
+            </a>
+        </div>
+    </section>
     {% endif %}
 </div>
 {% endblock %}

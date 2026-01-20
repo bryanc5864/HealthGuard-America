@@ -25,14 +25,18 @@
 <div class="container container-xl">
     <!-- Stats Section -->
     <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
-        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
             <div class="stat-card stat-card--ruralaccess">
-                <div class="stat-card-value">{{ "{:,}".format(stats.total_hpsas) if stats.total_hpsas else '14,631' }}</div>
-                <div class="stat-card-label">HPSA Designations</div>
+                <div class="stat-card-value">{{ "{:,}".format(stats.total_providers) if stats.total_providers else '1M+' }}</div>
+                <div class="stat-card-label">Providers Mapped</div>
+            </div>
+            <div class="stat-card stat-card--ruralaccess">
+                <div class="stat-card-value">14,631</div>
+                <div class="stat-card-label">Shortage Designations</div>
             </div>
             <div class="stat-card stat-card--ruralaccess">
                 <div class="stat-card-value">{{ "{:,}".format(stats.total_counties) if stats.total_counties else '2,956' }}</div>
-                <div class="stat-card-label">Affected Counties</div>
+                <div class="stat-card-label">Counties Analyzed</div>
             </div>
             <div class="stat-card stat-card--ruralaccess">
                 <div class="stat-card-value">{{ "{:,}".format(stats.total_fqhcs) if stats.total_fqhcs else '1,400+' }}</div>

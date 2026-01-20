@@ -1,77 +1,128 @@
 {% extends "public/base_public.html" %}
 
+{% block title %}Search Drugs - DrugWatch{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('public.drugwatch_home') }}">DrugWatch</a></li>
-            <li class="breadcrumb-item active">Search</li>
-        </ol>
-    </nav>
-
-    <h2 class="mb-4">
-        <i class="bi bi-search me-2"></i>
-        {% if query %}Search Results for "{{ query }}"{% else %}Search Drugs{% endif %}
-    </h2>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('public.drugwatch_search') }}" method="get">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="q" value="{{ query }}"
-                           placeholder="Search by brand or generic name...">
-                    <button class="btn btn-danger" type="submit">Search</button>
-                </div>
-            </form>
+<!-- Page Header -->
+<div class="page-header page-header--drugwatch">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.home') }}">Public Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.drugwatch_home') }}">DrugWatch</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Search</span>
         </div>
+        <h1 class="page-title">
+            <i class="bi bi-search"></i>
+            {% if query %}Search Results for "{{ query }}"{% else %}Search Drugs{% endif %}
+        </h1>
+        <p class="page-subtitle">
+            Find drug prices and international comparisons
+        </p>
     </div>
+</div>
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Results ({{ drugs | length }})</h5>
-        </div>
-        <div class="card-body">
-            {% if drugs %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Brand Name</th>
-                            <th>Generic Name</th>
-                            <th>Manufacturer</th>
-                            <th>Total Spending (2023)</th>
-                            <th>Avg Price/Unit</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in drugs %}
-                        <tr>
-                            <td><strong>{{ d.get('brand_name', 'N/A') }}</strong></td>
-                            <td>{{ d.get('generic_name', 'N/A') }}</td>
-                            <td>{{ d.get('manufacturer', 'N/A') }}</td>
-                            <td>${{ "{:,.0f}".format(d.get('total_spending_2023', 0) | float) }}</td>
-                            <td>${{ "%.2f" | format(d.get('avg_price_per_unit_2023', 0) | float) }}</td>
-                            <td>
-                                <a href="{{ url_for('public.drugwatch_drug', drug_id=d.get('brand_name', '')) }}"
-                                   class="btn btn-sm btn-outline-danger">Compare</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="container container-xl">
+    <!-- Search Box -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--drugwatch); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-capsule"></i> Drug Search
+                </h3>
             </div>
-            {% else %}
-            <p class="text-muted text-center py-4">
-                {% if query %}
-                No drugs found for "{{ query }}". Try a different search term.
-                {% else %}
-                Enter a drug name to search.
-                {% endif %}
-            </p>
-            {% endif %}
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('public.drugwatch_search') }}" method="get">
+                    <div style="display: flex; gap: var(--spacing-3);">
+                        <input type="text" class="form-control" name="q" value="{{ query }}"
+                               placeholder="Search by brand or generic name..." style="flex: 1;">
+                        <button class="btn btn-drugwatch" type="submit">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        {% if query %}
+                        <a href="{{ url_for('public.drugwatch_search') }}" class="btn btn-outline">
+                            <i class="bi bi-x-lg"></i> Clear
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Results -->
+    <section>
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--drugwatch); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-list-ul"></i> Results
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">{{ drugs | length }} drugs found</span>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                {% if drugs %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Brand Name</th>
+                                <th>Generic Name</th>
+                                <th>Manufacturer</th>
+                                <th>Total Spending (2023)</th>
+                                <th>Avg Price/Unit</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in drugs %}
+                            <tr>
+                                <td><strong style="color: var(--neutral-900);">{{ d.get('brand_name', 'N/A') }}</strong></td>
+                                <td style="color: var(--neutral-600);">{{ d.get('generic_name', 'N/A') }}</td>
+                                <td style="font-size: var(--text-sm); color: var(--neutral-500);">{{ d.get('manufacturer', 'N/A') }}</td>
+                                <td style="font-weight: 600; color: var(--drugwatch);">${{ "{:,.0f}".format(d.get('total_spending_2023', 0) | float) }}</td>
+                                <td>${{ "%.2f" | format(d.get('avg_price_per_unit_2023', 0) | float) }}</td>
+                                <td>
+                                    <a href="{{ url_for('public.drugwatch_drug', drug_id=d.get('brand_name', '')) }}"
+                                       class="btn btn-sm btn-drugwatch">
+                                        <i class="bi bi-globe"></i> Compare
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: var(--spacing-8); color: var(--neutral-500);">
+                    <i class="bi bi-capsule" style="font-size: var(--text-4xl); display: block; margin-bottom: var(--spacing-3);"></i>
+                    {% if query %}
+                    <p style="margin: 0;">No drugs found for "{{ query }}". Try a different search term.</p>
+                    {% else %}
+                    <p style="margin: 0;">Enter a drug name to search.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="section-sm">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-3); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-lg);"></i>
+                <div>
+                    <strong>About Drug Pricing Data</strong>
+                    <p style="margin: var(--spacing-2) 0 0 0; font-size: var(--text-sm);">
+                        Data sourced from Medicare Part D spending files, Australia's Pharmaceutical Benefits Scheme (PBS),
+                        and Health Canada Drug Database. Prices shown are for reference and may not reflect your actual costs.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 {% endblock %}

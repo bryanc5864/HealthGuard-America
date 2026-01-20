@@ -1,308 +1,338 @@
 {% extends "public/base_public.html" %}
 
+{% block title %}Analyze Nutrition Label - FoodScore{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
-            <li class="breadcrumb-item active">Analyze Label</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header page-header--foodscore">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.home') }}">Public Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.foodscore_home') }}">FoodScore</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Analyze Label</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-camera"></i> Analyze Nutrition Label
+        </h1>
+        <p class="page-subtitle">
+            Upload a photo or enter nutrition information for AI-powered health analysis
+        </p>
+    </div>
+</div>
 
-    <h2 class="mb-4">
-        <i class="bi bi-camera me-2 text-success"></i>Analyze Nutrition Label
-    </h2>
-    <p class="text-muted mb-4">Upload a photo of a nutrition label or manually enter the information to get an AI-powered health analysis.</p>
-
-    <div class="row">
-        <!-- Input Form -->
-        <div class="col-lg-6">
-            <!-- Image Upload Section -->
-            <div class="card mb-4 border-success">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0"><i class="bi bi-camera me-2"></i>Upload Nutrition Label Image</h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">Take or upload a photo of the nutrition label</label>
-                        <input type="file" class="form-control" id="labelImage" accept="image/*" capture="environment">
+<div class="container container-xl">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <!-- Input Column -->
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-4);">
+                <!-- Image Upload Section -->
+                <div class="card" style="overflow: hidden;">
+                    <div style="background: var(--foodscore); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-camera"></i> Upload Nutrition Label Image
+                        </h3>
                     </div>
-                    <div id="imagePreview" class="mb-3 d-none">
-                        <img id="previewImg" class="img-fluid rounded border" style="max-height: 300px;">
-                    </div>
-                    <div id="ocrStatus" class="d-none">
-                        <div class="d-flex align-items-center">
-                            <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
-                            <span>Analyzing image with AI...</span>
+                    <div style="padding: var(--spacing-5);">
+                        <div style="margin-bottom: var(--spacing-3);">
+                            <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-2);">Take or upload a photo of the nutrition label</label>
+                            <input type="file" class="form-control" id="labelImage" accept="image/*" capture="environment">
                         </div>
-                    </div>
-                    <div id="ocrResult" class="d-none alert alert-info">
-                        <i class="bi bi-check-circle me-2"></i>
-                        <span id="ocrResultText"></span>
-                    </div>
-                    <button type="button" id="analyzeImageBtn" class="btn btn-outline-success w-100" disabled>
-                        <i class="bi bi-cpu me-2"></i>Extract Text from Image
-                    </button>
-                    <small class="text-muted d-block mt-2">
-                        <i class="bi bi-info-circle me-1"></i>
-                        For best results, ensure the nutrition label is well-lit and in focus.
-                    </small>
-                </div>
-            </div>
-
-            <div class="text-center mb-3">
-                <span class="badge bg-secondary">OR</span>
-                <span class="text-muted">Enter information manually below</span>
-            </div>
-
-            <form action="{{ url_for('public.foodscore_analyze') }}" method="get" id="analyzeForm">
-                <input type="hidden" name="submitted" value="1">
-
-                <!-- Product Name -->
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0"><i class="bi bi-tag me-2"></i>Product Information</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">Product Name (Optional)</label>
-                            <input type="text" class="form-control" name="product_name" value="{{ product_name }}"
-                                   placeholder="e.g., Whole Grain Cereal">
+                        <div id="imagePreview" class="d-none" style="margin-bottom: var(--spacing-3);">
+                            <img id="previewImg" style="max-height: 250px; width: 100%; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--neutral-200);">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Serving Size (Optional)</label>
-                            <input type="text" class="form-control" name="serving_size" value="{{ serving_size }}"
-                                   placeholder="e.g., 1 cup (30g)">
+                        <div id="ocrStatus" class="d-none" style="display: flex; align-items: center; gap: var(--spacing-2); margin-bottom: var(--spacing-3);">
+                            <div style="width: 16px; height: 16px; border: 2px solid var(--foodscore); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <span style="color: var(--neutral-600);">Analyzing image with AI...</span>
                         </div>
+                        <div id="ocrResult" class="d-none alert alert-info" style="margin-bottom: var(--spacing-3);">
+                            <i class="bi bi-check-circle"></i>
+                            <span id="ocrResultText"></span>
+                        </div>
+                        <button type="button" id="analyzeImageBtn" class="btn btn-foodscore" disabled style="width: 100%;">
+                            <i class="bi bi-cpu"></i> Extract Text from Image
+                        </button>
+                        <small style="display: block; margin-top: var(--spacing-2); color: var(--neutral-500);">
+                            <i class="bi bi-info-circle"></i> For best results, ensure the nutrition label is well-lit and in focus.
+                        </small>
                     </div>
                 </div>
 
-                <!-- Ingredients -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Ingredients List <span class="text-warning">*Required</span></h6>
+                <div style="text-align: center;">
+                    <span class="badge" style="background: var(--neutral-200); color: var(--neutral-600);">OR</span>
+                    <span style="color: var(--neutral-500); font-size: var(--text-sm); margin-left: var(--spacing-2);">Enter information manually below</span>
+                </div>
+
+                <form action="{{ url_for('public.foodscore_analyze') }}" method="get" id="analyzeForm">
+                    <input type="hidden" name="submitted" value="1">
+
+                    <!-- Product Information -->
+                    <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                        <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                            <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                                <i class="bi bi-tag" style="color: var(--foodscore);"></i> Product Information
+                            </h3>
+                        </div>
+                        <div style="padding: var(--spacing-5);">
+                            <div style="margin-bottom: var(--spacing-3);">
+                                <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Product Name (Optional)</label>
+                                <input type="text" class="form-control" name="product_name" value="{{ product_name }}"
+                                       placeholder="e.g., Whole Grain Cereal">
+                            </div>
+                            <div>
+                                <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Serving Size (Optional)</label>
+                                <input type="text" class="form-control" name="serving_size" value="{{ serving_size }}"
+                                       placeholder="e.g., 1 cup (30g)">
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">Enter ingredients exactly as they appear on the label</label>
+
+                    <!-- Ingredients -->
+                    <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                        <div style="background: var(--foodscore); padding: var(--spacing-4);">
+                            <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                                <i class="bi bi-list-ul"></i> Ingredients List <span style="color: var(--warning);">*Required</span>
+                            </h3>
+                        </div>
+                        <div style="padding: var(--spacing-5);">
+                            <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-2);">Enter ingredients exactly as they appear on the label</label>
                             <textarea class="form-control" name="ingredients" rows="4" required
                                       placeholder="e.g., Whole grain wheat, sugar, corn syrup, honey, salt, natural flavor, BHT for freshness">{{ ingredients }}</textarea>
-                            <small class="text-muted">The ML model analyzes ingredients to detect processing level and additives</small>
+                            <small style="color: var(--neutral-500); margin-top: var(--spacing-2); display: block;">The ML model analyzes ingredients to detect processing level and additives</small>
                         </div>
                     </div>
-                </div>
 
-                <!-- Nutrition Facts -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Nutrition Facts (Optional)</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Calories</label>
-                                <input type="text" class="form-control" name="calories" value="{{ calories }}"
-                                       placeholder="e.g., 120">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Total Fat (g)</label>
-                                <input type="text" class="form-control" name="total_fat" value="{{ total_fat }}"
-                                       placeholder="e.g., 3">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Saturated Fat (g)</label>
-                                <input type="text" class="form-control" name="saturated_fat" value="{{ saturated_fat }}"
-                                       placeholder="e.g., 1">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Sodium (mg)</label>
-                                <input type="text" class="form-control" name="sodium" value="{{ sodium }}"
-                                       placeholder="e.g., 230">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Total Carbs (g)</label>
-                                <input type="text" class="form-control" name="total_carbs" value="{{ total_carbs }}"
-                                       placeholder="e.g., 23">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Sugars (g)</label>
-                                <input type="text" class="form-control" name="sugars" value="{{ sugars }}"
-                                       placeholder="e.g., 10">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Protein (g)</label>
-                                <input type="text" class="form-control" name="protein" value="{{ protein }}"
-                                       placeholder="e.g., 3">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Fiber (g)</label>
-                                <input type="text" class="form-control" name="fiber" value="{{ fiber }}"
-                                       placeholder="e.g., 3">
+                    <!-- Nutrition Facts -->
+                    <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                        <div style="background: var(--primary); padding: var(--spacing-4);">
+                            <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                                <i class="bi bi-clipboard-data"></i> Nutrition Facts (Optional)
+                            </h3>
+                        </div>
+                        <div style="padding: var(--spacing-5);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3);">
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Calories</label>
+                                    <input type="text" class="form-control" name="calories" value="{{ calories }}"
+                                           placeholder="e.g., 120">
+                                </div>
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Total Fat (g)</label>
+                                    <input type="text" class="form-control" name="total_fat" value="{{ total_fat }}"
+                                           placeholder="e.g., 3">
+                                </div>
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Saturated Fat (g)</label>
+                                    <input type="text" class="form-control" name="saturated_fat" value="{{ saturated_fat }}"
+                                           placeholder="e.g., 1">
+                                </div>
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Sodium (mg)</label>
+                                    <input type="text" class="form-control" name="sodium" value="{{ sodium }}"
+                                           placeholder="e.g., 230">
+                                </div>
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Total Carbs (g)</label>
+                                    <input type="text" class="form-control" name="total_carbs" value="{{ total_carbs }}"
+                                           placeholder="e.g., 23">
+                                </div>
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Sugars (g)</label>
+                                    <input type="text" class="form-control" name="sugars" value="{{ sugars }}"
+                                           placeholder="e.g., 10">
+                                </div>
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Protein (g)</label>
+                                    <input type="text" class="form-control" name="protein" value="{{ protein }}"
+                                           placeholder="e.g., 3">
+                                </div>
+                                <div>
+                                    <label style="font-size: var(--text-sm); color: var(--neutral-700); display: block; margin-bottom: var(--spacing-1);">Fiber (g)</label>
+                                    <input type="text" class="form-control" name="fiber" value="{{ fiber }}"
+                                           placeholder="e.g., 3">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-success btn-lg">
-                        <i class="bi bi-cpu me-2"></i>Analyze with AI
+                    <button type="submit" class="btn btn-foodscore btn-lg" style="width: 100%;">
+                        <i class="bi bi-cpu"></i> Analyze with AI
                     </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Results Column -->
-        <div class="col-lg-6">
-            {% if analysis %}
-            <!-- Health Score -->
-            <div class="card mb-4 border-{% if analysis.health_score >= 70 %}success{% elif analysis.health_score >= 40 %}warning{% else %}danger{% endif %}">
-                <div class="card-header bg-{% if analysis.health_score >= 70 %}success{% elif analysis.health_score >= 40 %}warning{% else %}danger{% endif %} text-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Health Analysis</h5>
-                </div>
-                <div class="card-body text-center">
-                    <h1 class="display-1 {% if analysis.health_score >= 70 %}text-success{% elif analysis.health_score >= 40 %}text-warning{% else %}text-danger{% endif %}">
-                        {{ analysis.health_score }}
-                    </h1>
-                    <p class="lead mb-0">Health Score (0-100)</p>
-                    <small class="text-muted">
-                        {% if analysis.health_score >= 70 %}Good choice!
-                        {% elif analysis.health_score >= 40 %}Consider alternatives
-                        {% else %}High health concerns{% endif %}
-                    </small>
-                </div>
+                </form>
             </div>
 
-            <!-- NOVA Classification -->
-            {% if analysis.ml_results.ml_nova_group %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-robot me-2"></i>AI Processing Level (NOVA)</h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge bg-{% if analysis.ml_results.ml_nova_group == 1 %}success{% elif analysis.ml_results.ml_nova_group == 2 %}info{% elif analysis.ml_results.ml_nova_group == 3 %}warning{% else %}danger{% endif %} fs-4 p-3">
-                            NOVA {{ analysis.ml_results.ml_nova_group }}
-                        </span>
-                        <span>Confidence: {{ analysis.ml_results.ml_nova_confidence }}%</span>
+            <!-- Results Column -->
+            <div>
+                {% if analysis %}
+                <!-- Health Score -->
+                <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4); border: 2px solid {% if analysis.health_score >= 70 %}var(--success){% elif analysis.health_score >= 40 %}var(--warning){% else %}var(--error){% endif %};">
+                    <div style="background: {% if analysis.health_score >= 70 %}var(--success){% elif analysis.health_score >= 40 %}var(--warning){% else %}var(--error){% endif %}; padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-graph-up"></i> Health Analysis
+                        </h3>
                     </div>
-                    <p class="mb-2"><strong>{{ analysis.ml_results.ml_nova_description }}</strong></p>
-                    <div class="progress" style="height: 25px;">
-                        {% for i in range(4) %}
-                        <div class="progress-bar bg-{% if i == 0 %}success{% elif i == 1 %}info{% elif i == 2 %}warning{% else %}danger{% endif %}"
-                             style="width: {{ (analysis.ml_results.ml_nova_probabilities[i] * 100)|round(1) }}%"
-                             title="NOVA {{ i+1 }}: {{ (analysis.ml_results.ml_nova_probabilities[i] * 100)|round(1) }}%">
-                            {% if analysis.ml_results.ml_nova_probabilities[i] > 0.1 %}
-                            {{ i+1 }}
-                            {% endif %}
+                    <div style="padding: var(--spacing-6); text-align: center;">
+                        <div style="font-size: 5rem; font-weight: 800; color: {% if analysis.health_score >= 70 %}var(--success){% elif analysis.health_score >= 40 %}var(--warning){% else %}var(--error){% endif %}; line-height: 1;">
+                            {{ analysis.health_score }}
                         </div>
-                        {% endfor %}
+                        <p style="font-size: var(--text-lg); color: var(--neutral-600); margin-bottom: var(--spacing-2);">Health Score (0-100)</p>
+                        <small style="color: var(--neutral-500);">
+                            {% if analysis.health_score >= 70 %}Good choice!
+                            {% elif analysis.health_score >= 40 %}Consider alternatives
+                            {% else %}High health concerns{% endif %}
+                        </small>
                     </div>
-                    <small class="text-muted">NOVA 1 (green) = minimally processed, NOVA 4 (red) = ultra-processed</small>
                 </div>
-            </div>
-            {% endif %}
 
-            <!-- Health Concerns -->
-            {% if analysis.health_concerns %}
-            <div class="card mb-4 border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Health Concerns</h6>
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% for concern in analysis.health_concerns %}
-                    <li class="list-group-item d-flex justify-content-between">
-                        <div>
-                            <strong>{{ concern.issue }}</strong>
-                            <br><small class="text-muted">{{ concern.note }}</small>
-                        </div>
-                        <span class="badge bg-danger">{{ concern.value }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <!-- Health Positives -->
-            {% if analysis.health_positives %}
-            <div class="card mb-4 border-success">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Health Benefits</h6>
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% for pos in analysis.health_positives %}
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>{{ pos.benefit }}</strong>
-                        <span class="badge bg-success">{{ pos.value }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <!-- Additive Risks -->
-            {% if analysis.ml_results.ml_additive_risks %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Detected Additives</h6>
-                </div>
-                <div class="card-body">
-                    {% if analysis.ml_results.ml_additive_high_risk_count %}
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        {{ analysis.ml_results.ml_additive_high_risk_count }} high-risk additive(s) detected
+                <!-- NOVA Classification -->
+                {% if analysis.ml_results.ml_nova_group %}
+                <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                    <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                        <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-robot" style="color: var(--primary);"></i> AI Processing Level (NOVA)
+                        </h3>
                     </div>
-                    {% endif %}
-                    <ul class="list-group">
-                        {% for additive in analysis.ml_results.ml_additive_risks[:5] %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>{{ additive.name }}</span>
-                            <span class="badge bg-{% if additive.risk_category == 'high' %}danger{% elif additive.risk_category == 'medium' %}warning{% else %}secondary{% endif %}">
-                                Risk: {{ additive.risk_score }}
+                    <div style="padding: var(--spacing-5);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+                            <span class="badge" style="font-size: var(--text-xl); padding: var(--spacing-3) var(--spacing-4); background: {% if analysis.ml_results.ml_nova_group == 1 %}var(--success){% elif analysis.ml_results.ml_nova_group == 2 %}var(--info){% elif analysis.ml_results.ml_nova_group == 3 %}var(--warning){% else %}var(--error){% endif %}; color: white;">
+                                NOVA {{ analysis.ml_results.ml_nova_group }}
                             </span>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                            <span style="color: var(--neutral-600);">Confidence: {{ analysis.ml_results.ml_nova_confidence }}%</span>
+                        </div>
+                        <p style="font-weight: 600; margin-bottom: var(--spacing-3);">{{ analysis.ml_results.ml_nova_description }}</p>
+                        <div style="display: flex; height: 24px; border-radius: var(--radius-md); overflow: hidden; background: var(--neutral-200);">
+                            {% for i in range(4) %}
+                            <div style="width: {{ (analysis.ml_results.ml_nova_probabilities[i] * 100)|round(1) }}%; background: {% if i == 0 %}var(--success){% elif i == 1 %}var(--info){% elif i == 2 %}var(--warning){% else %}var(--error){% endif %}; display: flex; align-items: center; justify-content: center;">
+                                {% if analysis.ml_results.ml_nova_probabilities[i] > 0.1 %}
+                                <span style="color: white; font-size: var(--text-xs); font-weight: 600;">{{ i+1 }}</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <small style="color: var(--neutral-500); margin-top: var(--spacing-2); display: block;">NOVA 1 (green) = minimally processed, NOVA 4 (red) = ultra-processed</small>
+                    </div>
                 </div>
-            </div>
-            {% endif %}
+                {% endif %}
 
-            {% else %}
-            <!-- Instructions when no analysis -->
-            <div class="card border-success">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-camera display-1 text-success mb-4"></i>
-                    <h4>How to Use</h4>
-                    <ol class="text-start">
-                        <li class="mb-2">Take a photo of a nutrition label or have the package handy</li>
-                        <li class="mb-2">Enter the <strong>ingredients list</strong> exactly as shown</li>
-                        <li class="mb-2">Optionally add nutrition facts for a more complete analysis</li>
-                        <li class="mb-2">Click "Analyze with AI" to get your results</li>
-                    </ol>
-                    <hr>
-                    <p class="text-muted small mb-0">
-                        Our AI analyzes ingredients to determine processing level (NOVA 1-4)
-                        and identifies potentially harmful additives.
-                    </p>
+                <!-- Health Concerns -->
+                {% if analysis.health_concerns %}
+                <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4); border: 1px solid var(--error);">
+                    <div style="background: var(--error); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-exclamation-triangle"></i> Health Concerns
+                        </h3>
+                    </div>
+                    <div style="padding: 0;">
+                        {% for concern in analysis.health_concerns %}
+                        <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-100); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: var(--neutral-900);">{{ concern.issue }}</strong>
+                                <br><small style="color: var(--neutral-500);">{{ concern.note }}</small>
+                            </div>
+                            <span class="badge badge-error">{{ concern.value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
+                {% endif %}
+
+                <!-- Health Benefits -->
+                {% if analysis.health_positives %}
+                <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4); border: 1px solid var(--success);">
+                    <div style="background: var(--success); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-check-circle"></i> Health Benefits
+                        </h3>
+                    </div>
+                    <div style="padding: 0;">
+                        {% for pos in analysis.health_positives %}
+                        <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-100); display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: var(--neutral-900);">{{ pos.benefit }}</strong>
+                            <span class="badge badge-success">{{ pos.value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Additive Risks -->
+                {% if analysis.ml_results.ml_additive_risks %}
+                <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                    <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                        <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-shield-exclamation" style="color: var(--warning);"></i> Detected Additives
+                        </h3>
+                    </div>
+                    <div style="padding: var(--spacing-5);">
+                        {% if analysis.ml_results.ml_additive_high_risk_count %}
+                        <div class="alert alert-warning" style="margin-bottom: var(--spacing-3);">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            {{ analysis.ml_results.ml_additive_high_risk_count }} high-risk additive(s) detected
+                        </div>
+                        {% endif %}
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-2);">
+                            {% for additive in analysis.ml_results.ml_additive_risks[:5] %}
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-3); background: var(--neutral-50); border-radius: var(--radius-md);">
+                                <span>{{ additive.name }}</span>
+                                <span class="badge {% if additive.risk_category == 'high' %}badge-error{% elif additive.risk_category == 'medium' %}badge-warning{% else %}{% endif %}" style="{% if additive.risk_category not in ['high', 'medium'] %}background: var(--neutral-200); color: var(--neutral-700);{% endif %}">
+                                    Risk: {{ additive.risk_score }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <!-- Instructions when no analysis -->
+                <div class="card" style="overflow: hidden; border: 1px solid var(--foodscore);">
+                    <div style="padding: var(--spacing-8); text-align: center;">
+                        <i class="bi bi-camera" style="font-size: 4rem; color: var(--foodscore); margin-bottom: var(--spacing-4); display: block;"></i>
+                        <h4 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-4);">How to Use</h4>
+                        <ol style="text-align: left; margin: 0 auto; max-width: 350px; padding-left: var(--spacing-5);">
+                            <li style="margin-bottom: var(--spacing-2);">Take a photo of a nutrition label or have the package handy</li>
+                            <li style="margin-bottom: var(--spacing-2);">Enter the <strong>ingredients list</strong> exactly as shown</li>
+                            <li style="margin-bottom: var(--spacing-2);">Optionally add nutrition facts for a more complete analysis</li>
+                            <li style="margin-bottom: var(--spacing-2);">Click "Analyze with AI" to get your results</li>
+                        </ol>
+                        <div style="border-top: 1px solid var(--neutral-200); margin-top: var(--spacing-5); padding-top: var(--spacing-5);">
+                            <p style="color: var(--neutral-500); font-size: var(--text-sm); margin: 0;">
+                                Our AI analyzes ingredients to determine processing level (NOVA 1-4)
+                                and identifies potentially harmful additives.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
-    </div>
+    </section>
 
     <!-- Info Card -->
-    <div class="card bg-light mt-4">
-        <div class="card-body">
-            <h6><i class="bi bi-info-circle me-2"></i>About This Analysis</h6>
-            <ul class="small mb-0">
+    <section class="section-sm">
+        <div class="card" style="background: var(--neutral-50); padding: var(--spacing-5);">
+            <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">
+                <i class="bi bi-info-circle"></i> About This Analysis
+            </h4>
+            <ul style="font-size: var(--text-sm); margin: 0; padding-left: var(--spacing-5); color: var(--neutral-600);">
                 <li><strong>NOVA Classification:</strong> AI model classifies foods by processing level (1=minimal to 4=ultra-processed)</li>
                 <li><strong>Additive Detection:</strong> Identifies preservatives, colorings, and other additives with risk scores</li>
                 <li><strong>Health Score:</strong> Combined score based on nutrition facts, processing level, and additive content</li>
                 <li>This tool provides educational information and is not a substitute for professional dietary advice</li>
             </ul>
         </div>
-    </div>
+    </section>
 </div>
+
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -388,18 +418,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 ocrResultText.textContent = 'Nutrition label extracted! Review the values below and click Analyze.';
                 ocrResult.classList.remove('d-none');
-                ocrResult.classList.remove('alert-danger');
+                ocrResult.classList.remove('alert-danger', 'alert-warning');
                 ocrResult.classList.add('alert-success');
             } else {
                 ocrResultText.textContent = data.error || 'Could not extract text from image. Please enter manually.';
                 ocrResult.classList.remove('d-none');
-                ocrResult.classList.remove('alert-success');
+                ocrResult.classList.remove('alert-success', 'alert-danger');
                 ocrResult.classList.add('alert-warning');
             }
         } catch (error) {
             ocrResultText.textContent = 'Error processing image. Please enter manually.';
             ocrResult.classList.remove('d-none');
-            ocrResult.classList.remove('alert-success');
+            ocrResult.classList.remove('alert-success', 'alert-warning');
             ocrResult.classList.add('alert-danger');
         }
 

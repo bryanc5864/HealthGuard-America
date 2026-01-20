@@ -1,52 +1,82 @@
 {% extends "public/base_public.html" %}
 
+{% block title %}Scan Barcode - FoodScore{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
-            <li class="breadcrumb-item active">Scan Barcode</li>
-        </ol>
-    </nav>
-
-    <div class="text-center mb-5">
-        <h2><i class="bi bi-upc-scan me-2"></i>Scan Barcode</h2>
-        <p class="text-muted">Point your camera at a product barcode</p>
+<!-- Page Header -->
+<div class="page-header page-header--foodscore">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.home') }}">Public Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.foodscore_home') }}">FoodScore</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Scan Barcode</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-upc-scan"></i> Scan Barcode
+        </h1>
+        <p class="page-subtitle">
+            Point your camera at a product barcode to look up health information
+        </p>
     </div>
+</div>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body text-center p-5">
-                    <div class="border border-2 border-dashed rounded p-5 mb-4" style="min-height: 300px;">
-                        <i class="bi bi-camera display-1 text-muted"></i>
-                        <p class="text-muted mt-3">Camera feed will appear here</p>
-                        <small class="text-muted">Barcode scanning requires camera access</small>
+<div class="container container-xl">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
+        <div style="max-width: 500px; margin: 0 auto;">
+            <!-- Camera Section -->
+            <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                <div style="background: var(--foodscore); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-camera-video"></i> Camera Scanner
+                    </h3>
+                </div>
+                <div style="padding: var(--spacing-6); text-align: center;">
+                    <div style="border: 2px dashed var(--neutral-300); border-radius: var(--radius-lg); padding: var(--spacing-8); min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: var(--spacing-4);">
+                        <i class="bi bi-camera" style="font-size: 4rem; color: var(--neutral-400); margin-bottom: var(--spacing-3);"></i>
+                        <p style="color: var(--neutral-500); margin-bottom: var(--spacing-1);">Camera feed will appear here</p>
+                        <small style="color: var(--neutral-400);">Barcode scanning requires camera access</small>
                     </div>
-                    <button class="btn btn-success btn-lg" id="startCamera">
-                        <i class="bi bi-camera-video me-2"></i>Start Camera
+                    <button class="btn btn-foodscore btn-lg" id="startCamera" style="width: 100%;">
+                        <i class="bi bi-camera-video"></i> Start Camera
                     </button>
                 </div>
             </div>
 
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h6>Or enter barcode manually:</h6>
+            <!-- Manual Entry -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-keyboard" style="color: var(--foodscore);"></i> Manual Entry
+                    </h3>
+                </div>
+                <div style="padding: var(--spacing-5);">
+                    <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Or enter the barcode number manually:</p>
                     <form action="{{ url_for('public.foodscore_product', barcode='') }}" method="get" id="barcodeForm">
-                        <div class="input-group">
+                        <div style="display: flex; gap: var(--spacing-3);">
                             <input type="text" class="form-control" id="barcodeInput"
-                                   placeholder="Enter barcode number..." pattern="[0-9]{8,14}">
-                            <button class="btn btn-outline-success" type="submit">Look Up</button>
+                                   placeholder="Enter barcode number..." pattern="[0-9]{8,14}" style="flex: 1;">
+                            <button class="btn btn-foodscore" type="submit">
+                                <i class="bi bi-search"></i> Look Up
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
+
+            <!-- Back Link -->
+            <div style="text-align: center; margin-top: var(--spacing-4);">
+                <a href="{{ url_for('public.foodscore_home') }}" style="color: var(--foodscore); font-size: var(--text-sm);">
+                    <i class="bi bi-arrow-left"></i> Back to FoodScore Home
+                </a>
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 
-{% block extra_js %}
 <script>
 document.getElementById('barcodeForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -56,5 +86,4 @@ document.getElementById('barcodeForm').addEventListener('submit', function(e) {
     }
 });
 </script>
-{% endblock %}
 {% endblock %}

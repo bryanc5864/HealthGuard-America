@@ -27,6 +27,14 @@
     <!-- Stats Section -->
     <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
         <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
+            <div class="stat-card stat-card--chroniccare">
+                <div class="stat-card-value">1.2M</div>
+                <div class="stat-card-label">CDC Records</div>
+            </div>
+            <div class="stat-card stat-card--chroniccare">
+                <div class="stat-card-value">3,142</div>
+                <div class="stat-card-label">Counties</div>
+            </div>
             <div class="stat-card" style="border-left-color: var(--error);">
                 <div class="stat-card-value" style="color: var(--error);">{{ stats.avg_obesity }}%</div>
                 <div class="stat-card-label">Obesity Rate</div>
@@ -36,16 +44,8 @@
                 <div class="stat-card-label">Diabetes</div>
             </div>
             <div class="stat-card stat-card--chroniccare">
-                <div class="stat-card-value">{{ stats.avg_heart_disease }}%</div>
-                <div class="stat-card-label">Heart Disease</div>
-            </div>
-            <div class="stat-card stat-card--chroniccare">
                 <div class="stat-card-value">{{ stats.critical_counties }}</div>
                 <div class="stat-card-label">Critical Counties</div>
-            </div>
-            <div class="stat-card stat-card--chroniccare">
-                <div class="stat-card-value">{{ stats.high_priority_counties }}</div>
-                <div class="stat-card-label">High Priority</div>
             </div>
             <div class="stat-card" style="border-left-color: var(--success);">
                 <div class="stat-card-value" style="color: var(--success);">{{ stats.states_covered }}</div>

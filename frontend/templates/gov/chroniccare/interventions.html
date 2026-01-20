@@ -1,59 +1,82 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}Interventions - ChronicCare{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
-            <li class="breadcrumb-item active">Interventions</li>
-        </ol>
-    </nav>
-
-    <h2 class="mb-4">
-        <i class="bi bi-bullseye me-2"></i>ML-Prioritized Intervention Targets
-    </h2>
-
-    <div class="alert alert-success mb-4">
-        <i class="bi bi-cpu me-2"></i>
-        <strong>Intervention Prioritizer Model:</strong>
-        {% if ml_available %}
-        <span class="badge bg-success ms-2">Live</span>
-        {{ ml_model_confidence }}% accuracy in ranking intervention urgency.
-        Counties are classified into 4 priority levels based on 20 health and socioeconomic features.
-        <br><small class="text-muted">Real-time ML inference active - predictions updated on each request.</small>
-        {% else %}
-        <span class="badge bg-warning text-dark ms-2">Heuristic Mode</span>
-        ML model unavailable. Using heuristic scoring based on disease prevalence rates.
-        {% endif %}
+<!-- Page Header -->
+<div class="page-header page-header--chroniccare">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Interventions</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-bullseye"></i> ML-Prioritized Intervention Targets
+        </h1>
+        <p class="page-subtitle">
+            Data-driven county prioritization for chronic disease interventions
+        </p>
     </div>
+</div>
 
-    <!-- Priority Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('gov.chroniccare_interventions') }}" method="get">
-                <div class="row align-items-end">
-                    <div class="col-md-3">
+<div class="container container-2xl">
+    <!-- ML Status Alert -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="alert alert-success" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-4); align-items: center;">
+                <i class="bi bi-cpu" style="font-size: var(--text-2xl);"></i>
+                <div>
+                    <strong>Intervention Prioritizer Model:</strong>
+                    {% if ml_available %}
+                    <span class="badge badge-success" style="margin-left: var(--spacing-2);">Live</span>
+                    {{ ml_model_confidence }}% accuracy in ranking intervention urgency.
+                    Counties are classified into 4 priority levels based on 20 health and socioeconomic features.
+                    <br><small style="color: var(--neutral-600);">Real-time ML inference active - predictions updated on each request.</small>
+                    {% else %}
+                    <span class="badge badge-warning" style="margin-left: var(--spacing-2);">Heuristic Mode</span>
+                    ML model unavailable. Using heuristic scoring based on disease prevalence rates.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-funnel"></i> Filter Options
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('gov.chroniccare_interventions') }}" method="get" style="display: flex; gap: var(--spacing-4); align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="min-width: 150px; margin: 0;">
                         <label class="form-label">Priority Level</label>
-                        <select class="form-select" name="priority">
+                        <select class="form-control" name="priority">
                             <option value="">All Priorities</option>
                             <option value="Critical" {% if selected_priority == 'Critical' %}selected{% endif %}>Critical</option>
                             <option value="High" {% if selected_priority == 'High' %}selected{% endif %}>High</option>
                             <option value="Medium" {% if selected_priority == 'Medium' %}selected{% endif %}>Medium</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
                         <label class="form-label">State</label>
-                        <select class="form-select" name="state">
+                        <select class="form-control" name="state">
                             <option value="">All States (50 + Territories)</option>
                             {% for state in states %}
                             <option value="{{ state }}" {% if selected_state == state %}selected{% endif %}>{{ state }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="form-group" style="min-width: 130px; margin: 0;">
                         <label class="form-label">Show</label>
-                        <select class="form-select" name="limit">
+                        <select class="form-control" name="limit">
                             <option value="50" {% if selected_limit == 50 %}selected{% endif %}>50 results</option>
                             <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 results</option>
                             <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 results</option>
@@ -61,30 +84,32 @@
                             <option value="3000" {% if selected_limit == 3000 %}selected{% endif %}>All (~3000)</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                    </div>
+                    <button type="submit" class="btn btn-chroniccare">
+                        <i class="bi bi-check2"></i> Apply Filters
+                    </button>
                     {% if selected_state or selected_priority or selected_limit != 50 %}
-                    <div class="col-md-2">
-                        <a href="{{ url_for('gov.chroniccare_interventions') }}" class="btn btn-outline-secondary w-100">Clear</a>
-                    </div>
+                    <a href="{{ url_for('gov.chroniccare_interventions') }}" class="btn btn-outline">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </a>
                     {% endif %}
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Results Table -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Top Priority Counties</h5>
-            <button class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-download me-1"></i>Export CSV
-            </button>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
+    <section>
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-list-ol"></i> Top Priority Counties
+                </h3>
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none;">
+                    <i class="bi bi-download"></i> Export CSV
+                </button>
+            </div>
+            <div class="table-container">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>Rank</th>
@@ -100,12 +125,12 @@
                     </thead>
                     <tbody>
                         {% for p in priorities %}
-                        <tr {% if p.priority_changed %}class="table-warning"{% endif %}>
-                            <td>{{ loop.index }}</td>
+                        <tr {% if p.priority_changed %}style="background: var(--warning-light);"{% endif %}>
+                            <td><strong>{{ loop.index }}</strong></td>
                             <td>
-                                {{ p.county }}
+                                <strong style="color: var(--neutral-900);">{{ p.county }}</strong>
                                 {% if p.priority_changed %}
-                                <span class="badge bg-warning text-dark ms-1" title="ML priority differs from stored priority">
+                                <span class="badge badge-warning" style="margin-left: var(--spacing-1);" title="ML priority differs from stored priority">
                                     <i class="bi bi-exclamation-triangle"></i>
                                 </span>
                                 {% endif %}
@@ -114,43 +139,43 @@
                             <td>
                                 {% set display_priority = p.ml_priority_tier if ml_available else p.priority %}
                                 {% if display_priority == 'Critical' %}
-                                <span class="badge bg-danger">Critical</span>
+                                <span class="badge badge-error">Critical</span>
                                 {% elif display_priority == 'High' %}
-                                <span class="badge bg-warning text-dark">High</span>
+                                <span class="badge badge-warning">High</span>
                                 {% elif display_priority == 'Medium' %}
-                                <span class="badge bg-info">Medium</span>
+                                <span class="badge" style="background: var(--info); color: white;">Medium</span>
                                 {% else %}
-                                <span class="badge bg-success">Low</span>
+                                <span class="badge badge-success">Low</span>
                                 {% endif %}
                                 {% if p.priority_changed %}
-                                <br><small class="text-muted">(was: {{ p.priority }})</small>
+                                <br><small style="color: var(--neutral-500);">(was: {{ p.priority }})</small>
                                 {% endif %}
                             </td>
                             <td>
                                 <strong>{{ p.ml_risk_score }}</strong>
                                 {% if p.ml_risk_score != p.risk_score %}
-                                <br><small class="text-muted">(orig: {{ p.risk_score }})</small>
+                                <br><small style="color: var(--neutral-500);">(orig: {{ p.risk_score }})</small>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if p.ml_confidence > 0 %}
-                                <div class="progress" style="height: 20px; min-width: 80px;">
-                                    <div class="progress-bar {% if p.ml_confidence >= 90 %}bg-success{% elif p.ml_confidence >= 70 %}bg-info{% else %}bg-warning{% endif %}"
-                                         role="progressbar" style="width: {{ p.ml_confidence }}%">
-                                        {{ p.ml_confidence }}%
+                                <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                    <div style="flex: 1; height: 8px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden; min-width: 60px;">
+                                        <div style="height: 100%; background: {% if p.ml_confidence >= 90 %}var(--success){% elif p.ml_confidence >= 70 %}var(--info){% else %}var(--warning){% endif %}; width: {{ p.ml_confidence }}%;"></div>
                                     </div>
+                                    <span style="font-size: var(--text-sm);">{{ p.ml_confidence }}%</span>
                                 </div>
                                 {% else %}
-                                <span class="text-muted">N/A</span>
+                                <span style="color: var(--neutral-400);">N/A</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if p.diabetes >= p.obesity and p.diabetes >= p.heart_disease %}
-                                <span class="badge bg-secondary">Diabetes</span>
+                                <span class="badge" style="background: var(--neutral-200); color: var(--neutral-700);">Diabetes</span>
                                 {% elif p.obesity >= p.diabetes and p.obesity >= p.heart_disease %}
-                                <span class="badge bg-secondary">Obesity</span>
+                                <span class="badge" style="background: var(--neutral-200); color: var(--neutral-700);">Obesity</span>
                                 {% else %}
-                                <span class="badge bg-secondary">Heart Disease</span>
+                                <span class="badge" style="background: var(--neutral-200); color: var(--neutral-700);">Heart Disease</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -165,17 +190,23 @@
                                 <small>Maintenance & monitoring</small>
                                 {% endif %}
                             </td>
-                            <td><a href="{{ url_for('gov.chroniccare_county', fips=p.fips) }}" class="btn btn-sm btn-outline-primary">Details</a></td>
+                            <td>
+                                <a href="{{ url_for('gov.chroniccare_county', fips=p.fips) }}" class="btn btn-sm btn-chroniccare">
+                                    Details
+                                </a>
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="9" class="text-center text-muted">No priority data available</td>
+                            <td colspan="9" style="text-align: center; padding: var(--spacing-6); color: var(--neutral-500);">
+                                No priority data available
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

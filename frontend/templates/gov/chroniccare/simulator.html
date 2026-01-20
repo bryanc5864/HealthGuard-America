@@ -1,314 +1,323 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}ML Simulator - ChronicCare{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
-            <li class="breadcrumb-item active">ML Simulator</li>
-        </ol>
-    </nav>
-
-    <div class="page-header mb-4">
-        <div class="d-flex align-items-center">
-            <h1><i class="bi bi-sliders me-2" style="color: #0dcaf0;"></i>ML Simulator</h1>
-            <span class="badge bg-info ms-3">Experimental</span>
+<!-- Page Header -->
+<div class="page-header page-header--chroniccare">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>ML Simulator</span>
         </div>
-        <p class="text-muted">Input county-level features to simulate chronic disease predictions and intervention priorities.</p>
+        <h1 class="page-title">
+            <i class="bi bi-sliders"></i> ML Simulator
+            <span class="badge" style="background: rgba(255,255,255,0.2); font-size: var(--text-sm); vertical-align: middle; margin-left: var(--spacing-2);">Experimental</span>
+        </h1>
+        <p class="page-subtitle">
+            Input county-level features to simulate chronic disease predictions and intervention priorities
+        </p>
     </div>
+</div>
 
-    <!-- Feature Input Form -->
-    <form action="{{ url_for('gov.chroniccare_simulator') }}" method="get">
+<div class="container container-2xl">
+    <form action="{{ url_for('gov.chroniccare_simulator') }}" method="get" style="margin-top: -2rem; position: relative; z-index: 10;">
         <input type="hidden" name="submitted" value="1">
 
-        <div class="row">
+        <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--spacing-6);">
             <!-- Left Column - Input Features -->
-            <div class="col-lg-7">
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-5);">
                 <!-- Food Environment Features -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h6 class="mb-0"><i class="bi bi-basket me-2"></i>Food Environment (5 features)</h6>
+                <div class="card" style="overflow: hidden;">
+                    <div style="background: var(--success); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <i class="bi bi-basket"></i> Food Environment (5 features)
+                        </h3>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
+                    <div style="padding: var(--spacing-5);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Grocery Stores per 1,000</label>
                                 <input type="number" step="0.01" class="form-control" name="grocery_stores_per_1000"
                                        value="{{ features.grocery_stores_per_1000 }}" placeholder="0.25">
-                                <small class="text-muted">National avg: 0.25</small>
+                                <small style="color: var(--neutral-500);">National avg: 0.25</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Fast Food per 1,000</label>
                                 <input type="number" step="0.01" class="form-control" name="fast_food_restaurants_per_1000"
                                        value="{{ features.fast_food_restaurants_per_1000 }}" placeholder="0.65">
-                                <small class="text-muted">National avg: 0.65</small>
+                                <small style="color: var(--neutral-500);">National avg: 0.65</small>
                             </div>
-                            <div class="col-md-4">
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4); margin-top: var(--spacing-4);">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Food Environment Index</label>
                                 <input type="number" step="0.1" class="form-control" name="food_environment_index"
                                        value="{{ features.food_environment_index }}" placeholder="7.0">
-                                <small class="text-muted">0-10 scale</small>
+                                <small style="color: var(--neutral-500);">0-10 scale</small>
                             </div>
-                            <div class="col-md-4">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Food Insecurity Rate (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="food_insecurity_rate"
                                        value="{{ features.food_insecurity_rate }}" placeholder="12.0">
-                                <small class="text-muted">National avg: 12%</small>
+                                <small style="color: var(--neutral-500);">National avg: 12%</small>
                             </div>
-                            <div class="col-md-4">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Limited Food Access (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="pct_limited_food_access"
                                        value="{{ features.pct_limited_food_access }}" placeholder="8.0">
-                                <small class="text-muted">National avg: 8%</small>
+                                <small style="color: var(--neutral-500);">National avg: 8%</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Healthcare Access Features -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="bi bi-hospital me-2"></i>Healthcare Access (4 features)</h6>
+                <div class="card" style="overflow: hidden;">
+                    <div style="background: var(--primary); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <i class="bi bi-hospital"></i> Healthcare Access (4 features)
+                        </h3>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
+                    <div style="padding: var(--spacing-5);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Primary Care Physicians per 100k</label>
                                 <input type="number" step="0.1" class="form-control" name="pcp_rate"
                                        value="{{ features.pcp_rate }}" placeholder="55">
-                                <small class="text-muted">National avg: 55</small>
+                                <small style="color: var(--neutral-500);">National avg: 55</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Mental Health Providers per 100k</label>
                                 <input type="number" step="0.1" class="form-control" name="mental_health_provider_rate"
                                        value="{{ features.mental_health_provider_rate }}" placeholder="180">
-                                <small class="text-muted">National avg: 180</small>
+                                <small style="color: var(--neutral-500);">National avg: 180</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Uninsured Rate (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="pct_uninsured"
                                        value="{{ features.pct_uninsured }}" placeholder="10">
-                                <small class="text-muted">National avg: 10%</small>
+                                <small style="color: var(--neutral-500);">National avg: 10%</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Preventable Hospitalizations per 100k</label>
                                 <input type="number" step="1" class="form-control" name="preventable_hospitalizations"
                                        value="{{ features.preventable_hospitalizations }}" placeholder="4500">
-                                <small class="text-muted">National avg: 4500</small>
+                                <small style="color: var(--neutral-500);">National avg: 4500</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Socioeconomic Features -->
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-dark">
-                        <h6 class="mb-0"><i class="bi bi-cash-stack me-2"></i>Socioeconomic Factors (5 features)</h6>
+                <div class="card" style="overflow: hidden;">
+                    <div style="background: var(--warning); padding: var(--spacing-4);">
+                        <h3 style="color: var(--neutral-900); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <i class="bi bi-cash-stack"></i> Socioeconomic Factors (5 features)
+                        </h3>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
+                    <div style="padding: var(--spacing-5);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Median Household Income ($)</label>
                                 <input type="number" step="100" class="form-control" name="median_household_income"
                                        value="{{ features.median_household_income }}" placeholder="55000">
-                                <small class="text-muted">National avg: $55,000</small>
+                                <small style="color: var(--neutral-500);">National avg: $55,000</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Child Poverty Rate (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="child_poverty_rate"
                                        value="{{ features.child_poverty_rate }}" placeholder="18">
-                                <small class="text-muted">National avg: 18%</small>
+                                <small style="color: var(--neutral-500);">National avg: 18%</small>
                             </div>
-                            <div class="col-md-4">
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4); margin-top: var(--spacing-4);">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Income Inequality Ratio</label>
                                 <input type="number" step="0.1" class="form-control" name="income_inequality_ratio"
                                        value="{{ features.income_inequality_ratio }}" placeholder="4.5">
-                                <small class="text-muted">80th/20th percentile</small>
+                                <small style="color: var(--neutral-500);">80th/20th percentile</small>
                             </div>
-                            <div class="col-md-4">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">HS Graduation Rate (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="high_school_graduation_rate"
                                        value="{{ features.high_school_graduation_rate }}" placeholder="88">
-                                <small class="text-muted">National avg: 88%</small>
+                                <small style="color: var(--neutral-500);">National avg: 88%</small>
                             </div>
-                            <div class="col-md-4">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Some College (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="pct_some_college"
                                        value="{{ features.pct_some_college }}" placeholder="60">
-                                <small class="text-muted">National avg: 60%</small>
+                                <small style="color: var(--neutral-500);">National avg: 60%</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Behavioral Features -->
-                <div class="card mb-4">
-                    <div class="card-header bg-danger text-white">
-                        <h6 class="mb-0"><i class="bi bi-person-walking me-2"></i>Behavioral Factors (4 features)</h6>
+                <div class="card" style="overflow: hidden;">
+                    <div style="background: var(--error); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <i class="bi bi-person-walking"></i> Behavioral Factors (4 features)
+                        </h3>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
+                    <div style="padding: var(--spacing-5);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Physical Inactivity (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="physical_inactivity_prevalence"
                                        value="{{ features.physical_inactivity_prevalence }}" placeholder="26">
-                                <small class="text-muted">National avg: 26%</small>
+                                <small style="color: var(--neutral-500);">National avg: 26%</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Excessive Drinking (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="excessive_drinking_prevalence"
                                        value="{{ features.excessive_drinking_prevalence }}" placeholder="18">
-                                <small class="text-muted">National avg: 18%</small>
+                                <small style="color: var(--neutral-500);">National avg: 18%</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Smoking Prevalence (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="smoking_prevalence"
                                        value="{{ features.smoking_prevalence }}" placeholder="17">
-                                <small class="text-muted">National avg: 17%</small>
+                                <small style="color: var(--neutral-500);">National avg: 17%</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Insufficient Sleep (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="pct_insufficient_sleep"
                                        value="{{ features.pct_insufficient_sleep }}" placeholder="35">
-                                <small class="text-muted">National avg: 35%</small>
+                                <small style="color: var(--neutral-500);">National avg: 35%</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Demographics & Disease Burden -->
-                <div class="card mb-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0"><i class="bi bi-people me-2"></i>Demographics & Scores (3 features)</h6>
+                <div class="card" style="overflow: hidden;">
+                    <div style="background: var(--neutral-600); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <i class="bi bi-people"></i> Demographics & Scores (3 features)
+                        </h3>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4">
+                    <div style="padding: var(--spacing-5);">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Rural Population (%)</label>
                                 <input type="number" step="0.1" class="form-control" name="pct_rural"
                                        value="{{ features.pct_rural }}" placeholder="20">
-                                <small class="text-muted">National avg: 20%</small>
+                                <small style="color: var(--neutral-500);">National avg: 20%</small>
                             </div>
-                            <div class="col-md-4">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Chronic Disease Burden (0-100)</label>
                                 <input type="number" step="0.1" class="form-control" name="chronic_disease_burden_score"
                                        value="{{ features.chronic_disease_burden_score }}" placeholder="50">
-                                <small class="text-muted">Composite score</small>
+                                <small style="color: var(--neutral-500);">Composite score</small>
                             </div>
-                            <div class="col-md-4">
+                            <div class="form-group" style="margin: 0;">
                                 <label class="form-label">Food Environment Score (0-100)</label>
                                 <input type="number" step="0.1" class="form-control" name="food_environment_score"
                                        value="{{ features.food_environment_score }}" placeholder="50">
-                                <small class="text-muted">Higher = better</small>
+                                <small style="color: var(--neutral-500);">Higher = better</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-info btn-lg">
-                        <i class="bi bi-cpu me-2"></i>Run ML Prediction
-                    </button>
-                </div>
+                <button type="submit" class="btn btn-chroniccare" style="padding: var(--spacing-4); font-size: var(--text-base);">
+                    <i class="bi bi-cpu"></i> Run ML Prediction
+                </button>
             </div>
 
             <!-- Right Column - Results -->
-            <div class="col-lg-5">
+            <div>
                 {% if submitted %}
                 <!-- Prediction Results -->
-                <div class="card mb-4 border-info sticky-top" style="top: 20px;">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="bi bi-robot me-2"></i>ML Predictions</h5>
+                <div class="card" style="overflow: hidden; border: 2px solid var(--chroniccare); position: sticky; top: var(--spacing-4);">
+                    <div style="background: var(--chroniccare); padding: var(--spacing-4);">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-robot"></i> ML Predictions
+                        </h3>
                     </div>
-                    <div class="card-body">
+                    <div style="padding: var(--spacing-5);">
                         {% if predictions and 'error' not in predictions %}
                         <!-- Disease Predictions -->
-                        <h6 class="text-muted mb-3">Predicted Disease Prevalence</h6>
-                        <div class="row text-center mb-4">
-                            <div class="col-4">
-                                <div class="border rounded p-3 bg-light">
-                                    <h3 class="text-warning mb-1">{{ predictions.get('diabetes_prevalence', 'N/A') }}%</h3>
-                                    <small>Diabetes</small>
-                                </div>
+                        <h4 style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Predicted Disease Prevalence</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-3); margin-bottom: var(--spacing-5);">
+                            <div style="text-align: center; padding: var(--spacing-4); background: var(--neutral-50); border-radius: var(--radius-lg);">
+                                <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--warning);">{{ predictions.get('diabetes_prevalence', 'N/A') }}%</div>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500);">Diabetes</div>
                             </div>
-                            <div class="col-4">
-                                <div class="border rounded p-3 bg-light">
-                                    <h3 class="text-danger mb-1">{{ predictions.get('obesity_prevalence', 'N/A') }}%</h3>
-                                    <small>Obesity</small>
-                                </div>
+                            <div style="text-align: center; padding: var(--spacing-4); background: var(--neutral-50); border-radius: var(--radius-lg);">
+                                <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--error);">{{ predictions.get('obesity_prevalence', 'N/A') }}%</div>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500);">Obesity</div>
                             </div>
-                            <div class="col-4">
-                                <div class="border rounded p-3 bg-light">
-                                    <h3 class="text-primary mb-1">{{ predictions.get('heart_disease_prevalence', 'N/A') }}%</h3>
-                                    <small>Heart Disease</small>
-                                </div>
+                            <div style="text-align: center; padding: var(--spacing-4); background: var(--neutral-50); border-radius: var(--radius-lg);">
+                                <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--primary);">{{ predictions.get('heart_disease_prevalence', 'N/A') }}%</div>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500);">Heart Disease</div>
                             </div>
                         </div>
 
                         {% if priority %}
                         <!-- Intervention Priority -->
-                        <h6 class="text-muted mb-3">Intervention Priority</h6>
-                        <div class="alert alert-{% if priority.tier == 'Critical' %}danger{% elif priority.tier == 'High' %}warning{% elif priority.tier == 'Medium' %}info{% else %}success{% endif %} text-center">
-                            <h2 class="mb-1">{{ priority.tier }}</h2>
-                            <p class="mb-2">Priority Tier</p>
-                            <small>Confidence: {{ priority.confidence }}%</small>
+                        <h4 style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Intervention Priority</h4>
+                        <div class="alert {% if priority.tier == 'Critical' %}alert-error{% elif priority.tier == 'High' %}alert-warning{% else %}alert-info{% endif %}" style="text-align: center; margin-bottom: var(--spacing-4);">
+                            <div style="font-size: var(--text-2xl); font-weight: 700;">{{ priority.tier }}</div>
+                            <div style="font-size: var(--text-sm);">Priority Tier</div>
+                            <small style="opacity: 0.8;">Confidence: {{ priority.confidence }}%</small>
                         </div>
 
-                        <div class="row text-center mb-4">
-                            <div class="col-6">
-                                <div class="border rounded p-2">
-                                    <h5 class="mb-1">{{ priority.maha_index }}</h5>
-                                    <small class="text-muted">MAHA Index</small>
-                                </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3); margin-bottom: var(--spacing-5);">
+                            <div style="text-align: center; padding: var(--spacing-3); border: 1px solid var(--neutral-200); border-radius: var(--radius-lg);">
+                                <div style="font-size: var(--text-xl); font-weight: 700;">{{ priority.maha_index }}</div>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500);">MAHA Index</div>
                             </div>
-                            <div class="col-6">
-                                <div class="border rounded p-2">
-                                    <h5 class="mb-1">{{ priority.ml_risk_score }}</h5>
-                                    <small class="text-muted">Risk Score</small>
-                                </div>
+                            <div style="text-align: center; padding: var(--spacing-3); border: 1px solid var(--neutral-200); border-radius: var(--radius-lg);">
+                                <div style="font-size: var(--text-xl); font-weight: 700;">{{ priority.ml_risk_score }}</div>
+                                <div style="font-size: var(--text-xs); color: var(--neutral-500);">Risk Score</div>
                             </div>
                         </div>
                         {% endif %}
 
                         {% if risk_breakdown %}
                         <!-- Risk Factors -->
-                        <h6 class="text-muted mb-3">Top Risk Factors</h6>
-                        <ul class="list-group mb-4">
+                        <h4 style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Top Risk Factors</h4>
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-2); margin-bottom: var(--spacing-5);">
                             {% for factor in risk_breakdown[:5] %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-3); background: var(--neutral-50); border-radius: var(--radius-md);">
                                 <div>
-                                    <strong>{{ factor.name }}</strong>
-                                    <br><small class="text-muted">{{ factor.category }}</small>
+                                    <strong style="font-size: var(--text-sm);">{{ factor.name }}</strong>
+                                    <br><small style="color: var(--neutral-500);">{{ factor.category }}</small>
                                 </div>
-                                <div class="text-end">
-                                    <span class="badge bg-danger">{{ factor.contribution }}%</span>
-                                    <br><small>Value: {{ factor.value }}</small>
+                                <div style="text-align: right;">
+                                    <span class="badge badge-error">{{ factor.contribution }}%</span>
+                                    <br><small style="color: var(--neutral-500);">Value: {{ factor.value }}</small>
                                 </div>
-                            </li>
+                            </div>
                             {% endfor %}
-                        </ul>
+                        </div>
                         {% endif %}
 
                         {% if recommendations %}
                         <!-- Recommendations -->
-                        <h6 class="text-muted mb-3">Recommended Interventions</h6>
+                        <h4 style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-3);">Recommended Interventions</h4>
                         {% for rec in recommendations[:3] %}
-                        <div class="card mb-2">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between">
-                                    <strong>{{ rec.intervention }}</strong>
-                                    <span class="badge bg-{% if rec.impact == 'High' %}success{% elif rec.impact == 'Medium' %}warning{% else %}secondary{% endif %}">{{ rec.impact }} Impact</span>
-                                </div>
-                                <small class="text-muted">Target: {{ rec.target_factor }} | Est. Reduction: {{ rec.estimated_reduction }}</small>
+                        <div class="card" style="margin-bottom: var(--spacing-2); padding: var(--spacing-3);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <strong style="font-size: var(--text-sm);">{{ rec.intervention }}</strong>
+                                <span class="badge {% if rec.impact == 'High' %}badge-success{% elif rec.impact == 'Medium' %}badge-warning{% else %}{% endif %}" style="{% if rec.impact != 'High' and rec.impact != 'Medium' %}background: var(--neutral-200); color: var(--neutral-700);{% endif %}">{{ rec.impact }} Impact</span>
                             </div>
+                            <small style="color: var(--neutral-500);">Target: {{ rec.target_factor }} | Est. Reduction: {{ rec.estimated_reduction }}</small>
                         </div>
                         {% endfor %}
                         {% endif %}
 
                         {% elif predictions and 'error' in predictions %}
-                        <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
+                        <div class="alert alert-error">
+                            <i class="bi bi-exclamation-triangle"></i>
                             Error: {{ predictions.error }}
                         </div>
                         {% endif %}
@@ -316,31 +325,45 @@
                 </div>
                 {% else %}
                 <!-- Instructions -->
-                <div class="card border-info">
-                    <div class="card-body text-center py-5">
-                        <i class="bi bi-sliders display-1 text-info mb-4"></i>
-                        <h4>ML County Simulator</h4>
-                        <p class="text-muted">
+                <div class="card" style="border: 2px solid var(--chroniccare); position: sticky; top: var(--spacing-4);">
+                    <div style="padding: var(--spacing-8); text-align: center;">
+                        <i class="bi bi-sliders" style="font-size: 4rem; color: var(--chroniccare); margin-bottom: var(--spacing-4); display: block;"></i>
+                        <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--spacing-3);">ML County Simulator</h3>
+                        <p style="color: var(--neutral-500); margin-bottom: var(--spacing-4);">
                             Enter feature values on the left to simulate predictions for a hypothetical county.
                             The ML models will predict:
                         </p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-check-circle text-success me-2"></i>Diabetes prevalence</li>
-                            <li><i class="bi bi-check-circle text-success me-2"></i>Obesity prevalence</li>
-                            <li><i class="bi bi-check-circle text-success me-2"></i>Heart disease prevalence</li>
-                            <li><i class="bi bi-check-circle text-success me-2"></i>Intervention priority tier</li>
-                            <li><i class="bi bi-check-circle text-success me-2"></i>MAHA Index score</li>
-                        </ul>
-                        <hr>
-                        <small class="text-muted">
+                        <div style="text-align: left; display: inline-block;">
+                            <div style="display: flex; align-items: center; gap: var(--spacing-2); margin-bottom: var(--spacing-2);">
+                                <i class="bi bi-check-circle" style="color: var(--success);"></i>
+                                <span>Diabetes prevalence</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--spacing-2); margin-bottom: var(--spacing-2);">
+                                <i class="bi bi-check-circle" style="color: var(--success);"></i>
+                                <span>Obesity prevalence</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--spacing-2); margin-bottom: var(--spacing-2);">
+                                <i class="bi bi-check-circle" style="color: var(--success);"></i>
+                                <span>Heart disease prevalence</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--spacing-2); margin-bottom: var(--spacing-2);">
+                                <i class="bi bi-check-circle" style="color: var(--success);"></i>
+                                <span>Intervention priority tier</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                <i class="bi bi-check-circle" style="color: var(--success);"></i>
+                                <span>MAHA Index score</span>
+                            </div>
+                        </div>
+                        <div style="border-top: 1px solid var(--neutral-200); padding-top: var(--spacing-4); margin-top: var(--spacing-4);">
                             {% if ml_available %}
-                            <span class="badge bg-success">ML Models Active</span>
-                            Using trained PyTorch models
+                            <span class="badge badge-success">ML Models Active</span>
+                            <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-top: var(--spacing-2); margin-bottom: 0;">Using trained PyTorch models</p>
                             {% else %}
-                            <span class="badge bg-warning">Heuristic Mode</span>
-                            ML models not loaded - using rule-based predictions
+                            <span class="badge badge-warning">Heuristic Mode</span>
+                            <p style="font-size: var(--text-sm); color: var(--neutral-500); margin-top: var(--spacing-2); margin-bottom: 0;">ML models not loaded - using rule-based predictions</p>
                             {% endif %}
-                        </small>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
@@ -349,16 +372,21 @@
     </form>
 
     <!-- Model Info -->
-    <div class="card mt-4 bg-light">
-        <div class="card-body">
-            <h6><i class="bi bi-info-circle me-2"></i>About This Simulator</h6>
-            <ul class="small mb-0">
-                <li><strong>Chronic Risk Predictor:</strong> Multi-task neural network (MAE: 1.76%) predicting county-level disease prevalence</li>
-                <li><strong>Intervention Prioritizer:</strong> Classification model (93.9% accuracy) for MAHA initiative targeting</li>
-                <li><strong>21 Input Features:</strong> Food environment (5), Healthcare (4), Socioeconomic (5), Behavioral (4), Demographics (3)</li>
-                <li>Default values represent national averages - adjust to simulate different county profiles</li>
-            </ul>
+    <section style="margin-top: var(--spacing-6);">
+        <div class="alert alert-info">
+            <div style="display: flex; gap: var(--spacing-3); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-2);">About This Simulator</h4>
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li><strong>Chronic Risk Predictor:</strong> Multi-task neural network (MAE: 1.76%) predicting county-level disease prevalence</li>
+                        <li><strong>Intervention Prioritizer:</strong> Classification model (93.9% accuracy) for MAHA initiative targeting</li>
+                        <li><strong>21 Input Features:</strong> Food environment (5), Healthcare (4), Socioeconomic (5), Behavioral (4), Demographics (3)</li>
+                        <li>Default values represent national averages - adjust to simulate different county profiles</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

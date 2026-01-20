@@ -1329,8 +1329,194 @@ a:hover {
 }
 
 /* ============================================
-   Animations
+   Animations & Transitions
    ============================================ */
+
+/* Global smooth transitions for interactive elements */
+a,
+.btn,
+.card,
+.badge,
+.nav-link,
+.stat-card,
+.form-control,
+.portal-card,
+.module-card,
+.table tbody tr,
+input,
+select,
+textarea {
+  transition: all var(--transition-base);
+}
+
+/* Button hover effects */
+.btn {
+  transform: translateY(0);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Exclude white/outline buttons from lift effect (e.g., gov login) */
+.btn-white:hover,
+.btn-outline:hover {
+  transform: translateY(0);
+}
+
+.btn:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+
+/* Badge hover glow */
+.badge {
+  transition: all var(--transition-fast);
+}
+
+a.badge:hover,
+.badge:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+}
+
+/* Table row highlight */
+.table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+/* Form focus animations */
+.form-control {
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.form-control:hover {
+  border-color: var(--neutral-400);
+}
+
+/* Alert subtle entrance */
+.alert {
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+/* Icon animations on hover */
+.btn i,
+.nav-link i,
+.card i {
+  transition: transform var(--transition-fast);
+}
+
+.btn:hover i {
+  transform: translateX(2px);
+}
+
+/* Arrow icon special animation */
+.btn:hover .bi-arrow-right {
+  transform: translateX(4px);
+}
+
+/* Nav link underline effect */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: all var(--transition-fast);
+  transform: translateX(-50%);
+  opacity: 0;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 60%;
+  opacity: 0.5;
+}
+
+/* Portal card glow effect */
+.portal-card {
+  transition: all var(--transition-base), box-shadow var(--transition-slow);
+}
+
+.portal-card:hover {
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
+.portal-card-icon {
+  transition: transform var(--transition-base), background var(--transition-base);
+}
+
+.portal-card:hover .portal-card-icon {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Module card image zoom is already defined, add overlay fade */
+.module-card-overlay {
+  transition: opacity var(--transition-base);
+}
+
+.module-card:hover .module-card-overlay {
+  opacity: 0.8;
+}
+
+/* Stat card number pop effect */
+.stat-card-value {
+  transition: transform var(--transition-fast);
+}
+
+.stat-card:hover .stat-card-value {
+  transform: scale(1.05);
+}
+
+/* Search box icon animation */
+.search-box i {
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.search-box .form-control:focus + i,
+.search-box:focus-within i {
+  color: var(--primary-600);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Breadcrumb link transitions */
+.breadcrumb a {
+  transition: color var(--transition-fast);
+}
+
+/* Footer link underline animation */
+.footer-links a {
+  position: relative;
+}
+
+.footer-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--white);
+  transition: width var(--transition-fast);
+}
+
+.footer-links a:hover::after {
+  width: 100%;
+}
+
+/* Page load fade-in for main content */
+.container.container-xl {
+  animation: fadeIn 0.4s ease;
+}
+
+/* Keyframe animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1347,9 +1533,30 @@ a:hover {
   }
 }
 
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
 }
 
 .animate-fade-in {
@@ -1360,9 +1567,28 @@ a:hover {
   animation: slideUp 0.5s ease forwards;
 }
 
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease forwards;
+}
+
 .animate-pulse {
   animation: pulse 2s infinite;
 }
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-glow {
+  animation: glow 2s infinite;
+}
+
+/* Staggered animation delays for lists */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
 
 /* ============================================
    Loading States

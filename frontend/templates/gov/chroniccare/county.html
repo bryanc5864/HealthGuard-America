@@ -1,295 +1,323 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}County Profile - ChronicCare{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
-            <li class="breadcrumb-item active">County Profile</li>
-        </ol>
-    </nav>
-
-    {% if county %}
-    <h2 class="mb-4">
-        <i class="bi bi-geo-alt me-2"></i>{{ county.county_name }}, {{ county.state_abbr }}
-        <small class="text-muted">FIPS: {{ fips }}</small>
-    </h2>
-
-    <!-- County Health Metrics -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card border-danger">
-                <div class="card-body text-center">
-                    <h3 class="text-danger">{{ county.obesity_prevalence|default(0)|round(1) }}%</h3>
-                    <p class="mb-0">Obesity Prevalence</p>
-                </div>
-            </div>
+<!-- Page Header -->
+<div class="page-header page-header--chroniccare">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>County Profile</span>
         </div>
-        <div class="col-md-3">
-            <div class="card border-warning">
-                <div class="card-body text-center">
-                    <h3 class="text-warning">{{ county.diabetes_prevalence|default(0)|round(1) }}%</h3>
-                    <p class="mb-0">Diabetes Prevalence</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-info">
-                <div class="card-body text-center">
-                    <h3 class="text-info">{{ county.heart_disease_prevalence|default(0)|round(1) }}%</h3>
-                    <p class="mb-0">Heart Disease</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h3>{{ county.chronic_disease_burden_score|default(0)|round(1) }}</h3>
-                    <p class="mb-0">Burden Score</p>
-                </div>
-            </div>
-        </div>
+        {% if county %}
+        <h1 class="page-title">
+            <i class="bi bi-geo-alt"></i> {{ county.county_name }}, {{ county.state_abbr }}
+        </h1>
+        <p class="page-subtitle">
+            FIPS: {{ fips }} | Comprehensive health profile and intervention analysis
+        </p>
+        {% else %}
+        <h1 class="page-title">
+            <i class="bi bi-geo-alt"></i> County Profile
+        </h1>
+        {% endif %}
     </div>
+</div>
 
-    <!-- Additional Metrics -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Health Indicators</h5>
+<div class="container container-xl">
+    {% if county %}
+    <!-- Health Metrics Stats -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">{{ county.obesity_prevalence|default(0)|round(1) }}%</div>
+                <div class="stat-card-label">Obesity Prevalence</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">{{ county.diabetes_prevalence|default(0)|round(1) }}%</div>
+                <div class="stat-card-label">Diabetes Prevalence</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--info);">
+                <div class="stat-card-value" style="color: var(--info);">{{ county.heart_disease_prevalence|default(0)|round(1) }}%</div>
+                <div class="stat-card-label">Heart Disease</div>
+            </div>
+            <div class="stat-card stat-card--chroniccare">
+                <div class="stat-card-value">{{ county.chronic_disease_burden_score|default(0)|round(1) }}</div>
+                <div class="stat-card-label">Burden Score</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health and Food Environment -->
+    <section style="margin-bottom: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-5);">
+            <!-- Health Indicators -->
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                        <i class="bi bi-heart-pulse" style="color: var(--chroniccare);"></i>
+                        Health Indicators
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <table class="table table-sm">
+                <div class="table-container">
+                    <table class="table">
                         <tbody>
                             <tr>
                                 <td>Smoking Prevalence</td>
-                                <td class="text-end">{{ county.smoking_prevalence|default('N/A') }}%</td>
+                                <td style="text-align: right;"><strong>{{ county.smoking_prevalence|default('N/A') }}%</strong></td>
                             </tr>
                             <tr>
                                 <td>Physical Inactivity</td>
-                                <td class="text-end">{{ county.physical_inactivity_prevalence|default('N/A') }}%</td>
+                                <td style="text-align: right;"><strong>{{ county.physical_inactivity_prevalence|default('N/A') }}%</strong></td>
                             </tr>
                             <tr>
                                 <td>COPD Prevalence</td>
-                                <td class="text-end">{{ county.copd_prevalence|default('N/A') }}%</td>
+                                <td style="text-align: right;"><strong>{{ county.copd_prevalence|default('N/A') }}%</strong></td>
                             </tr>
                             <tr>
                                 <td>High Blood Pressure</td>
-                                <td class="text-end">{{ county.high_bp_prevalence|default('N/A') }}%</td>
+                                <td style="text-align: right;"><strong>{{ county.high_bp_prevalence|default('N/A') }}%</strong></td>
                             </tr>
                             <tr>
                                 <td>Depression</td>
-                                <td class="text-end">{{ county.depression_prevalence|default('N/A') }}%</td>
+                                <td style="text-align: right;"><strong>{{ county.depression_prevalence|default('N/A') }}%</strong></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Food Environment</h5>
+
+            <!-- Food Environment -->
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                        <i class="bi bi-basket" style="color: var(--success);"></i>
+                        Food Environment
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <table class="table table-sm">
+                <div class="table-container">
+                    <table class="table">
                         <tbody>
                             <tr>
                                 <td>Food Insecurity Rate</td>
-                                <td class="text-end">{{ county.food_insecurity_rate|default('N/A') }}%</td>
+                                <td style="text-align: right;"><strong>{{ county.food_insecurity_rate|default('N/A') }}%</strong></td>
                             </tr>
                             <tr>
                                 <td>Food Environment Index</td>
-                                <td class="text-end">{{ county.food_environment_index|default('N/A') }}</td>
+                                <td style="text-align: right;"><strong>{{ county.food_environment_index|default('N/A') }}</strong></td>
                             </tr>
                             <tr>
                                 <td>Fast Food Restaurants (per 1000)</td>
-                                <td class="text-end">{{ county.fast_food_restaurants_per_1000|default('N/A') }}</td>
+                                <td style="text-align: right;"><strong>{{ county.fast_food_restaurants_per_1000|default('N/A') }}</strong></td>
                             </tr>
                             <tr>
                                 <td>Grocery Stores (per 1000)</td>
-                                <td class="text-end">{{ county.grocery_stores_per_1000|default('N/A') }}</td>
+                                <td style="text-align: right;"><strong>{{ county.grocery_stores_per_1000|default('N/A') }}</strong></td>
                             </tr>
                             <tr>
                                 <td>Limited Food Access</td>
-                                <td class="text-end">{{ county.pct_limited_food_access|default('N/A') }}%</td>
+                                <td style="text-align: right;"><strong>{{ county.pct_limited_food_access|default('N/A') }}%</strong></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Intervention Priority -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">MAHA Intervention Status</h5>
-        </div>
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-4">
-                    <strong>Priority Tier:</strong>
-                    {% if county.maha_intervention_tier == 'critical' %}
-                    <span class="badge bg-danger">Critical</span>
-                    {% elif county.maha_intervention_tier == 'high' %}
-                    <span class="badge bg-warning text-dark">High</span>
-                    {% elif county.maha_intervention_tier == 'medium' %}
-                    <span class="badge bg-info">Medium</span>
-                    {% else %}
-                    <span class="badge bg-success">Low</span>
-                    {% endif %}
-                </div>
-                <div class="col-md-4">
-                    <strong>Priority Score:</strong> {{ county.maha_priority_score|default(0)|round(2) }}
-                </div>
-                <div class="col-md-4">
-                    <strong>Health Burden Score:</strong> {{ county.health_burden_score|default(0)|round(2) }}
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-bullseye"></i> MAHA Intervention Status
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Priority Tier</div>
+                        {% if county.maha_intervention_tier == 'critical' %}
+                        <span class="badge badge-error" style="font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">Critical</span>
+                        {% elif county.maha_intervention_tier == 'high' %}
+                        <span class="badge badge-warning" style="font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">High</span>
+                        {% elif county.maha_intervention_tier == 'medium' %}
+                        <span class="badge" style="background: var(--info); color: white; font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">Medium</span>
+                        {% else %}
+                        <span class="badge badge-success" style="font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">Low</span>
+                        {% endif %}
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Priority Score</div>
+                        <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--neutral-900);">{{ county.maha_priority_score|default(0)|round(2) }}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Health Burden Score</div>
+                        <div style="font-size: var(--text-2xl); font-weight: 700; color: var(--neutral-900);">{{ county.health_burden_score|default(0)|round(2) }}</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- ML Risk Breakdown -->
     {% if ml_available and ml_risk_breakdown %}
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Risk Factor Breakdown</h5>
-            <span class="badge bg-success">ML Model Active</span>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Top Contributing Risk Factors</h6>
-                    <p class="text-muted small">Factors most responsible for elevated chronic disease risk in this county.</p>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden; border: 2px solid var(--chroniccare);">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-cpu"></i> ML Risk Factor Breakdown
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">ML Model Active</span>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+                    <div>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">Top Contributing Risk Factors</h4>
+                        <p style="color: var(--neutral-500); font-size: var(--text-xs); margin-bottom: var(--spacing-4);">
+                            Factors most responsible for elevated chronic disease risk in this county.
+                        </p>
 
-                    {% for factor in ml_risk_breakdown %}
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span>
-                                <strong>{{ factor.name }}</strong>
-                                <span class="badge bg-secondary ms-1">{{ factor.category }}</span>
-                            </span>
-                            <span class="text-muted">{{ factor.value }}{% if 'rate' in factor.name.lower() or 'prevalence' in factor.name.lower() or 'pct' in factor.name.lower() %}%{% endif %}</span>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar {% if factor.contribution > 10 %}bg-danger{% elif factor.contribution > 5 %}bg-warning{% else %}bg-info{% endif %}"
-                                 role="progressbar" style="width: {{ [factor.contribution * 5, 100]|min }}%"
-                                 title="Contribution: {{ factor.contribution }}%">
+                        {% for factor in ml_risk_breakdown %}
+                        <div style="margin-bottom: var(--spacing-4);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-2);">
+                                <span>
+                                    <strong style="font-size: var(--text-sm);">{{ factor.name }}</strong>
+                                    <span class="badge" style="background: var(--neutral-200); color: var(--neutral-700); margin-left: var(--spacing-2);">{{ factor.category }}</span>
+                                </span>
+                                <span style="color: var(--neutral-500); font-size: var(--text-sm);">{{ factor.value }}{% if 'rate' in factor.name.lower() or 'prevalence' in factor.name.lower() or 'pct' in factor.name.lower() %}%{% endif %}</span>
+                            </div>
+                            <div style="height: 8px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
+                                <div style="height: 100%; background: {% if factor.contribution > 10 %}var(--error){% elif factor.contribution > 5 %}var(--warning){% else %}var(--info){% endif %}; width: {{ [factor.contribution * 5, 100]|min }}%;"></div>
                             </div>
                         </div>
+                        {% endfor %}
+
+                        {% if not ml_risk_breakdown %}
+                        <p style="color: var(--neutral-500);">No significant risk factors identified above threshold levels.</p>
+                        {% endif %}
                     </div>
-                    {% endfor %}
 
-                    {% if not ml_risk_breakdown %}
-                    <p class="text-muted">No significant risk factors identified above threshold levels.</p>
-                    {% endif %}
+                    <div>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">Risk Factor Categories</h4>
+                        <canvas id="riskBreakdownChart" height="200"></canvas>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <h6>Risk Factor Categories</h6>
-                    <canvas id="riskBreakdownChart" height="200"></canvas>
+                {% if ml_priority %}
+                <div style="border-top: 1px solid var(--neutral-200); padding-top: var(--spacing-4); margin-top: var(--spacing-4);">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4); text-align: center;">
+                        <div>
+                            <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-1);">ML Priority</div>
+                            {% set ml_tier = ml_priority.get('priority', 'Unknown') %}
+                            {% if ml_tier == 'Critical' or ml_tier == 'critical' %}
+                            <span class="badge badge-error">Critical</span>
+                            {% elif ml_tier == 'High' or ml_tier == 'high' %}
+                            <span class="badge badge-warning">High</span>
+                            {% elif ml_tier == 'Medium' or ml_tier == 'medium' %}
+                            <span class="badge" style="background: var(--info); color: white;">Medium</span>
+                            {% else %}
+                            <span class="badge badge-success">Low</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-1);">ML Confidence</div>
+                            {% set conf = (ml_priority.get('confidence', 0) * 100)|round(1) %}
+                            <span class="badge {% if conf >= 90 %}badge-success{% elif conf >= 70 %}{% else %}badge-warning{% endif %}" style="{% if conf >= 70 and conf < 90 %}background: var(--info); color: white;{% endif %}">{{ conf }}%</span>
+                        </div>
+                        <div>
+                            <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-1);">MAHA Index</div>
+                            <span style="font-size: var(--text-lg); font-weight: 700;">{{ ml_priority.get('maha_index', 0)|round(1) }}</span>
+                        </div>
+                    </div>
                 </div>
+                {% endif %}
             </div>
-
-            {% if ml_priority %}
-            <hr>
-            <div class="row mt-3">
-                <div class="col-md-4">
-                    <strong>ML Priority:</strong>
-                    {% set ml_tier = ml_priority.get('priority', 'Unknown') %}
-                    {% if ml_tier == 'Critical' or ml_tier == 'critical' %}
-                    <span class="badge bg-danger">Critical</span>
-                    {% elif ml_tier == 'High' or ml_tier == 'high' %}
-                    <span class="badge bg-warning text-dark">High</span>
-                    {% elif ml_tier == 'Medium' or ml_tier == 'medium' %}
-                    <span class="badge bg-info">Medium</span>
-                    {% else %}
-                    <span class="badge bg-success">Low</span>
-                    {% endif %}
-                </div>
-                <div class="col-md-4">
-                    <strong>ML Confidence:</strong>
-                    {% set conf = (ml_priority.get('confidence', 0) * 100)|round(1) %}
-                    <span class="badge {% if conf >= 90 %}bg-success{% elif conf >= 70 %}bg-info{% else %}bg-warning{% endif %}">{{ conf }}%</span>
-                </div>
-                <div class="col-md-4">
-                    <strong>MAHA Index:</strong>
-                    {{ ml_priority.get('maha_index', 0)|round(1) }}
-                </div>
-            </div>
-            {% endif %}
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- ML Recommended Interventions -->
     {% if ml_available and ml_recommended_interventions %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>ML-Recommended Interventions</h5>
-        </div>
-        <div class="card-body">
-            <p class="text-muted small mb-3">Interventions recommended based on ML analysis of county risk factors. Sorted by estimated impact.</p>
-
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Target Factor</th>
-                            <th>Recommended Intervention</th>
-                            <th>Estimated Impact</th>
-                            <th>Est. Reduction</th>
-                            <th>Cost Tier</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for rec in ml_recommended_interventions %}
-                        <tr>
-                            <td>
-                                <strong>{{ rec.target_factor }}</strong>
-                                <br><small class="text-muted">Current: {{ rec.current_value }}{% if 'rate' in rec.target_factor.lower() or 'prevalence' in rec.target_factor.lower() %}%{% endif %}</small>
-                            </td>
-                            <td>{{ rec.intervention }}</td>
-                            <td>
-                                {% if rec.impact == 'High' %}
-                                <span class="badge bg-success">High Impact</span>
-                                {% elif rec.impact == 'Medium' %}
-                                <span class="badge bg-info">Medium Impact</span>
-                                {% else %}
-                                <span class="badge bg-secondary">Low Impact</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="text-success">{{ rec.estimated_reduction }}</span>
-                            </td>
-                            <td>
-                                {% if rec.cost_tier == 'High' %}
-                                <span class="badge bg-danger">$$$</span>
-                                {% elif rec.cost_tier == 'Medium' %}
-                                <span class="badge bg-warning text-dark">$$</span>
-                                {% else %}
-                                <span class="badge bg-success">$</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                    <i class="bi bi-lightbulb" style="color: var(--warning);"></i>
+                    ML-Recommended Interventions
+                </h3>
             </div>
+            <div style="padding: var(--spacing-4);">
+                <p style="color: var(--neutral-500); font-size: var(--text-sm); margin-bottom: var(--spacing-4);">
+                    Interventions recommended based on ML analysis of county risk factors. Sorted by estimated impact.
+                </p>
 
-            <div class="alert alert-info mt-3 mb-0">
-                <i class="bi bi-info-circle me-2"></i>
-                <strong>Note:</strong> Estimated reductions are based on published intervention effectiveness studies and may vary based on implementation quality and local factors.
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Target Factor</th>
+                                <th>Recommended Intervention</th>
+                                <th>Estimated Impact</th>
+                                <th>Est. Reduction</th>
+                                <th>Cost Tier</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rec in ml_recommended_interventions %}
+                            <tr>
+                                <td>
+                                    <strong style="color: var(--neutral-900);">{{ rec.target_factor }}</strong>
+                                    <br><small style="color: var(--neutral-500);">Current: {{ rec.current_value }}{% if 'rate' in rec.target_factor.lower() or 'prevalence' in rec.target_factor.lower() %}%{% endif %}</small>
+                                </td>
+                                <td>{{ rec.intervention }}</td>
+                                <td>
+                                    {% if rec.impact == 'High' %}
+                                    <span class="badge badge-success">High Impact</span>
+                                    {% elif rec.impact == 'Medium' %}
+                                    <span class="badge" style="background: var(--info); color: white;">Medium Impact</span>
+                                    {% else %}
+                                    <span class="badge" style="background: var(--neutral-200); color: var(--neutral-700);">Low Impact</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span style="color: var(--success); font-weight: 600;">{{ rec.estimated_reduction }}</span>
+                                </td>
+                                <td>
+                                    {% if rec.cost_tier == 'High' %}
+                                    <span class="badge badge-error">$$$</span>
+                                    {% elif rec.cost_tier == 'Medium' %}
+                                    <span class="badge badge-warning">$$</span>
+                                    {% else %}
+                                    <span class="badge badge-success">$</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info" style="margin-top: var(--spacing-4); margin-bottom: 0;">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Note:</strong> Estimated reductions are based on published intervention effectiveness studies and may vary based on implementation quality and local factors.
+                </div>
             </div>
         </div>
-    </div>
+    </section>
     {% elif not ml_available %}
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <strong>ML Analysis Unavailable:</strong> The ML risk prediction model is not currently loaded. Risk breakdown and intervention recommendations are not available.
-    </div>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>ML Analysis Unavailable:</strong> The ML risk prediction model is not currently loaded. Risk breakdown and intervention recommendations are not available.
+        </div>
+    </section>
     {% endif %}
 
     {% if ml_available and ml_risk_breakdown %}
@@ -314,7 +342,7 @@
             labels: categories,
             datasets: [{
                 data: contributions,
-                backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745', '#6c757d']
+                backgroundColor: ['#dc3545', '#ffc107', '#0ea5e9', '#28a745', '#6b7280']
             }]
         },
         options: {
@@ -328,10 +356,12 @@
     {% endif %}
 
     {% else %}
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        No data found for FIPS code: {{ fips }}
-    </div>
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            No data found for FIPS code: {{ fips }}
+        </div>
+    </section>
     {% endif %}
 </div>
 {% endblock %}

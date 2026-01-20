@@ -1,31 +1,44 @@
 {% extends "public/base_public.html" %}
 
+{% block title %}Price Comparison - {{ drug.get('brand_name', drug_id) if drug else drug_id }} - DrugWatch{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('public.drugwatch_home') }}">DrugWatch</a></li>
-            <li class="breadcrumb-item active">Price Comparison</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header page-header--drugwatch">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.home') }}">Public Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.drugwatch_home') }}">DrugWatch</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Price Comparison</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-globe"></i> International Price Comparison
+            {% if drug %} - {{ drug.get('brand_name', drug_id) }}{% endif %}
+        </h1>
+        <p class="page-subtitle">
+            Compare US prices with international markets
+        </p>
+    </div>
+</div>
 
-    <h2 class="mb-4">
-        <i class="bi bi-globe me-2"></i>International Price Comparison
-        {% if drug %}
-        - {{ drug.get('brand_name', drug_id) }}
-        {% endif %}
-    </h2>
-
+<div class="container container-xl">
     {% if drug %}
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Price by Country</h5>
+    <!-- Main Content -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-6);">
+            <!-- Price Table -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--drugwatch); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-table"></i> Price by Country
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
+                <div style="padding: var(--spacing-5);">
+                    <div class="table-container">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -36,8 +49,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="table-danger">
-                                    <td><span class="fi fi-us me-2"></span><strong>United States</strong></td>
+                                <tr style="background: var(--error); color: white;">
+                                    <td><strong>United States</strong></td>
                                     <td>{{ drug.get('brand_name', drug_id) }}</td>
                                     <td><strong>${{ "%.2f" | format(drug.get('avg_price_per_unit_2023', 0) | float) }}</strong></td>
                                     <td>-</td>
@@ -50,28 +63,28 @@
                                 <tr>
                                     <td>
                                         {% if intl.get('country') == 'Canada' %}
-                                        <span class="fi fi-ca me-2"></span>
+                                        <i class="bi bi-flag-fill" style="color: var(--error);"></i>
                                         {% elif intl.get('country') == 'Australia' %}
-                                        <span class="fi fi-au me-2"></span>
+                                        <i class="bi bi-flag-fill" style="color: var(--primary);"></i>
                                         {% elif intl.get('country') == 'UK' %}
-                                        <span class="fi fi-gb me-2"></span>
+                                        <i class="bi bi-flag-fill" style="color: var(--info);"></i>
                                         {% endif %}
                                         {{ intl.get('country', 'International') }}
                                     </td>
                                     <td>{{ intl.get('drug_name', intl.get('brand_name', 'N/A')) }}</td>
-                                    <td>${{ "%.2f" | format(intl_price) }}</td>
+                                    <td style="font-weight: 600;">${{ "%.2f" | format(intl_price) }}</td>
                                     <td>
                                         {% if savings > 0 %}
-                                        <span class="text-success">-{{ "%.0f" | format(savings) }}%</span>
+                                        <span style="color: var(--success); font-weight: 600;">-{{ "%.0f" | format(savings) }}%</span>
                                         {% else %}
-                                        <span class="text-muted">N/A</span>
+                                        <span style="color: var(--neutral-400);">N/A</span>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
                                 {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-3">
+                                    <td colspan="4" style="text-align: center; padding: var(--spacing-6); color: var(--neutral-500);">
                                         No international pricing data available for this drug.
                                     </td>
                                 </tr>
@@ -81,51 +94,82 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            {% if comparison and comparison.international %}
-            {% set us_price = drug.get('avg_price_per_unit_2023', 0) | float %}
-            {% set lowest_intl = comparison.international[0].get('price', comparison.international[0].get('price_per_unit_usd', us_price)) | float if comparison.international else us_price %}
-            {% set potential_savings = us_price - lowest_intl if us_price > lowest_intl else 0 %}
-            {% set savings_pct = ((us_price - lowest_intl) / us_price * 100) if us_price > 0 and us_price > lowest_intl else 0 %}
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h3>Potential Savings</h3>
-                    <div class="display-4 fw-bold">${{ "%.2f" | format(potential_savings) }}</div>
-                    <p>per unit vs US price</p>
-                    <hr class="bg-white">
-                    <p class="mb-0">Savings percentage:</p>
-                    <div class="h4">{{ "%.0f" | format(savings_pct) }}%</div>
-                </div>
-            </div>
-            {% else %}
-            <div class="card bg-secondary text-white">
-                <div class="card-body text-center">
-                    <h3>No International Data</h3>
-                    <p class="mb-0">International pricing comparison is not available for this drug.</p>
-                </div>
-            </div>
-            {% endif %}
 
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h6>Drug Details</h6>
-                    <p class="mb-1"><strong>Brand:</strong> {{ drug.get('brand_name', 'N/A') }}</p>
-                    <p class="mb-1"><strong>Generic:</strong> {{ drug.get('generic_name', 'N/A') }}</p>
-                    <p class="mb-0"><strong>Manufacturer:</strong> {{ drug.get('manufacturer', 'N/A') }}</p>
+            <!-- Sidebar -->
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-4);">
+                <!-- Savings Card -->
+                {% if comparison and comparison.international %}
+                {% set us_price = drug.get('avg_price_per_unit_2023', 0) | float %}
+                {% set lowest_intl = comparison.international[0].get('price', comparison.international[0].get('price_per_unit_usd', us_price)) | float if comparison.international else us_price %}
+                {% set potential_savings = us_price - lowest_intl if us_price > lowest_intl else 0 %}
+                {% set savings_pct = ((us_price - lowest_intl) / us_price * 100) if us_price > 0 and us_price > lowest_intl else 0 %}
+                <div class="card" style="background: var(--success); overflow: hidden;">
+                    <div style="padding: var(--spacing-6); text-align: center; color: white;">
+                        <h3 style="font-size: var(--text-lg); margin-bottom: var(--spacing-2);">Potential Savings</h3>
+                        <div style="font-size: var(--text-4xl); font-weight: 800; margin-bottom: var(--spacing-1);">${{ "%.2f" | format(potential_savings) }}</div>
+                        <p style="margin-bottom: var(--spacing-4); opacity: 0.9;">per unit vs US price</p>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: var(--spacing-4);">
+                            <p style="margin-bottom: var(--spacing-1); opacity: 0.8; font-size: var(--text-sm);">Savings percentage:</p>
+                            <div style="font-size: var(--text-2xl); font-weight: 700;">{{ "%.0f" | format(savings_pct) }}%</div>
+                        </div>
+                    </div>
                 </div>
+                {% else %}
+                <div class="card" style="background: var(--neutral-400); overflow: hidden;">
+                    <div style="padding: var(--spacing-6); text-align: center; color: white;">
+                        <h3 style="font-size: var(--text-lg); margin-bottom: var(--spacing-2);">No International Data</h3>
+                        <p style="margin: 0; opacity: 0.9;">International pricing comparison is not available for this drug.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Drug Details Card -->
+                <div class="card" style="overflow: hidden;">
+                    <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                        <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                            <i class="bi bi-capsule" style="color: var(--drugwatch);"></i> Drug Details
+                        </h3>
+                    </div>
+                    <div style="padding: var(--spacing-5);">
+                        <div style="margin-bottom: var(--spacing-3);">
+                            <span style="font-size: var(--text-sm); color: var(--neutral-500);">Brand</span>
+                            <div style="font-weight: 600;">{{ drug.get('brand_name', 'N/A') }}</div>
+                        </div>
+                        <div style="margin-bottom: var(--spacing-3);">
+                            <span style="font-size: var(--text-sm); color: var(--neutral-500);">Generic</span>
+                            <div style="font-weight: 600;">{{ drug.get('generic_name', 'N/A') }}</div>
+                        </div>
+                        <div>
+                            <span style="font-size: var(--text-sm); color: var(--neutral-500);">Manufacturer</span>
+                            <div style="font-weight: 600;">{{ drug.get('manufacturer', 'N/A') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back Button -->
+                <a href="{{ url_for('public.drugwatch_drug', drug_id=drug_id) }}" class="btn btn-outline" style="border-color: var(--drugwatch); color: var(--drugwatch);">
+                    <i class="bi bi-arrow-left"></i> Back to Drug Details
+                </a>
             </div>
         </div>
-    </div>
+    </section>
 
     {% else %}
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        Drug "{{ drug_id }}" not found in database.
-    </div>
-    <a href="{{ url_for('public.drugwatch_search') }}" class="btn btn-primary">
-        <i class="bi bi-search me-1"></i>Search for a Drug
-    </a>
+    <!-- Drug not found -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
+        <div class="alert alert-warning">
+            <div style="display: flex; gap: var(--spacing-3); align-items: center;">
+                <i class="bi bi-exclamation-triangle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <strong>Drug Not Found</strong>
+                    <p style="margin: var(--spacing-1) 0 0 0;">Drug "{{ drug_id }}" not found in database.</p>
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('public.drugwatch_search') }}" class="btn btn-drugwatch">
+            <i class="bi bi-search"></i> Search for a Drug
+        </a>
+    </section>
     {% endif %}
 </div>
 {% endblock %}

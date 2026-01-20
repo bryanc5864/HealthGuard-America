@@ -1,112 +1,165 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}HPSA Details - RuralAccess{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a></li>
-            <li class="breadcrumb-item active">HPSA Details</li>
-        </ol>
-    </nav>
-
-    <h2 class="mb-4">
-        <i class="bi bi-exclamation-triangle me-2"></i>HPSA Designation
-        <small class="text-muted">ID: {{ hpsa_id }}</small>
-    </h2>
-
-    {% if not hpsa %}
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        HPSA data for ID {{ hpsa_id }} not found.
+<!-- Page Header -->
+<div class="page-header page-header--ruralaccess">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>HPSA Details</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-exclamation-triangle"></i> HPSA Designation
+        </h1>
+        <p class="page-subtitle">
+            ID: {{ hpsa_id }}
+        </p>
     </div>
+</div>
+
+<div class="container container-xl">
+    {% if not hpsa %}
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            HPSA data for ID {{ hpsa_id }} not found.
+        </div>
+    </section>
     {% else %}
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Designation Details</h5>
+    <!-- Main Info Cards -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <!-- Designation Details -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-file-earmark-text"></i> Designation Details
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <p><strong>Name:</strong> {{ hpsa.hpsa_name or 'N/A' }}</p>
-                    <p><strong>Designation Type:</strong> {{ hpsa.designation_type or 'N/A' }}</p>
-                    <p><strong>Discipline:</strong> {{ hpsa.discipline or 'N/A' }}</p>
-                    <p><strong>Status:</strong>
-                        <span class="badge {% if hpsa.status == 'Designated' %}bg-danger{% else %}bg-secondary{% endif %}">
-                            {{ hpsa.status or 'N/A' }}
-                        </span>
-                    </p>
+                <div style="padding: var(--spacing-5);">
+                    <div style="display: grid; gap: var(--spacing-4);">
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">Name</span>
+                            <strong style="text-align: right; max-width: 60%;">{{ hpsa.hpsa_name or 'N/A' }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">Designation Type</span>
+                            <strong>{{ hpsa.designation_type or 'N/A' }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">Discipline</span>
+                            <strong>{{ hpsa.discipline or 'N/A' }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--neutral-500);">Status</span>
+                            <span class="badge {% if hpsa.status == 'Designated' %}badge-error{% else %}{% endif %}" style="{% if hpsa.status != 'Designated' %}background: var(--neutral-200); color: var(--neutral-700);{% endif %}">
+                                {{ hpsa.status or 'N/A' }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">HPSA Score</h5>
+
+            <!-- HPSA Score -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-speedometer2" style="color: var(--ruralaccess);"></i> HPSA Score
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="display-4 mb-3 {% if hpsa.hpsa_score >= 20 %}text-danger{% elif hpsa.hpsa_score >= 15 %}text-warning{% else %}text-success{% endif %}">
+                <div style="padding: var(--spacing-5); text-align: center;">
+                    <div style="font-size: 4rem; font-weight: 800; color: {% if hpsa.hpsa_score >= 20 %}var(--error){% elif hpsa.hpsa_score >= 15 %}var(--warning){% else %}var(--success){% endif %}; margin-bottom: var(--spacing-3);">
                         {{ hpsa.hpsa_score if hpsa.hpsa_score is not none else 'N/A' }}
                     </div>
                     {% if hpsa.hpsa_score is not none %}
-                    <div class="progress mb-2">
-                        <div class="progress-bar {% if hpsa.hpsa_score >= 20 %}bg-danger{% elif hpsa.hpsa_score >= 15 %}bg-warning{% else %}bg-success{% endif %}"
-                             role="progressbar"
-                             style="width: {{ (hpsa.hpsa_score / 25 * 100)|int }}%"
-                             aria-valuenow="{{ hpsa.hpsa_score }}"
-                             aria-valuemin="0"
-                             aria-valuemax="25">
-                        </div>
+                    <div style="height: 12px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden; margin-bottom: var(--spacing-2);">
+                        <div style="height: 100%; width: {{ (hpsa.hpsa_score / 25 * 100)|int }}%; background: {% if hpsa.hpsa_score >= 20 %}var(--error){% elif hpsa.hpsa_score >= 15 %}var(--warning){% else %}var(--success){% endif %};"></div>
                     </div>
-                    <small class="text-muted">Score scale: 0 (no shortage) to 25 (critical shortage)</small>
+                    <small style="color: var(--neutral-500);">Score scale: 0 (no shortage) to 25 (critical shortage)</small>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Location</h5>
+    <!-- Location and Demographics -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <!-- Location -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-geo-alt" style="color: var(--ruralaccess);"></i> Location
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <p><strong>State:</strong> {{ hpsa.state or 'N/A' }}</p>
-                    <p><strong>County:</strong> {{ hpsa.county or 'N/A' }}</p>
-                    <p><strong>County FIPS:</strong>
-                        {% if hpsa.county_fips %}
-                        <a href="{{ url_for('gov.ruralaccess_county', fips=hpsa.county_fips) }}">{{ hpsa.county_fips }}</a>
-                        {% else %}
-                        N/A
-                        {% endif %}
-                    </p>
-                    <p><strong>Rural Status:</strong> {{ hpsa.rural_status or 'N/A' }}</p>
+                <div style="padding: var(--spacing-5);">
+                    <div style="display: grid; gap: var(--spacing-4);">
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">State</span>
+                            <strong>{{ hpsa.state or 'N/A' }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">County</span>
+                            <strong>{{ hpsa.county or 'N/A' }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">County FIPS</span>
+                            {% if hpsa.county_fips %}
+                            <a href="{{ url_for('gov.ruralaccess_county', fips=hpsa.county_fips) }}" style="font-weight: 600; color: var(--ruralaccess);">{{ hpsa.county_fips }}</a>
+                            {% else %}
+                            <strong>N/A</strong>
+                            {% endif %}
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--neutral-500);">Rural Status</span>
+                            <strong>{{ hpsa.rural_status or 'N/A' }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demographics -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-people" style="color: var(--info);"></i> Demographics
+                    </h3>
+                </div>
+                <div style="padding: var(--spacing-5);">
+                    <div style="display: grid; gap: var(--spacing-4);">
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">Population</span>
+                            <strong>{{ "{:,.0f}".format(hpsa.population) if hpsa.population else 'N/A' }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--neutral-500);">Poverty Rate</span>
+                            <strong>{{ "%.1f%%"|format(hpsa.poverty_rate * 100) if hpsa.poverty_rate else 'N/A' }}</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Demographics</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Population:</strong> {{ "{:,.0f}".format(hpsa.population) if hpsa.population else 'N/A' }}</p>
-                    <p><strong>Poverty Rate:</strong> {{ "%.1f%%"|format(hpsa.poverty_rate * 100) if hpsa.poverty_rate else 'N/A' }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
+    <!-- Map Location -->
     {% if hpsa.latitude and hpsa.longitude %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Map Location</h5>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-map" style="color: var(--ruralaccess);"></i> Map Location
+                </h3>
+            </div>
+            <div id="hpsa-map" style="height: 400px; width: 100%;"></div>
         </div>
-        <div class="card-body p-0">
-            <div id="hpsa-map" style="height: 300px;"></div>
-        </div>
-    </div>
+    </section>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -115,7 +168,7 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
             L.marker([{{ hpsa.latitude }}, {{ hpsa.longitude }}]).addTo(map)
-                .bindPopup('{{ hpsa.hpsa_name|e }}')
+                .bindPopup('<strong>{{ hpsa.hpsa_name|e }}</strong>')
                 .openPopup();
         });
     </script>

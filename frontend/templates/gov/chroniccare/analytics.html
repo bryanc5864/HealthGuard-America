@@ -1,143 +1,147 @@
 {% extends "gov/base_gov.html" %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
-            <li class="breadcrumb-item active">Analytics</li>
-        </ol>
-    </nav>
+{% block title %}Analytics - ChronicCare{% endblock %}
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-graph-up me-2"></i>State-by-State Analytics</h2>
-        <span class="badge bg-primary">Government Only</span>
+{% block content %}
+<!-- Page Header -->
+<div class="page-header page-header--chroniccare">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Analytics</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-graph-up"></i> State-by-State Analytics
+        </h1>
+        <p class="page-subtitle">
+            Comprehensive chronic disease analysis across all US states and territories
+        </p>
     </div>
+</div>
+
+<div class="container container-2xl">
+    <!-- Stats Section -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
+            <div class="stat-card stat-card--chroniccare">
+                <div class="stat-card-value">{{ overall_stats.total_counties }}</div>
+                <div class="stat-card-label">Total Counties</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--info);">
+                <div class="stat-card-value" style="color: var(--info);">{{ state_stats | length }}</div>
+                <div class="stat-card-label">States + Territories</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">{{ overall_stats.avg_diabetes }}%</div>
+                <div class="stat-card-label">Avg Diabetes</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">{{ overall_stats.avg_obesity }}%</div>
+                <div class="stat-card-label">Avg Obesity</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--neutral-500);">
+                <div class="stat-card-value">{{ overall_stats.avg_heart_disease }}%</div>
+                <div class="stat-card-label">Avg Heart Disease</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--neutral-900);">
+                <div class="stat-card-value">{{ overall_stats.critical_counties }}</div>
+                <div class="stat-card-label">Critical Counties</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('gov.chroniccare_analytics') }}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">Filter by State</label>
-                    <select name="state" class="form-select">
-                        <option value="">All States ({{ states | length }})</option>
-                        {% for s in states %}
-                        <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">County Limit</label>
-                    <select name="limit" class="form-select">
-                        <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 counties</option>
-                        <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 counties</option>
-                        <option value="1000" {% if selected_limit == 1000 %}selected{% endif %}>1000 counties</option>
-                        <option value="3000" {% if selected_limit == 3000 %}selected{% endif %}>All (~3000)</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                </div>
-                {% if selected_state or selected_limit != 100 %}
-                <div class="col-md-2">
-                    <a href="{{ url_for('gov.chroniccare_analytics') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
-                </div>
-                {% endif %}
-            </form>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-funnel"></i> Filter Options
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('gov.chroniccare_analytics') }}" method="get" style="display: flex; gap: var(--spacing-4); align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
+                        <label class="form-label">Filter by State</label>
+                        <select name="state" class="form-control">
+                            <option value="">All States ({{ states | length }})</option>
+                            {% for s in states %}
+                            <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="min-width: 150px; margin: 0;">
+                        <label class="form-label">County Limit</label>
+                        <select name="limit" class="form-control">
+                            <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 counties</option>
+                            <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 counties</option>
+                            <option value="1000" {% if selected_limit == 1000 %}selected{% endif %}>1000 counties</option>
+                            <option value="3000" {% if selected_limit == 3000 %}selected{% endif %}>All (~3000)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-chroniccare">
+                        <i class="bi bi-check2"></i> Apply Filters
+                    </button>
+                    {% if selected_state or selected_limit != 100 %}
+                    <a href="{{ url_for('gov.chroniccare_analytics') }}" class="btn btn-outline">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- National Summary -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-2">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5 fw-bold">{{ overall_stats.total_counties }}</h3>
-                    <p class="mb-0">Total Counties</p>
+    <!-- Charts Section -->
+    <section style="margin-bottom: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-5);">
+            <!-- State Rankings Chart -->
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                        <i class="bi bi-bar-chart" style="color: var(--chroniccare);"></i>
+                        State Disease Burden Rankings
+                    </h3>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5 fw-bold">{{ state_stats | length }}</h3>
-                    <p class="mb-0">States + Territories</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5 fw-bold">{{ overall_stats.avg_diabetes }}%</h3>
-                    <p class="mb-0">Avg Diabetes</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5 fw-bold">{{ overall_stats.avg_obesity }}%</h3>
-                    <p class="mb-0">Avg Obesity</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-secondary text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5 fw-bold">{{ overall_stats.avg_heart_disease }}%</h3>
-                    <p class="mb-0">Avg Heart Disease</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-dark text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5 fw-bold">{{ overall_stats.critical_counties }}</h3>
-                    <p class="mb-0">Critical Counties</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- State Rankings Chart -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>State Disease Burden Rankings</h5>
-                </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <canvas id="stateRankingChart" height="300"></canvas>
                 </div>
             </div>
-        </div>
 
-        <!-- Risk Distribution by State -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Risk Level Distribution</h5>
+            <!-- Risk Distribution by State -->
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                        <i class="bi bi-pie-chart" style="color: var(--chroniccare);"></i>
+                        Risk Level Distribution
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <canvas id="riskDistributionChart" height="300"></canvas>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- State Statistics Table -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-table me-2"></i>State-by-State Statistics</h5>
-            <span class="badge bg-secondary">{{ filtered_state_stats | length }} states</span>
-        </div>
-        <div class="card-body">
-            {% if filtered_state_stats %}
-            <div class="table-responsive">
-                <table class="table table-hover table-sm">
-                    <thead class="table-light">
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-table"></i> State-by-State Statistics
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
+                    {{ filtered_state_stats | length }} states
+                </span>
+            </div>
+            <div class="table-container">
+                {% if filtered_state_stats %}
+                <table class="table">
+                    <thead>
                         <tr>
                             <th>State</th>
                             <th>Counties</th>
@@ -154,92 +158,99 @@
                         {% for state, data in filtered_state_stats.items() | sort %}
                         {% set combined_rate = (data.avg_diabetes * 0.4 + data.avg_obesity * 0.35 + data.avg_heart_disease * 0.25) %}
                         <tr>
-                            <td><strong>{{ state }}</strong></td>
+                            <td><strong style="color: var(--neutral-900);">{{ state }}</strong></td>
                             <td>{{ data.total_counties }}</td>
                             <td>
-                                <div class="progress" style="height: 20px; min-width: 80px;">
-                                    <div class="progress-bar bg-warning" role="progressbar"
-                                         style="width: {{ (data.avg_diabetes / 20 * 100) | int }}%;">
-                                        {{ data.avg_diabetes }}%
+                                <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                    <div style="flex: 1; height: 8px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
+                                        <div style="height: 100%; background: var(--warning); width: {{ (data.avg_diabetes / 20 * 100) | int }}%;"></div>
                                     </div>
+                                    <span style="font-size: var(--text-sm); min-width: 40px;">{{ data.avg_diabetes }}%</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="progress" style="height: 20px; min-width: 80px;">
-                                    <div class="progress-bar bg-danger" role="progressbar"
-                                         style="width: {{ (data.avg_obesity / 50 * 100) | int }}%;">
-                                        {{ data.avg_obesity }}%
+                                <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                    <div style="flex: 1; height: 8px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
+                                        <div style="height: 100%; background: var(--error); width: {{ (data.avg_obesity / 50 * 100) | int }}%;"></div>
                                     </div>
+                                    <span style="font-size: var(--text-sm); min-width: 40px;">{{ data.avg_obesity }}%</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="progress" style="height: 20px; min-width: 80px;">
-                                    <div class="progress-bar bg-info" role="progressbar"
-                                         style="width: {{ (data.avg_heart_disease / 15 * 100) | int }}%;">
-                                        {{ data.avg_heart_disease }}%
+                                <div style="display: flex; align-items: center; gap: var(--spacing-2);">
+                                    <div style="flex: 1; height: 8px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
+                                        <div style="height: 100%; background: var(--info); width: {{ (data.avg_heart_disease / 15 * 100) | int }}%;"></div>
                                     </div>
+                                    <span style="font-size: var(--text-sm); min-width: 40px;">{{ data.avg_heart_disease }}%</span>
                                 </div>
                             </td>
                             <td>
                                 {% if data.critical_counties > 0 %}
-                                <span class="badge bg-danger">{{ data.critical_counties }}</span>
+                                <span class="badge badge-error">{{ data.critical_counties }}</span>
                                 {% else %}
-                                <span class="text-muted">0</span>
+                                <span style="color: var(--neutral-400);">0</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if data.high_counties > 0 %}
-                                <span class="badge bg-warning text-dark">{{ data.high_counties }}</span>
+                                <span class="badge badge-warning">{{ data.high_counties }}</span>
                                 {% else %}
-                                <span class="text-muted">0</span>
+                                <span style="color: var(--neutral-400);">0</span>
                                 {% endif %}
                             </td>
                             <td>{{ data.medium_counties }}</td>
                             <td>
                                 {% if combined_rate > 20 %}
-                                <span class="badge bg-danger">Critical</span>
+                                <span class="badge badge-error">Critical</span>
                                 {% elif combined_rate > 18 %}
-                                <span class="badge bg-warning text-dark">High</span>
+                                <span class="badge badge-warning">High</span>
                                 {% else %}
-                                <span class="badge bg-success">Medium</span>
+                                <span class="badge badge-success">Medium</span>
                                 {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <div style="padding: var(--spacing-6); text-align: center;">
+                    <div class="alert alert-info" style="display: inline-block; margin: 0;">
+                        <i class="bi bi-info-circle"></i>
+                        No state-by-state data available.
+                    </div>
+                </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>
-                No state-by-state data available.
-            </div>
-            {% endif %}
         </div>
-    </div>
+    </section>
 
     <!-- Key Metrics Comparison -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Key Metrics Comparison</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <h6>Top 5 States - Diabetes</h6>
-                    <canvas id="diabetesTopChart" height="200"></canvas>
-                </div>
-                <div class="col-md-4">
-                    <h6>Top 5 States - Obesity</h6>
-                    <canvas id="obesityTopChart" height="200"></canvas>
-                </div>
-                <div class="col-md-4">
-                    <h6>Top 5 States - Heart Disease</h6>
-                    <canvas id="heartTopChart" height="200"></canvas>
+    <section>
+        <div class="card" style="overflow: hidden;">
+            <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                    <i class="bi bi-activity" style="color: var(--chroniccare);"></i>
+                    Key Metrics Comparison
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-5);">
+                    <div>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3); color: var(--warning);">Top 5 States - Diabetes</h4>
+                        <canvas id="diabetesTopChart" height="200"></canvas>
+                    </div>
+                    <div>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3); color: var(--error);">Top 5 States - Obesity</h4>
+                        <canvas id="obesityTopChart" height="200"></canvas>
+                    </div>
+                    <div>
+                        <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3); color: var(--info);">Top 5 States - Heart Disease</h4>
+                        <canvas id="heartTopChart" height="200"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <!-- Chart.js -->
@@ -360,7 +371,7 @@ new Chart(heartCtx, {
         datasets: [{
             label: 'Heart Disease %',
             data: heartTop.map(d => d.val),
-            backgroundColor: '#17a2b8'
+            backgroundColor: '#0ea5e9'
         }]
     },
     options: {
