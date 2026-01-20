@@ -1,0 +1,20 @@
+{
+  "total_hpsa_designations": 14631,
+  "unique_counties_with_shortages": 2821,
+  "by_discipline": {
+    "Primary Care": 14631
+  },
+  "by_state": {
+    "NY": 1820,
+    "CA": 1246,
+    "OH": 1071,
+    "AZ": 700,
+    "TX": 692,
+    "IL": 530,
+    "WI": 506,
+    "MN": 483,
+    "TN": 480,
+    "KY": 368
+  },
+  "processed_at": "2026-01-04T12:30:56.681269"
+}

@@ -1,13 +1,14 @@
-# Data files (too large for git)
+# Raw data (too large for git)
 data/raw/
-data/processed/
-*.parquet
-*.csv.gz
+# But allow small essential raw files
+!data/raw/pricevision/
+data/raw/pricevision/*
+!data/raw/pricevision/hospital_general_info.csv
 
-# Keep data directory structure
-!data/.gitkeep
-!data/raw/.gitkeep
-!data/processed/.gitkeep
+# Large processed files (>100MB) - use Git LFS or external storage
+data/processed/pricevision/all_prices_normalized.parquet
+data/processed/foodscore/usda_branded_foods.parquet
+data/processed/foodscore/nova_training_full.parquet
 
 # Python
 __pycache__/

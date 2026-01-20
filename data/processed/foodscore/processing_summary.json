@@ -1,0 +1,12 @@
+{
+  "total_products": 50000,
+  "avg_maha_score": 76.5627851579823,
+  "products_with_additives": 25105,
+  "nova_distribution": {
+    "4": 22277,
+    "3": 4825,
+    "1": 3943,
+    "2": 625
+  },
+  "processed_at": "2026-01-04T12:30:55.971014"
+}
