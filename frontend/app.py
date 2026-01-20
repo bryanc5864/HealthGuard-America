@@ -272,10 +272,40 @@ def download_file(filepath):
     return send_from_directory(DATA_DIR, filepath)
 
 
+def preload_ml_models():
+    """Pre-load ML models at startup for faster first requests"""
+    import threading
+
+    def _load_models():
+        try:
+            print("  Loading PriceVision ML model...")
+            from ml.procedure_encoder.inference import ProcedureMatchingService
+            ProcedureMatchingService.load()
+            print("  Loading FoodScore ML models...")
+            from ml.nova_classifier.inference import NovaClassificationService
+            from ml.additive_scorer.inference import AdditiveRiskService
+            NovaClassificationService.load()
+            AdditiveRiskService.load()
+            print("  Loading ChronicCare ML models...")
+            from ml.chroniccare.inference import ChronicRiskService, InterventionPrioritizationService
+            ChronicRiskService().load()
+            InterventionPrioritizationService().load()
+            print("  ML models loaded successfully!")
+        except Exception as e:
+            print(f"  Warning: ML model preload failed: {e}")
+
+    # Load in background thread to not block startup
+    thread = threading.Thread(target=_load_models, daemon=True)
+    thread.start()
+
+
 if __name__ == '__main__':
     print("="*60)
     print("HealthGuard America - Dual Portal Application")
     print("="*60)
+    print("Pre-loading ML models for faster response times...")
+    preload_ml_models()
+    print("")
     print("Starting server at http://localhost:5000")
     print("")
     print("Portals:")

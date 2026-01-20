@@ -64,7 +64,10 @@ def drugwatch_drug(drug_id):
 def api_drugs():
     """API: Get drugs"""
     search = request.args.get('q', '')
-    limit = int(request.args.get('limit', 50))
+    try:
+        limit = int(request.args.get('limit', 50) or 50)
+    except (ValueError, TypeError):
+        limit = 50
     drugs = DrugWatchService.get_us_drugs(search=search if search else None, limit=limit)
     return jsonify(drugs)
 

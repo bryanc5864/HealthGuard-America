@@ -1146,6 +1146,79 @@ a:hover {
 }
 
 /* ============================================
+   Chart Containers
+   ============================================ */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+.chart-container-sm {
+  position: relative;
+  width: 100%;
+  height: 200px;
+}
+
+.chart-container-md {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+.chart-container-lg {
+  position: relative;
+  width: 100%;
+  height: 400px;
+}
+
+.chart-container-xl {
+  position: relative;
+  width: 100%;
+  height: 500px;
+}
+
+/* Canvas responsive fix */
+.chart-container canvas,
+.chart-container-sm canvas,
+.chart-container-md canvas,
+.chart-container-lg canvas,
+.chart-container-xl canvas {
+  max-width: 100%;
+}
+
+/* Responsive chart heights */
+@media (max-width: 768px) {
+  .chart-container,
+  .chart-container-md {
+    height: 250px;
+  }
+
+  .chart-container-lg {
+    height: 300px;
+  }
+
+  .chart-container-xl {
+    height: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container,
+  .chart-container-md {
+    height: 200px;
+  }
+
+  .chart-container-lg {
+    height: 250px;
+  }
+
+  .chart-container-xl {
+    height: 300px;
+  }
+}
+
+/* ============================================
    Utilities
    ============================================ */
 .text-center { text-align: center; }
