@@ -1,77 +1,140 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}{{ hospital.get('Facility Name', 'Hospital') }} - PriceVision{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.pricevision_home') }}">PriceVision</a></li>
-            <li class="breadcrumb-item active">Hospital Details</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header page-header--pricevision">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.pricevision_home') }}">PriceVision</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Hospital Details</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-hospital"></i> {{ hospital.get('Facility Name', 'Hospital ' + npi) }}
+        </h1>
+        <p class="page-subtitle">
+            {{ hospital.get('City/Town', '') }}{% if hospital.get('State') %}, {{ hospital.get('State') }}{% endif %}
+        </p>
+    </div>
+</div>
 
-    <h2 class="mb-4">
-        <i class="bi bi-hospital me-2"></i>{{ hospital.get('Facility Name', 'Hospital ' + npi) }}
-    </h2>
-
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Hospital Information</h5>
+<div class="container container-xl">
+    <div style="display: grid; grid-template-columns: 350px 1fr; gap: var(--spacing-6); margin-top: -3rem; position: relative; z-index: 10;">
+        <!-- Left Column -->
+        <div>
+            <!-- Hospital Information -->
+            <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                <div style="background: var(--pricevision); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-building"></i> Hospital Information
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <p><strong>Facility ID:</strong> {{ npi }}</p>
-                    <p><strong>Location:</strong> {{ hospital.get('City/Town', 'N/A') }}, {{ hospital.get('State', 'N/A') }}</p>
-                    <p><strong>Address:</strong> {{ hospital.get('Address', 'N/A') }}</p>
-                    <p><strong>Phone:</strong> {{ hospital.get('Telephone Number', 'N/A') }}</p>
-                    <p><strong>Type:</strong> {{ hospital.get('Hospital Type', 'N/A') }}</p>
-                    <p><strong>Ownership:</strong> {{ hospital.get('Hospital Ownership', 'N/A') }}</p>
-                    <p><strong>Emergency Services:</strong> {{ hospital.get('Emergency Services', 'N/A') }}</p>
-                    <p><strong>Overall Rating:</strong> {{ hospital.get('Hospital overall rating', 'N/A') }}</p>
+                <div style="padding: var(--spacing-4);">
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Facility ID</span>
+                        <div style="font-weight: 600;">{{ npi }}</div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Location</span>
+                        <div>{{ hospital.get('City/Town', 'N/A') }}, {{ hospital.get('State', 'N/A') }}</div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Address</span>
+                        <div>{{ hospital.get('Address', 'N/A') }}</div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Phone</span>
+                        <div>{{ hospital.get('Telephone Number', 'N/A') }}</div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Type</span>
+                        <div>{{ hospital.get('Hospital Type', 'N/A') }}</div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Ownership</span>
+                        <div>{{ hospital.get('Hospital Ownership', 'N/A') }}</div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Emergency Services</span>
+                        <div>{{ hospital.get('Emergency Services', 'N/A') }}</div>
+                    </div>
+                    <div>
+                        <span style="font-size: var(--text-xs); color: var(--neutral-500); text-transform: uppercase;">Overall Rating</span>
+                        <div>
+                            {% set rating = hospital.get('Hospital overall rating', 'N/A') %}
+                            {% if rating and rating != 'N/A' and rating != 'Not Available' %}
+                            <span class="badge {% if rating|int >= 4 %}badge-success{% elif rating|int >= 3 %}badge-warning{% else %}badge-error{% endif %}">
+                                {{ rating }} <i class="bi bi-star-fill"></i>
+                            </span>
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- ML Pricing Pattern Analysis -->
             {% if pricing_analysis %}
-            <div class="card mb-4 border-info">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0"><i class="bi bi-robot me-2"></i>ML Pricing Analysis</h6>
+            <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
+                <div style="background: var(--info); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-robot"></i> ML Pricing Analysis
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong>Average Markup:</strong>
-                        <span class="badge {% if pricing_analysis.avg_markup > 100 %}bg-danger{% elif pricing_analysis.avg_markup > 50 %}bg-warning text-dark{% else %}bg-success{% endif %} ms-2">
-                            {{ pricing_analysis.avg_markup }}%
-                        </span>
-                        <small class="d-block text-muted">vs. cash price</small>
-                    </div>
-                    <div class="mb-3">
-                        <strong>Pricing Consistency:</strong>
-                        <div class="progress mt-1" style="height: 20px;">
-                            <div class="progress-bar {% if pricing_analysis.pricing_consistency >= 70 %}bg-success{% elif pricing_analysis.pricing_consistency >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
-                                 role="progressbar" style="width: {{ pricing_analysis.pricing_consistency }}%;">
-                                {{ pricing_analysis.pricing_consistency }}%
-                            </div>
+                <div style="padding: var(--spacing-4);">
+                    <div style="margin-bottom: var(--spacing-4);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-1);">
+                            <span style="font-weight: 600;">Average Markup</span>
+                            <span class="badge {% if pricing_analysis.avg_markup > 100 %}badge-error{% elif pricing_analysis.avg_markup > 50 %}badge-warning{% else %}badge-success{% endif %}">
+                                {{ pricing_analysis.avg_markup }}%
+                            </span>
                         </div>
-                        <small class="text-muted">Higher = more consistent pricing</small>
+                        <small style="color: var(--neutral-500);">vs. cash price</small>
                     </div>
+
+                    <div style="margin-bottom: var(--spacing-4);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-1);">
+                            <span style="font-weight: 600;">Pricing Consistency</span>
+                            <span style="font-size: var(--text-sm);">{{ pricing_analysis.pricing_consistency }}%</span>
+                        </div>
+                        <div style="height: 8px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
+                            <div style="height: 100%; width: {{ pricing_analysis.pricing_consistency }}%; background: {% if pricing_analysis.pricing_consistency >= 70 %}var(--success){% elif pricing_analysis.pricing_consistency >= 40 %}var(--warning){% else %}var(--error){% endif %};"></div>
+                        </div>
+                        <small style="color: var(--neutral-500);">Higher = more consistent pricing</small>
+                    </div>
+
                     {% if pricing_analysis.specialties %}
-                    <div class="mb-3">
-                        <strong>Specialties:</strong><br>
-                        {% for specialty in pricing_analysis.specialties %}
-                        <span class="badge bg-secondary me-1 mt-1">{{ specialty }}</span>
-                        {% endfor %}
+                    <div style="margin-bottom: var(--spacing-4);">
+                        <span style="font-weight: 600; display: block; margin-bottom: var(--spacing-2);">Specialties</span>
+                        <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-1);">
+                            {% for specialty in pricing_analysis.specialties %}
+                            <span class="badge" style="background: var(--neutral-200); color: var(--neutral-700);">{{ specialty }}</span>
+                            {% endfor %}
+                        </div>
                     </div>
                     {% endif %}
-                    <div class="mb-3">
-                        <strong>Price Range:</strong>
-                        <span class="text-success">${{ "{:,.0f}".format(pricing_analysis.price_range[0]) }}</span> -
-                        <span class="text-danger">${{ "{:,.0f}".format(pricing_analysis.price_range[1]) }}</span>
+
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <span style="font-weight: 600;">Price Range</span>
+                        <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-1);">
+                            <span style="color: var(--success);">${{ "{:,.0f}".format(pricing_analysis.price_range[0]) }}</span>
+                            <span style="color: var(--neutral-400);">to</span>
+                            <span style="color: var(--error);">${{ "{:,.0f}".format(pricing_analysis.price_range[1]) }}</span>
+                        </div>
                     </div>
+
                     <div>
-                        <strong>Avg Cash Price:</strong>
-                        ${{ "{:,.0f}".format(pricing_analysis.avg_cash_price) }}
+                        <span style="font-weight: 600;">Avg Cash Price</span>
+                        <div style="font-size: var(--text-xl); font-weight: 700; color: var(--success);">
+                            ${{ "{:,.0f}".format(pricing_analysis.avg_cash_price) }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -79,33 +142,38 @@
 
             <!-- Transparency Score -->
             {% if transparency_score is defined %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Transparency Score</h6>
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-3); border-bottom: 1px solid var(--neutral-200);">
+                    <h4 style="font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <i class="bi bi-shield-check"></i> Transparency Score
+                    </h4>
                 </div>
-                <div class="card-body text-center">
-                    <h2 class="{% if transparency_score >= 70 %}text-success{% elif transparency_score >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                <div style="padding: var(--spacing-4); text-align: center;">
+                    <div style="font-size: var(--text-4xl); font-weight: 800; color: {% if transparency_score >= 70 %}var(--success){% elif transparency_score >= 40 %}var(--warning){% else %}var(--error){% endif %};">
                         {{ transparency_score }}/100
-                    </h2>
-                    <div class="progress mb-2" style="height: 10px;">
-                        <div class="progress-bar {% if transparency_score >= 70 %}bg-success{% elif transparency_score >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
-                             role="progressbar" style="width: {{ transparency_score }}%;"></div>
                     </div>
-                    <small class="text-muted">Based on data completeness and quality</small>
+                    <div style="height: 10px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden; margin: var(--spacing-3) 0;">
+                        <div style="height: 100%; width: {{ transparency_score }}%; background: {% if transparency_score >= 70 %}var(--success){% elif transparency_score >= 40 %}var(--warning){% else %}var(--error){% endif %};"></div>
+                    </div>
+                    <small style="color: var(--neutral-500);">Based on data completeness and quality</small>
                 </div>
             </div>
             {% endif %}
         </div>
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Procedure Prices</h5>
-                    <span class="badge bg-secondary">{{ prices | length }} procedures</span>
+
+        <!-- Right Column - Procedure Prices -->
+        <div>
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-currency-dollar" style="color: var(--pricevision);"></i> Procedure Prices
+                    </h3>
+                    <span class="badge" style="background: var(--pricevision); color: white;">{{ prices | length }} procedures</span>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     {% if prices %}
-                    <div class="table-responsive">
-                        <table class="table table-hover table-sm">
+                    <div class="table-container">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>Description</th>
@@ -118,19 +186,23 @@
                             <tbody>
                                 {% for p in prices %}
                                 <tr>
-                                    <td>{{ p.get('description', 'N/A')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}</td>
-                                    <td><span class="badge bg-primary">{{ p.get('procedure_code', 'N/A') }}</span></td>
-                                    <td>{{ p.get('payer_name', 'N/A') }}</td>
+                                    <td>
+                                        <span title="{{ p.get('description', 'N/A') }}">
+                                            {{ p.get('description', 'N/A')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}
+                                        </span>
+                                    </td>
+                                    <td><span class="badge" style="background: var(--primary); color: white;">{{ p.get('procedure_code', 'N/A') }}</span></td>
+                                    <td style="font-size: var(--text-sm); color: var(--neutral-500);">{{ p.get('payer_name', 'N/A') }}</td>
                                     <td>${{ "{:,.0f}".format(p.get('gross_charge', 0) | float) if p.get('gross_charge') else 'N/A' }}</td>
-                                    <td class="text-success">${{ "{:,.0f}".format(p.get('cash_price', 0) | float) if p.get('cash_price') else 'N/A' }}</td>
+                                    <td style="color: var(--success); font-weight: 600;">${{ "{:,.0f}".format(p.get('cash_price', 0) | float) if p.get('cash_price') else 'N/A' }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                     {% else %}
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
+                    <div class="alert alert-info" style="margin: 0;">
+                        <i class="bi bi-info-circle"></i>
                         No price data available for this hospital.
                     </div>
                     {% endif %}

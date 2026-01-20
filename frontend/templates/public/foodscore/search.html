@@ -1,85 +1,145 @@
 {% extends "public/base_public.html" %}
 
+{% block title %}Search Products - FoodScore{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}">Public Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
-            <li class="breadcrumb-item active">Search</li>
-        </ol>
-    </nav>
-
-    <h2 class="mb-4">
-        <i class="bi bi-search me-2"></i>
-        {% if query %}Search Results for "{{ query }}"{% else %}Search Food Products{% endif %}
-    </h2>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('public.foodscore_search') }}" method="get">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="q" value="{{ query }}"
-                           placeholder="Search food products...">
-                    <button class="btn btn-success" type="submit">Search</button>
-                </div>
-            </form>
+<!-- Page Header -->
+<div class="page-header page-header--foodscore">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.home') }}">Public Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('public.foodscore_home') }}">FoodScore</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Search</span>
         </div>
+        <h1 class="page-title">
+            <i class="bi bi-search"></i>
+            {% if query %}Search Results for "{{ query }}"{% else %}Search Food Products{% endif %}
+        </h1>
+        <p class="page-subtitle">
+            Find health scores and nutrition information for food products
+        </p>
     </div>
+</div>
 
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Results ({{ products | length }})</h5>
-        </div>
-        <div class="card-body">
-            {% if products %}
-            <div class="row g-3">
-                {% for p in products %}
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">{{ p.get('product_name', 'Unknown')[:35] }}{% if p.get('product_name', '')|length > 35 %}...{% endif %}</h6>
-                                {% set nova = p.get('nova_group', 0) | string %}
-                                {% if nova == '4' or 'en:4' in nova %}
-                                <span class="badge bg-danger">NOVA 4</span>
-                                {% elif nova == '3' or 'en:3' in nova %}
-                                <span class="badge bg-warning text-dark">NOVA 3</span>
-                                {% elif nova == '2' or 'en:2' in nova %}
-                                <span class="badge bg-info">NOVA 2</span>
-                                {% elif nova == '1' or 'en:1' in nova %}
-                                <span class="badge bg-success">NOVA 1</span>
-                                {% else %}
-                                <span class="badge bg-secondary">N/A</span>
-                                {% endif %}
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted">{{ (p.get('brands') or 'Unknown brand')[:30] }}</small>
-                            </div>
-                            {% set score = p.get('maha_score', 50) | int %}
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                    <div class="progress-bar {% if score < 40 %}bg-danger{% elif score < 60 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ score }}%;"></div>
-                                </div>
-                                <span class="fw-bold">{{ score }}</span>
-                            </div>
-                            <a href="{{ url_for('public.foodscore_product', barcode=p.get('code', '')) }}"
-                               class="btn btn-sm btn-outline-success w-100">View Details</a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+<div class="container container-xl">
+    <!-- Search Box -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--foodscore); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-basket"></i> Product Search
+                </h3>
             </div>
-            {% else %}
-            <p class="text-muted text-center py-4">
-                {% if query %}
-                No products found for "{{ query }}". Try a different search term.
-                {% else %}
-                Enter a product name to search.
-                {% endif %}
-            </p>
-            {% endif %}
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('public.foodscore_search') }}" method="get">
+                    <div style="display: flex; gap: var(--spacing-3);">
+                        <input type="text" class="form-control" name="q" value="{{ query }}"
+                               placeholder="Search food products..." style="flex: 1;">
+                        <button class="btn btn-foodscore" type="submit">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        {% if query %}
+                        <a href="{{ url_for('public.foodscore_search') }}" class="btn btn-outline">
+                            <i class="bi bi-x-lg"></i> Clear
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Results -->
+    <section>
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--foodscore); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-list-ul"></i> Results
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">{{ products | length }} products found</span>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                {% if products %}
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+                    {% for p in products %}
+                    <div class="card" style="padding: var(--spacing-4);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--spacing-2);">
+                            <h4 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0; flex: 1; line-height: 1.3;">
+                                {{ (p.get('product_name') or 'Unknown')[:35] }}{% if (p.get('product_name') or '')|length > 35 %}...{% endif %}
+                            </h4>
+                            {% set nova = p.get('nova_group', 0) | string %}
+                            {% if nova == '4' or 'en:4' in nova %}
+                            <span class="badge badge-error">NOVA 4</span>
+                            {% elif nova == '3' or 'en:3' in nova %}
+                            <span class="badge badge-warning">NOVA 3</span>
+                            {% elif nova == '2' or 'en:2' in nova %}
+                            <span class="badge" style="background: var(--info); color: white;">NOVA 2</span>
+                            {% elif nova == '1' or 'en:1' in nova %}
+                            <span class="badge badge-success">NOVA 1</span>
+                            {% else %}
+                            <span class="badge" style="background: var(--neutral-300); color: var(--neutral-700);">N/A</span>
+                            {% endif %}
+                        </div>
+                        <div style="margin-bottom: var(--spacing-3);">
+                            <span style="font-size: var(--text-xs); color: var(--neutral-500);">{{ (p.get('brands') or 'Unknown brand')[:30] }}</span>
+                        </div>
+                        {% set score = p.get('maha_score', 50) | int %}
+                        <div style="display: flex; align-items: center; gap: var(--spacing-2); margin-bottom: var(--spacing-3);">
+                            <div style="flex: 1; height: 8px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
+                                <div style="height: 100%; width: {{ score }}%; background: {% if score < 40 %}var(--error){% elif score < 60 %}var(--warning){% else %}var(--success){% endif %};"></div>
+                            </div>
+                            <span style="font-weight: 700; font-size: var(--text-sm); min-width: 24px;">{{ score }}</span>
+                        </div>
+                        <a href="{{ url_for('public.foodscore_product', barcode=p.get('code', '')) }}"
+                           class="btn btn-sm btn-foodscore" style="width: 100%;">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: var(--spacing-8); color: var(--neutral-500);">
+                    <i class="bi bi-basket" style="font-size: var(--text-4xl); display: block; margin-bottom: var(--spacing-3);"></i>
+                    {% if query %}
+                    <p style="margin: 0;">No products found for "{{ query }}". Try a different search term.</p>
+                    {% else %}
+                    <p style="margin: 0;">Enter a product name to search.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Legend -->
+    <section class="section-sm">
+        <div class="card" style="padding: var(--spacing-4);">
+            <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">
+                <i class="bi bi-info-circle"></i> Understanding NOVA Groups
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-4);">
+                <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                    <span class="badge badge-success">NOVA 1</span>
+                    <span style="font-size: var(--text-xs); color: var(--neutral-600);">Unprocessed/minimally processed foods</span>
+                </div>
+                <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                    <span class="badge" style="background: var(--info); color: white;">NOVA 2</span>
+                    <span style="font-size: var(--text-xs); color: var(--neutral-600);">Processed culinary ingredients</span>
+                </div>
+                <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                    <span class="badge badge-warning">NOVA 3</span>
+                    <span style="font-size: var(--text-xs); color: var(--neutral-600);">Processed foods</span>
+                </div>
+                <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                    <span class="badge badge-error">NOVA 4</span>
+                    <span style="font-size: var(--text-xs); color: var(--neutral-600);">Ultra-processed food products</span>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 {% endblock %}

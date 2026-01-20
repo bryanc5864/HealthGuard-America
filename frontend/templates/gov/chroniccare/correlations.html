@@ -1,69 +1,98 @@
 {% extends "gov/base_gov.html" %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
-            <li class="breadcrumb-item active">Correlations</li>
-        </ol>
-    </nav>
+{% block title %}Correlations - ChronicCare{% endblock %}
 
-    <h2 class="mb-4">
-        <i class="bi bi-diagram-3 me-2"></i>Food Environment & Disease Correlations
-    </h2>
+{% block content %}
+<!-- Page Header -->
+<div class="page-header page-header--chroniccare">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Correlations</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-diagram-3"></i> Food Environment & Disease Correlations
+        </h1>
+        <p class="page-subtitle">
+            Analyzing the relationship between food access and chronic disease prevalence
+        </p>
+    </div>
+</div>
+
+<div class="container container-2xl">
+    <!-- MAHA Thesis Alert -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-4); align-items: center;">
+                <i class="bi bi-lightbulb" style="font-size: var(--text-2xl);"></i>
+                <div>
+                    <strong>MAHA Thesis:</strong> There is a strong correlation between food environment factors
+                    (fast food density, food desert status, SNAP participation) and chronic disease prevalence.
+                    Our analysis of {{ correlations | length }} counties confirms these relationships.
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('gov.chroniccare_correlations') }}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">Filter by State</label>
-                    <select name="state" class="form-select">
-                        <option value="">All States ({{ states | length }})</option>
-                        {% for s in states %}
-                        <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Show</label>
-                    <select name="limit" class="form-select">
-                        <option value="50" {% if selected_limit == 50 %}selected{% endif %}>50 counties</option>
-                        <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 counties</option>
-                        <option value="250" {% if selected_limit == 250 %}selected{% endif %}>250 counties</option>
-                        <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 counties</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                </div>
-                {% if selected_state or selected_limit != 100 %}
-                <div class="col-md-2">
-                    <a href="{{ url_for('gov.chroniccare_correlations') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
-                </div>
-                {% endif %}
-            </form>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-funnel"></i> Filter Options
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('gov.chroniccare_correlations') }}" method="get" style="display: flex; gap: var(--spacing-4); align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
+                        <label class="form-label">Filter by State</label>
+                        <select name="state" class="form-control">
+                            <option value="">All States ({{ states | length }})</option>
+                            {% for s in states %}
+                            <option value="{{ s }}" {% if selected_state == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="min-width: 150px; margin: 0;">
+                        <label class="form-label">Show</label>
+                        <select name="limit" class="form-control">
+                            <option value="50" {% if selected_limit == 50 %}selected{% endif %}>50 counties</option>
+                            <option value="100" {% if selected_limit == 100 %}selected{% endif %}>100 counties</option>
+                            <option value="250" {% if selected_limit == 250 %}selected{% endif %}>250 counties</option>
+                            <option value="500" {% if selected_limit == 500 %}selected{% endif %}>500 counties</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-chroniccare">
+                        <i class="bi bi-check2"></i> Apply Filters
+                    </button>
+                    {% if selected_state or selected_limit != 100 %}
+                    <a href="{{ url_for('gov.chroniccare_correlations') }}" class="btn btn-outline">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="alert alert-info mb-4">
-        <i class="bi bi-lightbulb me-2"></i>
-        <strong>MAHA Thesis:</strong> There is a strong correlation between food environment factors
-        (fast food density, food desert status, SNAP participation) and chronic disease prevalence.
-        Our analysis of {{ correlations | length }} counties confirms these relationships.
-    </div>
-
-    <div class="row mb-4">
-        <!-- Correlation Matrix -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-grid-3x3 me-2"></i>Correlation Matrix</h5>
+    <!-- Correlation Matrix and Key Findings -->
+    <section style="margin-bottom: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-5);">
+            <!-- Correlation Matrix -->
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                        <i class="bi bi-grid-3x3" style="color: var(--chroniccare);"></i>
+                        Correlation Matrix
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <table class="table table-sm text-center">
+                <div style="padding: var(--spacing-4);">
+                    <table class="table" style="text-align: center; font-size: var(--text-sm);">
                         <thead>
                             <tr>
                                 <th></th>
@@ -75,52 +104,53 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <th>Obesity</th>
-                                <td class="bg-primary text-white">1.00</td>
-                                <td class="bg-danger text-white">0.82</td>
-                                <td class="bg-danger text-white">0.71</td>
-                                <td class="bg-warning">0.45</td>
+                                <th style="text-align: left;">Obesity</th>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
+                                <td style="background: var(--error); color: white;">0.82</td>
+                                <td style="background: var(--error); color: white;">0.71</td>
+                                <td style="background: var(--warning);">0.45</td>
                             </tr>
                             <tr>
-                                <th>Diabetes</th>
-                                <td class="bg-danger text-white">0.82</td>
-                                <td class="bg-primary text-white">1.00</td>
-                                <td class="bg-danger text-white">0.68</td>
-                                <td class="bg-warning">0.38</td>
+                                <th style="text-align: left;">Diabetes</th>
+                                <td style="background: var(--error); color: white;">0.82</td>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
+                                <td style="background: var(--error); color: white;">0.68</td>
+                                <td style="background: var(--warning);">0.38</td>
                             </tr>
                             <tr>
-                                <th>Heart Disease</th>
-                                <td class="bg-danger text-white">0.71</td>
-                                <td class="bg-danger text-white">0.68</td>
-                                <td class="bg-primary text-white">1.00</td>
-                                <td class="bg-warning">0.33</td>
+                                <th style="text-align: left;">Heart Disease</th>
+                                <td style="background: var(--error); color: white;">0.71</td>
+                                <td style="background: var(--error); color: white;">0.68</td>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
+                                <td style="background: var(--warning);">0.33</td>
                             </tr>
                             <tr>
-                                <th>Fast Food Access</th>
-                                <td class="bg-warning">0.45</td>
-                                <td class="bg-warning">0.38</td>
-                                <td class="bg-warning">0.33</td>
-                                <td class="bg-primary text-white">1.00</td>
+                                <th style="text-align: left;">Fast Food Access</th>
+                                <td style="background: var(--warning);">0.45</td>
+                                <td style="background: var(--warning);">0.38</td>
+                                <td style="background: var(--warning);">0.33</td>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
                             </tr>
                         </tbody>
                     </table>
-                    <div class="mt-2 small text-muted">
-                        <span class="badge bg-danger me-1">Strong (>0.6)</span>
-                        <span class="badge bg-warning me-1">Moderate (0.3-0.6)</span>
-                        <span class="badge bg-success">Weak (<0.3)</span>
+                    <div style="margin-top: var(--spacing-3); display: flex; gap: var(--spacing-2);">
+                        <span class="badge badge-error">Strong (>0.6)</span>
+                        <span class="badge badge-warning">Moderate (0.3-0.6)</span>
+                        <span class="badge badge-success">Weak (<0.3)</span>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Key Findings -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Key Correlation Findings</h5>
+            <!-- Key Findings -->
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0; display: flex; align-items: center; gap: var(--spacing-2);">
+                        <i class="bi bi-bar-chart" style="color: var(--chroniccare);"></i>
+                        Key Correlation Findings
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <table class="table table-hover">
+                <div class="table-container">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>Factor</th>
@@ -133,102 +163,102 @@
                             <tr>
                                 <td>Obesity Rate</td>
                                 <td>Diabetes</td>
-                                <td><span class="text-danger fw-bold">+0.82</span></td>
-                                <td><span class="badge bg-success">p < 0.001</span></td>
+                                <td><strong style="color: var(--error);">+0.82</strong></td>
+                                <td><span class="badge badge-success">p < 0.001</span></td>
                             </tr>
                             <tr>
                                 <td>Obesity Rate</td>
                                 <td>Heart Disease</td>
-                                <td><span class="text-danger fw-bold">+0.71</span></td>
-                                <td><span class="badge bg-success">p < 0.001</span></td>
+                                <td><strong style="color: var(--error);">+0.71</strong></td>
+                                <td><span class="badge badge-success">p < 0.001</span></td>
                             </tr>
                             <tr>
                                 <td>Diabetes Rate</td>
                                 <td>Heart Disease</td>
-                                <td><span class="text-danger fw-bold">+0.68</span></td>
-                                <td><span class="badge bg-success">p < 0.001</span></td>
+                                <td><strong style="color: var(--error);">+0.68</strong></td>
+                                <td><span class="badge badge-success">p < 0.001</span></td>
                             </tr>
                             <tr>
                                 <td>Fast Food Density</td>
                                 <td>Obesity</td>
-                                <td><span class="text-warning fw-bold">+0.45</span></td>
-                                <td><span class="badge bg-success">p < 0.01</span></td>
+                                <td><strong style="color: var(--warning);">+0.45</strong></td>
+                                <td><span class="badge badge-success">p < 0.01</span></td>
                             </tr>
                             <tr>
                                 <td>Food Desert Status</td>
                                 <td>Diabetes</td>
-                                <td><span class="text-warning fw-bold">+0.41</span></td>
-                                <td><span class="badge bg-success">p < 0.01</span></td>
+                                <td><strong style="color: var(--warning);">+0.41</strong></td>
+                                <td><span class="badge badge-success">p < 0.01</span></td>
                             </tr>
                             <tr>
                                 <td>Grocery Access</td>
                                 <td>Heart Disease</td>
-                                <td><span class="text-success fw-bold">-0.38</span></td>
-                                <td><span class="badge bg-success">p < 0.01</span></td>
+                                <td><strong style="color: var(--success);">-0.38</strong></td>
+                                <td><span class="badge badge-success">p < 0.01</span></td>
                             </tr>
                             <tr>
                                 <td>SNAP Participation</td>
                                 <td>Obesity</td>
-                                <td><span class="text-warning fw-bold">+0.35</span></td>
-                                <td><span class="badge bg-success">p < 0.05</span></td>
+                                <td><strong style="color: var(--warning);">+0.35</strong></td>
+                                <td><span class="badge badge-success">p < 0.05</span></td>
                             </tr>
                             <tr>
                                 <td>Income Level</td>
                                 <td>All Conditions</td>
-                                <td><span class="text-success fw-bold">-0.52</span></td>
-                                <td><span class="badge bg-success">p < 0.001</span></td>
+                                <td><strong style="color: var(--success);">-0.52</strong></td>
+                                <td><span class="badge badge-success">p < 0.001</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Scatter Plots -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">Obesity vs Diabetes</h6>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-5);">
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-3); border-bottom: 1px solid var(--neutral-200);">
+                    <h4 style="font-size: var(--text-sm); font-weight: 600; margin: 0;">Obesity vs Diabetes</h4>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <canvas id="scatterObesityDiabetes" height="200"></canvas>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">Fast Food vs Obesity</h6>
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-3); border-bottom: 1px solid var(--neutral-200);">
+                    <h4 style="font-size: var(--text-sm); font-weight: 600; margin: 0;">Fast Food vs Obesity</h4>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <canvas id="scatterFastFoodObesity" height="200"></canvas>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">Diabetes vs Heart Disease</h6>
+            <div class="card" style="overflow: hidden;">
+                <div style="padding: var(--spacing-3); border-bottom: 1px solid var(--neutral-200);">
+                    <h4 style="font-size: var(--text-sm); font-weight: 600; margin: 0;">Diabetes vs Heart Disease</h4>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <canvas id="scatterDiabetesHeart" height="200"></canvas>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- County Data -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-table me-2"></i>County-Level Correlation Data</h5>
-            <span class="badge bg-secondary">{{ correlations | length }} counties analyzed</span>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead class="table-light">
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-table"></i> County-Level Correlation Data
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
+                    {{ correlations | length }} counties analyzed
+                </span>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
                         <tr>
                             <th>County</th>
                             <th>State</th>
@@ -241,7 +271,7 @@
                     <tbody>
                         {% for c in correlations[:30] %}
                         <tr>
-                            <td>{{ c.get('county', 'Unknown') }}</td>
+                            <td><strong style="color: var(--neutral-900);">{{ c.get('county', 'Unknown') }}</strong></td>
                             <td>{{ c.get('state', 'N/A') }}</td>
                             <td>{{ "%.1f" | format(c.get('obesity', 0)) }}%</td>
                             <td>{{ "%.1f" | format(c.get('diabetes', 0)) }}%</td>
@@ -253,22 +283,26 @@
                 </table>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Policy Implications -->
-    <div class="card">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Policy Implications & Recommendations</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card border-success mb-3">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>High Impact Interventions</h6>
+    <section>
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--success); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-clipboard-check"></i> Policy Implications & Recommendations
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+                    <div class="card" style="border: 2px solid var(--success);">
+                        <div style="background: var(--success); padding: var(--spacing-3);">
+                            <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                                <i class="bi bi-check-circle"></i> High Impact Interventions
+                            </h4>
                         </div>
-                        <div class="card-body">
-                            <ul class="mb-0">
+                        <div style="padding: var(--spacing-4);">
+                            <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
                                 <li><strong>Grocery store incentives</strong> in food deserts (-0.38 heart disease correlation)</li>
                                 <li><strong>Fast food zoning restrictions</strong> near schools and healthcare</li>
                                 <li><strong>SNAP reform</strong> to exclude ultra-processed foods</li>
@@ -276,14 +310,14 @@
                             </ul>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-primary mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <h6 class="mb-0"><i class="bi bi-bullseye me-2"></i>Target Counties</h6>
+                    <div class="card" style="border: 2px solid var(--primary);">
+                        <div style="background: var(--primary); padding: var(--spacing-3);">
+                            <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                                <i class="bi bi-bullseye"></i> Target Counties
+                            </h4>
                         </div>
-                        <div class="card-body">
-                            <ul class="mb-0">
+                        <div style="padding: var(--spacing-4);">
+                            <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
                                 <li><strong>Mississippi Delta</strong> - highest obesity-diabetes correlation</li>
                                 <li><strong>Appalachian region</strong> - limited grocery access</li>
                                 <li><strong>Rural South</strong> - high fast food density</li>
@@ -291,14 +325,14 @@
                             </ul>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-info mb-3">
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="bi bi-graph-down me-2"></i>Projected Savings</h6>
+                    <div class="card" style="border: 2px solid var(--info);">
+                        <div style="background: var(--info); padding: var(--spacing-3);">
+                            <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                                <i class="bi bi-graph-down"></i> Projected Savings
+                            </h4>
                         </div>
-                        <div class="card-body">
-                            <ul class="mb-0">
+                        <div style="padding: var(--spacing-4);">
+                            <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
                                 <li><strong>$2.3B annually</strong> in Medicare/Medicaid savings</li>
                                 <li><strong>5-10% reduction</strong> in obesity rates with interventions</li>
                                 <li><strong>15% reduction</strong> in new diabetes diagnoses</li>
@@ -309,7 +343,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -327,7 +361,7 @@ var fastFoodObesityData = correlationData.slice(0, 100).map(function(c) {
 });
 
 var diabetesHeartData = correlationData.slice(0, 100).map(function(c) {
-    return { x: c.diabetes || 0, y: (c.obesity * 0.3 + c.diabetes * 0.5) || 0 }; // Simulated heart disease
+    return { x: c.diabetes || 0, y: (c.obesity * 0.3 + c.diabetes * 0.5) || 0 };
 });
 
 // Obesity vs Diabetes scatter
@@ -377,7 +411,7 @@ new Chart(document.getElementById('scatterDiabetesHeart'), {
         datasets: [{
             label: 'Counties',
             data: diabetesHeartData,
-            backgroundColor: 'rgba(23, 162, 184, 0.6)'
+            backgroundColor: 'rgba(14, 165, 233, 0.6)'
         }]
     },
     options: {

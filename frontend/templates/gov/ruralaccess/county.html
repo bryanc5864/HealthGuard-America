@@ -1,135 +1,180 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}County Profile - RuralAccess{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a></li>
-            <li class="breadcrumb-item active">County Details</li>
-        </ol>
-    </nav>
-
-    <h2 class="mb-4">
-        <i class="bi bi-geo-alt me-2"></i>County Profile
-        <small class="text-muted">FIPS: {{ fips }}</small>
-    </h2>
-
-    {% if not county %}
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        County data for FIPS {{ fips }} not found.
-    </div>
-    {% else %}
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">County Information</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>State:</strong> {{ county.state or 'N/A' }}</p>
-                    <p><strong>Shortage Count:</strong> {{ county.shortage_count or 0 }}</p>
-                    <p><strong>Affected Population:</strong> {{ "{:,.0f}".format(county.affected_population) if county.affected_population else 'N/A' }}</p>
-                </div>
-            </div>
+<!-- Page Header -->
+<div class="page-header page-header--ruralaccess">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>County Details</span>
         </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Healthcare Access</h5>
+        <h1 class="page-title">
+            <i class="bi bi-geo-alt"></i> County Profile
+        </h1>
+        <p class="page-subtitle">
+            FIPS: {{ fips }}
+        </p>
+    </div>
+</div>
+
+<div class="container container-xl">
+    {% if not county %}
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            County data for FIPS {{ fips }} not found.
+        </div>
+    </section>
+    {% else %}
+    <!-- County Stats -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <!-- County Information -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-building"></i> County Information
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <p><strong>Avg. HPSA Score:</strong> {{ "%.1f"|format(county.avg_shortage_score) if county.avg_shortage_score else 'N/A' }}</p>
-                    {% if county.avg_shortage_score %}
-                    <div class="progress mb-2">
-                        <div class="progress-bar {% if county.avg_shortage_score >= 20 %}bg-danger{% elif county.avg_shortage_score >= 15 %}bg-warning{% else %}bg-success{% endif %}"
-                             role="progressbar"
-                             style="width: {{ (county.avg_shortage_score / 25 * 100)|int }}%"
-                             aria-valuenow="{{ county.avg_shortage_score }}"
-                             aria-valuemin="0"
-                             aria-valuemax="25">
+                <div style="padding: var(--spacing-5);">
+                    <div style="display: grid; gap: var(--spacing-4);">
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">State</span>
+                            <strong>{{ county.state or 'N/A' }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--neutral-100);">
+                            <span style="color: var(--neutral-500);">Shortage Count</span>
+                            <strong>{{ county.shortage_count or 0 }}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--neutral-500);">Affected Population</span>
+                            <strong>{{ "{:,.0f}".format(county.affected_population) if county.affected_population else 'N/A' }}</strong>
                         </div>
                     </div>
-                    <small class="text-muted">Score scale: 0 (no shortage) to 25 (critical shortage)</small>
+                </div>
+            </div>
+
+            <!-- Healthcare Access -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-heart-pulse" style="color: var(--ruralaccess);"></i> Healthcare Access
+                    </h3>
+                </div>
+                <div style="padding: var(--spacing-5);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-3);">
+                        <span style="color: var(--neutral-500);">Avg. HPSA Score</span>
+                        <strong style="font-size: var(--text-xl);">{{ "%.1f"|format(county.avg_shortage_score) if county.avg_shortage_score else 'N/A' }}</strong>
+                    </div>
+                    {% if county.avg_shortage_score %}
+                    <div style="height: 12px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden; margin-bottom: var(--spacing-2);">
+                        <div style="height: 100%; width: {{ (county.avg_shortage_score / 25 * 100)|int }}%; background: {% if county.avg_shortage_score >= 20 %}var(--error){% elif county.avg_shortage_score >= 15 %}var(--warning){% else %}var(--success){% endif %};"></div>
+                    </div>
+                    <small style="color: var(--neutral-500);">Score scale: 0 (no shortage) to 25 (critical shortage)</small>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- HPSA Designations in this County -->
     {% if hpsas %}
-    <h4 class="mb-3">HPSA Designations in this County</h4>
-    <div class="card mb-4">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>HPSA Name</th>
-                        <th>Type</th>
-                        <th>Discipline</th>
-                        <th>Score</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for hpsa in hpsas %}
-                    <tr>
-                        <td>{{ hpsa.hpsa_name or 'Unknown' }}</td>
-                        <td><small class="text-muted">{{ hpsa.designation_type or 'N/A' }}</small></td>
-                        <td>{{ hpsa.discipline or 'N/A' }}</td>
-                        <td>
-                            <span class="badge {% if hpsa.hpsa_score >= 20 %}bg-danger{% elif hpsa.hpsa_score >= 15 %}bg-warning{% else %}bg-success{% endif %}">
-                                {{ hpsa.hpsa_score or 'N/A' }}
-                            </span>
-                        </td>
-                        <td>{{ hpsa.status or 'N/A' }}</td>
-                        <td>
-                            <a href="{{ url_for('gov.ruralaccess_hpsa', hpsa_id=hpsa.hpsa_id) }}" class="btn btn-sm btn-outline-primary">Details</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-list-ul" style="color: var(--ruralaccess);"></i> HPSA Designations in this County
+                </h3>
+                <span class="badge" style="background: var(--ruralaccess); color: white;">{{ hpsas|length }} designations</span>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>HPSA Name</th>
+                                <th>Type</th>
+                                <th>Discipline</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hpsa in hpsas %}
+                            <tr>
+                                <td><strong style="color: var(--neutral-900);">{{ hpsa.hpsa_name or 'Unknown' }}</strong></td>
+                                <td style="font-size: var(--text-sm); color: var(--neutral-500);">{{ hpsa.designation_type or 'N/A' }}</td>
+                                <td>{{ hpsa.discipline or 'N/A' }}</td>
+                                <td>
+                                    <span class="badge {% if hpsa.hpsa_score >= 20 %}badge-error{% elif hpsa.hpsa_score >= 15 %}badge-warning{% else %}badge-success{% endif %}">
+                                        {{ hpsa.hpsa_score or 'N/A' }}
+                                    </span>
+                                </td>
+                                <td>{{ hpsa.status or 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('gov.ruralaccess_hpsa', hpsa_id=hpsa.hpsa_id) }}" class="btn btn-sm btn-ruralaccess">Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
     {% else %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        No HPSA designations found for this county.
-    </div>
+    <section class="section-sm">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            No HPSA designations found for this county.
+        </div>
+    </section>
     {% endif %}
 
     <!-- Nearby FQHCs -->
     {% if fqhcs %}
-    <h4 class="mb-3">Federally Qualified Health Centers</h4>
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Health Center</th>
-                        <th>Site Name</th>
-                        <th>City</th>
-                        <th>Phone</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for fqhc in fqhcs[:10] %}
-                    <tr>
-                        <td>{{ fqhc.health_center_name or 'Unknown' }}</td>
-                        <td>{{ fqhc.site_name or 'N/A' }}</td>
-                        <td>{{ fqhc.city or 'N/A' }}, {{ fqhc.state or '' }}</td>
-                        <td>{{ fqhc.phone or 'N/A' }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--success); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-hospital"></i> Federally Qualified Health Centers
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Health Center</th>
+                                <th>Site Name</th>
+                                <th>City</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fqhc in fqhcs[:10] %}
+                            <tr>
+                                <td><strong style="color: var(--neutral-900);">{{ fqhc.health_center_name or 'Unknown' }}</strong></td>
+                                <td>{{ fqhc.site_name or 'N/A' }}</td>
+                                <td>{{ fqhc.city or 'N/A' }}{% if fqhc.state %}, {{ fqhc.state }}{% endif %}</td>
+                                <td>{{ fqhc.phone or 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
     {% endif %}
 </div>
 {% endblock %}

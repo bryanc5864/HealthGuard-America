@@ -1,5 +1,7 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}Spending Trends - DrugWatch{% endblock %}
+
 {% block extra_css %}
 {{ super() }}
 <style>
@@ -15,177 +17,186 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a></li>
-            <li class="breadcrumb-item active">Spending Trends</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header page-header--drugwatch">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Spending Trends</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-graph-up"></i> Medicare Drug Spending Trends
+        </h1>
+        <p class="page-subtitle">
+            Government-only analysis of Part D spending patterns
+        </p>
+    </div>
+</div>
 
-    <h2 class="mb-4">
-        <i class="bi bi-graph-up me-2"></i>Medicare Drug Spending Trends
-        <span class="badge bg-primary ms-2">Government Only</span>
-    </h2>
+<div class="container container-xl">
+    <!-- Key Metrics -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">$275.9B</div>
+                <div class="stat-card-label">Total Part D Spending</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">{{ "{:,}".format(stats.total_us_drugs) }}</div>
+                <div class="stat-card-label">Drugs in Database</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--primary);">
+                <div class="stat-card-value" style="color: var(--primary);">+8.3%</div>
+                <div class="stat-card-label">YoY Spending Growth</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">Top 25</div>
+                <div class="stat-card-label">Drugs = 45% of Spending</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Search Box -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('gov.drugwatch_trends') }}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label">Search Drugs</label>
-                    <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="Search by brand or generic name...">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Show</label>
-                    <select class="form-select" name="limit">
-                        <option value="25" {% if limit == 25 %}selected{% endif %}>25</option>
-                        <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
-                        <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
-                        <option value="200" {% if limit == 200 %}selected{% endif %}>200</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
-                </div>
-                {% if search %}
-                <div class="col-md-2">
-                    <a href="{{ url_for('gov.drugwatch_trends') }}" class="btn btn-outline-secondary w-100">Clear</a>
-                </div>
-                {% endif %}
-            </form>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--drugwatch); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-search"></i> Search Drug Spending
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('gov.drugwatch_trends') }}" method="get" style="display: flex; gap: var(--spacing-3); align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
+                        <label class="form-label">Search Drugs</label>
+                        <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="Search by brand or generic name...">
+                    </div>
+                    <div class="form-group" style="min-width: 120px; margin: 0;">
+                        <label class="form-label">Show</label>
+                        <select class="form-select form-control" name="limit">
+                            <option value="25" {% if limit == 25 %}selected{% endif %}>25</option>
+                            <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
+                            <option value="200" {% if limit == 200 %}selected{% endif %}>200</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-drugwatch">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    {% if search %}
+                    <a href="{{ url_for('gov.drugwatch_trends') }}" class="btn btn-outline">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Overview -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About Drug Spending Analysis</h5>
-        </div>
-        <div class="card-body">
-            <p>
-                This analysis tracks Medicare Part D prescription drug spending patterns, identifying the highest-cost
-                medications and their impact on federal healthcare expenditures.
-            </p>
-            <p class="mb-0">
-                <strong>Data Source:</strong> CMS Medicare Part D Spending by Drug dataset (2023) |
-                <strong>Total Drugs:</strong> {{ total_drugs }} {% if search %}matching "{{ search }}"{% endif %}
-            </p>
-        </div>
-    </div>
-
-    <!-- Key Metrics -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">$275.9B</h3>
-                    <p class="mb-0">Total Part D Spending</p>
+    <!-- About Section -->
+    <section style="margin-bottom: var(--spacing-4);">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-3); align-items: flex-start;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <p style="margin: 0 0 var(--spacing-2) 0;">
+                        This analysis tracks Medicare Part D prescription drug spending patterns, identifying the highest-cost
+                        medications and their impact on federal healthcare expenditures.
+                    </p>
+                    <p style="margin: 0; font-size: var(--text-sm); color: var(--neutral-600);">
+                        <strong>Data Source:</strong> CMS Medicare Part D Spending by Drug dataset (2023) |
+                        <strong>Total Drugs:</strong> {{ total_drugs }} {% if search %}matching "{{ search }}"{% endif %}
+                    </p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">{{ "{:,}".format(stats.total_us_drugs) }}</h3>
-                    <p class="mb-0">Drugs in Database</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">+8.3%</h3>
-                    <p class="mb-0">YoY Spending Growth</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">Top 25</h3>
-                    <p class="mb-0">Drugs = 45% of Spending</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- Charts Row -->
-    <div class="row g-4 mb-4">
-        <!-- Top Spending Drugs Bar Chart -->
-        <div class="col-lg-8">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Top 15 Drugs by Medicare Spending (2023)</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-4);">
+            <!-- Top Spending Drugs Bar Chart -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--drugwatch); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-bar-chart"></i> Top 15 Drugs by Medicare Spending (2023)
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <div class="chart-container">
                         <canvas id="topDrugsChart"></canvas>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Historical Trend Line Chart -->
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Part D Spending Trend</h5>
+            <!-- Historical Trend Line Chart -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--error); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-graph-up-arrow"></i> Part D Spending Trend
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <div class="chart-container">
                         <canvas id="historicalTrendChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Spending Distribution Charts -->
-    <div class="row g-4 mb-4">
-        <!-- Spending by Drug Category -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Spending Concentration</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+            <!-- Spending by Drug Category -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--primary); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-pie-chart"></i> Spending Concentration
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <div class="chart-container-sm">
                         <canvas id="concentrationChart"></canvas>
                     </div>
-                    <div class="mt-3 small text-muted text-center">
+                    <p style="margin: var(--spacing-3) 0 0 0; font-size: var(--text-sm); color: var(--neutral-500); text-align: center;">
                         Top 10 drugs account for ~30% of total Part D spending
-                    </div>
+                    </p>
                 </div>
             </div>
-        </div>
 
-        <!-- Year over Year Growth -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-percent me-2"></i>Year-over-Year Growth Rate</h5>
+            <!-- Year over Year Growth -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--warning); padding: var(--spacing-4);">
+                    <h3 style="color: var(--neutral-900); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-percent"></i> Year-over-Year Growth Rate
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-4);">
                     <div class="chart-container-sm">
                         <canvas id="growthRateChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Full Drug Table -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-table me-2"></i>All Drugs by Medicare Spending</h5>
-            <span class="badge bg-secondary">Page {{ page }} of {{ total_pages }} ({{ total_drugs }} drugs)</span>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                <table class="table table-hover table-sm">
-                    <thead class="table-light sticky-top">
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--drugwatch); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-table"></i> All Drugs by Medicare Spending
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">Page {{ page }} of {{ total_pages }} ({{ total_drugs }} drugs)</span>
+            </div>
+            <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+                <table class="table" style="margin: 0;">
+                    <thead style="position: sticky; top: 0; background: var(--neutral-50); z-index: 1;">
                         <tr>
                             <th>#</th>
                             <th>Brand Name</th>
@@ -193,94 +204,110 @@
                             <th>Total Spending (2023)</th>
                             <th>Beneficiaries</th>
                             <th>Claims</th>
-                            <th>Action</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for drug in drugs %}
                         <tr>
-                            <td>{{ (page - 1) * limit + loop.index }}</td>
-                            <td><strong>{{ (drug.get('brand_name') or 'N/A')[:30] }}</strong></td>
-                            <td><small>{{ (drug.get('generic_name') or 'N/A')[:40] }}</small></td>
-                            <td class="text-danger fw-bold">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
+                            <td><strong>{{ (page - 1) * limit + loop.index }}</strong></td>
+                            <td><strong style="color: var(--neutral-900);">{{ (drug.get('brand_name') or 'N/A')[:30] }}</strong></td>
+                            <td><span style="color: var(--neutral-600); font-size: var(--text-sm);">{{ (drug.get('generic_name') or 'N/A')[:40] }}</span></td>
+                            <td style="color: var(--error); font-weight: 700;">${{ "{:,.0f}".format(drug.get('total_spending_2023', 0) | float) }}</td>
                             <td>{{ "{:,}".format(drug.get('total_beneficiaries_2023', 0) | int) if drug.get('total_beneficiaries_2023') else 'N/A' }}</td>
                             <td>{{ "{:,}".format(drug.get('total_claims_2023', 0) | int) if drug.get('total_claims_2023') else 'N/A' }}</td>
-                            <td><a href="{{ url_for('gov.drugwatch_drug', drug_id=drug.get('brand_name', '')) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+                            <td>
+                                <a href="{{ url_for('gov.drugwatch_drug', drug_id=drug.get('brand_name', '')) }}" class="btn btn-sm btn-outline">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="7" class="text-center text-muted">No drugs found</td></tr>
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: var(--spacing-6); color: var(--neutral-500);">
+                                No drugs found
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
             <!-- Pagination -->
             {% if total_pages > 1 %}
-            <nav class="mt-3">
-                <ul class="pagination justify-content-center mb-0">
+            <div style="padding: var(--spacing-4); border-top: 1px solid var(--neutral-200);">
+                <div style="display: flex; justify-content: center; gap: var(--spacing-2);">
                     {% if page > 1 %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=page-1) }}">Previous</a></li>
+                    <a href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=page-1) }}" class="btn btn-sm btn-outline">Previous</a>
                     {% endif %}
                     {% for p in range(1, total_pages + 1) %}
                     {% if p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2) %}
-                    <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=p) }}">{{ p }}</a></li>
+                    <a href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=p) }}"
+                       class="btn btn-sm {% if p == page %}btn-drugwatch{% else %}btn-outline{% endif %}">{{ p }}</a>
                     {% elif p == 4 or p == total_pages - 3 %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <span style="padding: var(--spacing-2);">...</span>
                     {% endif %}
                     {% endfor %}
                     {% if page < total_pages %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=page+1) }}">Next</a></li>
+                    <a href="{{ url_for('gov.drugwatch_trends', q=search, limit=limit, page=page+1) }}" class="btn btn-sm btn-outline">Next</a>
                     {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Spending by Category -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Spending Concentration</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Key Insights</h6>
-                    <ul>
-                        <li>The <strong>top 10 drugs</strong> account for approximately 30% of total Medicare Part D spending</li>
-                        <li>Brand-name drugs dominate spending despite generics being available for many conditions</li>
-                        <li>Specialty drugs (biologics, cancer treatments) have the highest per-unit costs</li>
-                        <li>Diabetes medications represent a significant portion of total spending</li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    <h6>Cost Drivers</h6>
-                    <table class="table table-sm">
-                        <tr>
-                            <td>Brand Premium over Generic</td>
-                            <td class="text-end"><span class="badge bg-danger">+300-500%</span></td>
-                        </tr>
-                        <tr>
-                            <td>Annual Price Increases</td>
-                            <td class="text-end"><span class="badge bg-warning text-dark">5-10%/year</span></td>
-                        </tr>
-                        <tr>
-                            <td>Specialty Drug Share</td>
-                            <td class="text-end"><span class="badge bg-primary">50%+ of spend</span></td>
-                        </tr>
-                    </table>
                 </div>
             </div>
+            {% endif %}
         </div>
-    </div>
+    </section>
 
-    <!-- Historical Trends -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Historical Spending Trend</h5>
+    <!-- Key Insights -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+            <div class="card" style="padding: var(--spacing-5);">
+                <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-4);">
+                    <i class="bi bi-lightbulb" style="color: var(--warning);"></i> Key Insights
+                </h4>
+                <ul style="margin: 0; padding-left: var(--spacing-4);">
+                    <li style="margin-bottom: var(--spacing-2);">The <strong>top 10 drugs</strong> account for approximately 30% of total Medicare Part D spending</li>
+                    <li style="margin-bottom: var(--spacing-2);">Brand-name drugs dominate spending despite generics being available for many conditions</li>
+                    <li style="margin-bottom: var(--spacing-2);">Specialty drugs (biologics, cancer treatments) have the highest per-unit costs</li>
+                    <li style="margin: 0;">Diabetes medications represent a significant portion of total spending</li>
+                </ul>
+            </div>
+            <div class="card" style="padding: var(--spacing-5);">
+                <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-4);">
+                    <i class="bi bi-graph-up-arrow" style="color: var(--error);"></i> Cost Drivers
+                </h4>
+                <table class="table" style="margin: 0;">
+                    <tr>
+                        <td style="border-top: none;">Brand Premium over Generic</td>
+                        <td style="border-top: none; text-align: right;">
+                            <span class="badge badge-error">+300-500%</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Annual Price Increases</td>
+                        <td style="text-align: right;">
+                            <span class="badge badge-warning">5-10%/year</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Specialty Drug Share</td>
+                        <td style="text-align: right;">
+                            <span class="badge" style="background: var(--primary); color: white;">50%+ of spend</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
+    </section>
+
+    <!-- Historical Trends Table -->
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--neutral-700); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-graph-up-arrow"></i> Historical Spending Trend
+                </h3>
+            </div>
+            <div class="table-container">
+                <table class="table" style="margin: 0;">
                     <thead>
                         <tr>
                             <th>Year</th>
@@ -291,84 +318,78 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>2023</td>
-                            <td class="fw-bold">$275.9B</td>
-                            <td class="text-danger">+8.3%</td>
+                            <td><strong>2023</strong></td>
+                            <td><strong>$275.9B</strong></td>
+                            <td><span style="color: var(--error);">+8.3%</span></td>
                             <td>3,598</td>
                         </tr>
                         <tr>
                             <td>2022</td>
                             <td>$254.7B</td>
-                            <td class="text-danger">+7.1%</td>
+                            <td><span style="color: var(--error);">+7.1%</span></td>
                             <td>3,512</td>
                         </tr>
                         <tr>
                             <td>2021</td>
                             <td>$237.8B</td>
-                            <td class="text-danger">+6.8%</td>
+                            <td><span style="color: var(--error);">+6.8%</span></td>
                             <td>3,445</td>
                         </tr>
                         <tr>
                             <td>2020</td>
                             <td>$222.6B</td>
-                            <td class="text-danger">+5.2%</td>
+                            <td><span style="color: var(--error);">+5.2%</span></td>
                             <td>3,389</td>
                         </tr>
                         <tr>
                             <td>2019</td>
                             <td>$211.6B</td>
-                            <td class="text-warning">+4.8%</td>
+                            <td><span style="color: var(--warning);">+4.8%</span></td>
                             <td>3,321</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Policy Implications -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Policy Implications</h5>
+    <section class="section-sm">
+        <div style="margin-bottom: var(--spacing-4);">
+            <h3 style="font-size: var(--text-lg); font-weight: 700;">
+                <i class="bi bi-lightbulb"></i> Policy Implications
+            </h3>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card border-primary h-100">
-                        <div class="card-body">
-                            <h6 class="text-primary"><i class="bi bi-check-circle me-2"></i>IRA Drug Negotiation</h6>
-                            <p class="small mb-0">
-                                The Inflation Reduction Act allows Medicare to negotiate prices for select high-spend drugs.
-                                First 10 drugs selected in 2023 represent $50B+ in annual spending.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-warning h-100">
-                        <div class="card-body">
-                            <h6 class="text-warning"><i class="bi bi-exclamation-circle me-2"></i>Price Cap Opportunity</h6>
-                            <p class="small mb-0">
-                                Annual price increases now capped at inflation rate. Manufacturers exceeding cap must
-                                pay rebates to Medicare.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-success h-100">
-                        <div class="card-body">
-                            <h6 class="text-success"><i class="bi bi-graph-down me-2"></i>Out-of-Pocket Cap</h6>
-                            <p class="small mb-0">
-                                New $2,000 annual out-of-pocket cap for Part D beneficiaries starting 2025 will
-                                shift costs to plans and manufacturers.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+            <div class="card" style="border-left: 4px solid var(--primary); padding: var(--spacing-4);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; color: var(--primary); margin-bottom: var(--spacing-2);">
+                    <i class="bi bi-check-circle"></i> IRA Drug Negotiation
+                </h4>
+                <p style="font-size: var(--text-sm); color: var(--neutral-600); margin: 0;">
+                    The Inflation Reduction Act allows Medicare to negotiate prices for select high-spend drugs.
+                    First 10 drugs selected in 2023 represent $50B+ in annual spending.
+                </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--warning); padding: var(--spacing-4);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; color: var(--warning); margin-bottom: var(--spacing-2);">
+                    <i class="bi bi-exclamation-circle"></i> Price Cap Opportunity
+                </h4>
+                <p style="font-size: var(--text-sm); color: var(--neutral-600); margin: 0;">
+                    Annual price increases now capped at inflation rate. Manufacturers exceeding cap must
+                    pay rebates to Medicare.
+                </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--success); padding: var(--spacing-4);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; color: var(--success); margin-bottom: var(--spacing-2);">
+                    <i class="bi bi-graph-down"></i> Out-of-Pocket Cap
+                </h4>
+                <p style="font-size: var(--text-sm); color: var(--neutral-600); margin: 0;">
+                    New $2,000 annual out-of-pocket cap for Part D beneficiaries starting 2025 will
+                    shift costs to plans and manufacturers.
+                </p>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}
 
@@ -376,20 +397,22 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Chart.js defaults
-    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.family = "'Inter', 'Segoe UI', system-ui, sans-serif";
 
-    // Color palette
+    // Color palette matching our design system
     const colors = {
-        primary: '#0d6efd',
-        danger: '#dc3545',
-        warning: '#ffc107',
-        success: '#28a745',
-        info: '#17a2b8'
+        primary: '#3b82f6',
+        drugwatch: '#dc2626',
+        error: '#dc2626',
+        warning: '#f59e0b',
+        success: '#10b981',
+        info: '#06b6d4',
+        neutral: '#6b7280'
     };
 
     // Top drugs data from backend
     const topDrugsData = {{ top_drugs|tojson|safe }};
-    const chartData = topDrugsData.slice(0, 15); // Limit to 15 for chart
+    const chartData = topDrugsData.slice(0, 15);
 
     // 1. Top Drugs Horizontal Bar Chart
     new Chart(document.getElementById('topDrugsChart'), {
@@ -401,8 +424,8 @@
                 data: chartData.map(d => (d.total_spending_2023 || 0) / 1e9),
                 backgroundColor: chartData.map((d, i) => {
                     const spending = d.total_spending_2023 || 0;
-                    if (spending > 10e9) return colors.danger;
-                    if (spending > 5e9) return '#fd7e14';
+                    if (spending > 10e9) return colors.error;
+                    if (spending > 5e9) return '#f97316';
                     if (spending > 2e9) return colors.warning;
                     return colors.info;
                 }),
@@ -445,12 +468,12 @@
             datasets: [{
                 label: 'Total Spending',
                 data: [211.6, 222.6, 237.8, 254.7, 275.9],
-                borderColor: colors.danger,
-                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderColor: colors.error,
+                backgroundColor: 'rgba(220, 38, 38, 0.1)',
                 fill: true,
                 tension: 0.3,
                 pointRadius: 5,
-                pointBackgroundColor: colors.danger
+                pointBackgroundColor: colors.error
             }]
         },
         options: {
@@ -482,9 +505,8 @@
     });
 
     // 3. Spending Concentration Doughnut Chart
-    // Calculate spending concentration from top drugs
     const top10Spending = topDrugsData.slice(0, 10).reduce((sum, d) => sum + (d.total_spending_2023 || 0), 0);
-    const totalSpending = 275.9e9; // $275.9B total Part D
+    const totalSpending = 275.9e9;
     const otherSpending = totalSpending - top10Spending;
 
     new Chart(document.getElementById('concentrationChart'), {
@@ -493,7 +515,7 @@
             labels: ['Top 10 Drugs', 'All Other Drugs'],
             datasets: [{
                 data: [top10Spending / 1e9, otherSpending / 1e9],
-                backgroundColor: [colors.danger, '#e9ecef'],
+                backgroundColor: [colors.error, '#e5e7eb'],
                 borderWidth: 2,
                 borderColor: '#fff'
             }]
@@ -524,16 +546,16 @@
                 label: 'YoY Growth %',
                 data: [5.2, 6.8, 7.1, 8.3],
                 backgroundColor: [
-                    'rgba(40, 167, 69, 0.7)',
-                    'rgba(255, 193, 7, 0.7)',
-                    'rgba(253, 126, 20, 0.7)',
-                    'rgba(220, 53, 69, 0.7)'
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(249, 115, 22, 0.7)',
+                    'rgba(220, 38, 38, 0.7)'
                 ],
                 borderColor: [
                     colors.success,
                     colors.warning,
-                    '#fd7e14',
-                    colors.danger
+                    '#f97316',
+                    colors.error
                 ],
                 borderWidth: 2,
                 borderRadius: 4

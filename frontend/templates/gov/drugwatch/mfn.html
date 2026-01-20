@@ -1,119 +1,135 @@
 {% extends "gov/base_gov.html" %}
 
-{% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a></li>
-            <li class="breadcrumb-item active">MFN Analysis</li>
-        </ol>
-    </nav>
+{% block title %}MFN Analysis - DrugWatch{% endblock %}
 
-    <h2 class="mb-4">
-        <i class="bi bi-globe me-2"></i>Most Favored Nation (MFN) Pricing Analysis
-        <span class="badge bg-primary ms-2">Government Only</span>
-    </h2>
+{% block content %}
+<!-- Page Header -->
+<div class="page-header page-header--drugwatch">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.drugwatch_home') }}">DrugWatch</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>MFN Analysis</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-globe"></i> Most Favored Nation (MFN) Pricing Analysis
+        </h1>
+        <p class="page-subtitle">
+            Government-only analysis of international drug pricing savings
+        </p>
+    </div>
+</div>
+
+<div class="container container-xl">
+    <!-- Summary Stats -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">$275.9B</div>
+                <div class="stat-card-label">Current Medicare Part D (2023)</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">~$95.9B</div>
+                <div class="stat-card-label">Est. MFN Spending</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">$180B</div>
+                <div class="stat-card-label">Potential Annual Savings</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--primary);">
+                <div class="stat-card-value" style="color: var(--primary);">65%</div>
+                <div class="stat-card-label">Average Price Reduction</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Search Box -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="{{ url_for('gov.drugwatch_mfn') }}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label">Search Drugs</label>
-                    <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="Search by brand or generic name...">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Show</label>
-                    <select class="form-select" name="limit">
-                        <option value="25" {% if limit == 25 %}selected{% endif %}>25</option>
-                        <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
-                        <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
-                        <option value="200" {% if limit == 200 %}selected{% endif %}>200</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
-                </div>
-                {% if search %}
-                <div class="col-md-2">
-                    <a href="{{ url_for('gov.drugwatch_mfn') }}" class="btn btn-outline-secondary w-100">Clear</a>
-                </div>
-                {% endif %}
-            </form>
+    <section style="margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--drugwatch); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-search"></i> Search MFN Analysis
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('gov.drugwatch_mfn') }}" method="get" style="display: flex; gap: var(--spacing-3); align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
+                        <label class="form-label">Search Drugs</label>
+                        <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="Search by brand or generic name...">
+                    </div>
+                    <div class="form-group" style="min-width: 120px; margin: 0;">
+                        <label class="form-label">Show</label>
+                        <select class="form-select form-control" name="limit">
+                            <option value="25" {% if limit == 25 %}selected{% endif %}>25</option>
+                            <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
+                            <option value="200" {% if limit == 200 %}selected{% endif %}>200</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-drugwatch">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    {% if search %}
+                    <a href="{{ url_for('gov.drugwatch_mfn') }}" class="btn btn-outline">
+                        <i class="bi bi-x-lg"></i> Clear
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Results Info -->
-    <div class="alert alert-info mb-4">
-        <i class="bi bi-info-circle me-2"></i>
-        <strong>{{ total_drugs }}</strong> drugs found{% if search %} matching "{{ search }}"{% endif %}. Showing top {{ mfn_analysis | length }} by spending.
-    </div>
+    <section style="margin-bottom: var(--spacing-4);">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-3); align-items: center;">
+                <i class="bi bi-info-circle" style="font-size: var(--text-xl);"></i>
+                <div>
+                    <strong>{{ total_drugs }}</strong> drugs found{% if search %} matching "{{ search }}"{% endif %}.
+                    Showing top {{ mfn_analysis | length }} by spending.
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- What is MFN -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>What is MFN Pricing?</h5>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--info); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-question-circle"></i> What is MFN Pricing?
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <p style="margin-bottom: var(--spacing-3);">
+                    <strong>Most Favored Nation (MFN) pricing</strong> is a policy where the US would pay no more for drugs than
+                    the lowest price paid by other developed nations. Currently, Americans pay 2-3x more for the same medications
+                    compared to Canada, Australia, and the UK.
+                </p>
+                <p style="margin: 0;">
+                    This analysis compares Medicare Part D spending against international reference prices to estimate
+                    potential savings if MFN pricing were implemented.
+                </p>
+            </div>
         </div>
-        <div class="card-body">
-            <p>
-                <strong>Most Favored Nation (MFN) pricing</strong> is a policy where the US would pay no more for drugs than
-                the lowest price paid by other developed nations. Currently, Americans pay 2-3x more for the same medications
-                compared to Canada, Australia, and the UK.
-            </p>
-            <p class="mb-0">
-                This analysis compares Medicare Part D spending against international reference prices to estimate
-                potential savings if MFN pricing were implemented.
-            </p>
-        </div>
-    </div>
+    </section>
 
-    <!-- Summary Stats -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">$275.9B</h3>
-                    <p class="mb-0">Current US Medicare Part D Spending (2023)</p>
-                </div>
+    <!-- MFN Savings Table -->
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--drugwatch); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-graph-up"></i> MFN Savings by Drug
+                </h3>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">{{ mfn_analysis | length }} drugs shown</span>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">~$95.9B</h3>
-                    <p class="mb-0">Estimated MFN Spending</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">$180B</h3>
-                    <p class="mb-0">Potential Annual Savings</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body text-center">
-                    <h3 class="display-5">65%</h3>
-                    <p class="mb-0">Average Price Reduction</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- All Drugs MFN Analysis Table -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>MFN Savings by Drug</h5>
-            <span class="badge bg-secondary">{{ mfn_analysis | length }} drugs shown</span>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                <table class="table table-hover table-sm">
-                    <thead class="table-light sticky-top">
+            <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+                <table class="table" style="margin: 0;">
+                    <thead style="position: sticky; top: 0; background: var(--neutral-50); z-index: 1;">
                         <tr>
                             <th>#</th>
                             <th>Drug Name</th>
@@ -131,112 +147,128 @@
                         {% set savings = item.potential_savings | float %}
                         {% set savings_pct = ((savings / spending * 100) | round(0)) if spending > 0 else 0 %}
                         <tr>
-                            <td>{{ loop.index }}</td>
-                            <td><strong>{{ item.drug }}</strong></td>
-                            <td><small class="text-muted">{{ (item.generic or 'N/A')[:40] }}</small></td>
-                            <td class="text-danger">${{ "{:,.0f}".format(spending) }}</td>
-                            <td class="text-warning">${{ "{:,.0f}".format(mfn_spending) }}</td>
-                            <td class="text-success fw-bold">${{ "{:,.0f}".format(savings) }}</td>
-                            <td><span class="badge bg-success">{{ savings_pct | int }}%</span></td>
+                            <td><strong>{{ loop.index }}</strong></td>
+                            <td><strong style="color: var(--neutral-900);">{{ item.drug }}</strong></td>
+                            <td><span style="color: var(--neutral-600); font-size: var(--text-sm);">{{ (item.generic or 'N/A')[:40] }}</span></td>
+                            <td style="color: var(--error); font-weight: 600;">${{ "{:,.0f}".format(spending) }}</td>
+                            <td style="color: var(--warning);">${{ "{:,.0f}".format(mfn_spending) }}</td>
+                            <td style="color: var(--success); font-weight: 700;">${{ "{:,.0f}".format(savings) }}</td>
+                            <td><span class="badge badge-success">{{ savings_pct | int }}%</span></td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="7" class="text-center text-muted">No drugs found</td></tr>
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: var(--spacing-6); color: var(--neutral-500);">
+                                No drugs found
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- International Comparison -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-globe2 me-2"></i>International Price References</h5>
-        </div>
-        <div class="card-body">
-            <p class="text-muted mb-3">Sample of drugs with international pricing data from our reference countries:</p>
-            {% if intl_prices %}
-            <div class="table-responsive">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Drug</th>
-                            <th>Country</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in intl_prices[:20] %}
-                        <tr>
-                            <td>{{ p.get('drug_name', p.get('name', p.get('brand_name', 'N/A'))) }}</td>
-                            <td>
-                                {% if p.get('country') == 'Canada' %}
-                                <span class="badge bg-danger">Canada</span>
-                                {% elif p.get('country') == 'Australia' %}
-                                <span class="badge bg-warning text-dark">Australia</span>
-                                {% else %}
-                                <span class="badge bg-secondary">{{ p.get('country', 'International') }}</span>
-                                {% endif %}
-                            </td>
-                            <td>${{ "%.2f" | format(p.get('price', p.get('price_per_unit_usd', 0)) | float) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--primary); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-globe2"></i> International Price References
+                </h3>
             </div>
-            {% else %}
-            <p class="text-muted">No international pricing data loaded.</p>
-            {% endif %}
+            <div style="padding: var(--spacing-5);">
+                <p style="color: var(--neutral-600); margin-bottom: var(--spacing-4);">
+                    Sample of drugs with international pricing data from our reference countries:
+                </p>
+                {% if intl_prices %}
+                <div class="table-container">
+                    <table class="table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Drug</th>
+                                <th>Country</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in intl_prices[:20] %}
+                            <tr>
+                                <td>{{ p.get('drug_name', p.get('name', p.get('brand_name', 'N/A'))) }}</td>
+                                <td>
+                                    {% if p.get('country') == 'Canada' %}
+                                    <span class="badge" style="background: var(--error); color: white;">Canada</span>
+                                    {% elif p.get('country') == 'Australia' %}
+                                    <span class="badge" style="background: var(--warning); color: var(--neutral-900);">Australia</span>
+                                    {% else %}
+                                    <span class="badge" style="background: var(--neutral-300); color: var(--neutral-700);">{{ p.get('country', 'International') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="color: var(--success);">${{ "%.2f" | format(p.get('price', p.get('price_per_unit_usd', 0)) | float) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p style="color: var(--neutral-500); margin: 0;">No international pricing data loaded.</p>
+                {% endif %}
+            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Policy Impact -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Benefits of MFN</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--success); padding: var(--spacing-4);">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-check-circle"></i> Benefits of MFN
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Reduce Medicare spending by ~$180B annually</li>
-                        <li>Lower out-of-pocket costs for seniors</li>
-                        <li>Reduce Part D premium growth</li>
-                        <li>Improve medication adherence (lower costs = better compliance)</li>
-                        <li>Level playing field with other developed nations</li>
+                <div style="padding: var(--spacing-5);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4);">
+                        <li style="margin-bottom: var(--spacing-2);">Reduce Medicare spending by ~$180B annually</li>
+                        <li style="margin-bottom: var(--spacing-2);">Lower out-of-pocket costs for seniors</li>
+                        <li style="margin-bottom: var(--spacing-2);">Reduce Part D premium growth</li>
+                        <li style="margin-bottom: var(--spacing-2);">Improve medication adherence (lower costs = better compliance)</li>
+                        <li style="margin: 0;">Level playing field with other developed nations</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--warning); padding: var(--spacing-4);">
+                    <h3 style="color: var(--neutral-900); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-exclamation-triangle"></i> Considerations
+                    </h3>
+                </div>
+                <div style="padding: var(--spacing-5);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4);">
+                        <li style="margin-bottom: var(--spacing-2);">Potential impact on pharmaceutical R&D investment</li>
+                        <li style="margin-bottom: var(--spacing-2);">Implementation complexity with existing contracts</li>
+                        <li style="margin-bottom: var(--spacing-2);">Industry lobbying and political resistance</li>
+                        <li style="margin-bottom: var(--spacing-2);">International reference pricing methodology debates</li>
+                        <li style="margin: 0;">Phase-in period requirements</li>
                     </ul>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Considerations</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Potential impact on pharmaceutical R&D investment</li>
-                        <li>Implementation complexity with existing contracts</li>
-                        <li>Industry lobbying and political resistance</li>
-                        <li>International reference pricing methodology debates</li>
-                        <li>Phase-in period requirements</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- Methodology -->
-    <div class="card bg-light">
-        <div class="card-body">
-            <h6><i class="bi bi-info-circle me-2"></i>Methodology</h6>
-            <p class="small mb-0">
-                MFN savings estimates are calculated by comparing US Medicare Part D prices to the lowest available
-                price among reference countries (Canada, Australia, UK). The 65% average reduction is based on
-                published studies comparing drug prices across OECD nations. Actual savings would depend on
-                implementation details, drug selection, and negotiation outcomes.
-            </p>
+    <section class="section-sm">
+        <div class="card" style="background: var(--neutral-100); border: none;">
+            <div style="padding: var(--spacing-4);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-2);">
+                    <i class="bi bi-info-circle"></i> Methodology
+                </h4>
+                <p style="font-size: var(--text-sm); color: var(--neutral-600); margin: 0;">
+                    MFN savings estimates are calculated by comparing US Medicare Part D prices to the lowest available
+                    price among reference countries (Canada, Australia, UK). The 65% average reduction is based on
+                    published studies comparing drug prices across OECD nations. Actual savings would depend on
+                    implementation details, drug selection, and negotiation outcomes.
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

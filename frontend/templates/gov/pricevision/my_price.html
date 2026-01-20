@@ -1,168 +1,184 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}Check My Price - PriceVision{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.pricevision_home') }}">PriceVision</a></li>
-            <li class="breadcrumb-item active">Check My Price</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header page-header--pricevision">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.pricevision_home') }}">PriceVision</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>Check My Price</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-calculator"></i> Check My Price
+        </h1>
+        <p class="page-subtitle">
+            Enter a procedure and the price you were quoted to see how it compares to market rates
+        </p>
+    </div>
+</div>
 
-    <h2 class="mb-4">
-        <i class="bi bi-calculator me-2 text-warning"></i>Check My Price
-    </h2>
-    <p class="text-muted mb-4">Enter a procedure and the price you were quoted to see how it compares to market rates.</p>
-
+<div class="container container-xl">
     <!-- Input Form -->
-    <div class="card mb-4 shadow-sm border-0">
-        <div class="card-body">
-            <form action="{{ url_for('gov.pricevision_my_price') }}" method="get" id="priceForm">
-                <div class="row g-3">
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label fw-semibold">Procedure Code <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-clipboard2-pulse"></i></span>
-                            <input type="text" class="form-control form-control-lg" name="procedure" value="{{ query }}"
-                                   placeholder="e.g., 70551" required>
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--pricevision); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-search"></i> Enter Your Price Quote
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <form action="{{ url_for('gov.pricevision_my_price') }}" method="get" id="priceForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 150px 1fr; gap: var(--spacing-4); align-items: end;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Procedure Code <span style="color: var(--error);">*</span></label>
+                            <input type="text" class="form-control" name="procedure" value="{{ query }}"
+                                   placeholder="e.g., 70551" required style="font-size: var(--text-lg);">
+                            <small style="color: var(--neutral-500);">HCPCS code or search term</small>
                         </div>
-                        <small class="text-muted">HCPCS code or search term</small>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label fw-semibold">Your Quoted Price <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-success text-white">$</span>
-                            <input type="text" class="form-control form-control-lg" name="price" value="{{ user_price }}"
-                                   placeholder="e.g., 1500" required id="priceInput">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Your Quoted Price <span style="color: var(--error);">*</span></label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--success); font-weight: 600;">$</span>
+                                <input type="text" class="form-control" name="price" value="{{ user_price }}"
+                                       placeholder="e.g., 1500" required style="padding-left: 28px; font-size: var(--text-lg);">
+                            </div>
+                            <small style="color: var(--neutral-500);">The price you were quoted</small>
                         </div>
-                        <small class="text-muted">The price you were quoted</small>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">State</label>
+                            <select name="state" class="form-control">
+                                <option value="">All States</option>
+                                {% for s in states %}
+                                <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                            <small style="color: var(--neutral-500);">Filter by state</small>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Hospital (Optional)</label>
+                            <input type="text" class="form-control" name="hospital" value="{{ hospital_name }}"
+                                   placeholder="For reference">
+                            <small style="color: var(--neutral-500);">For your records</small>
+                        </div>
                     </div>
-                    <div class="col-6 col-lg-3">
-                        <label class="form-label fw-semibold">State</label>
-                        <select name="state" class="form-select form-select-lg">
-                            <option value="">All States</option>
-                            {% for s in states %}
-                            <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
-                            {% endfor %}
-                        </select>
-                        <small class="text-muted">Filter by state</small>
-                    </div>
-                    <div class="col-6 col-lg-3">
-                        <label class="form-label fw-semibold">Hospital</label>
-                        <input type="text" class="form-control form-control-lg" name="hospital" value="{{ hospital_name }}"
-                               placeholder="Optional">
-                        <small class="text-muted">For reference</small>
-                    </div>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <button class="btn btn-warning btn-lg px-5" type="submit" id="checkBtn">
-                            <span class="spinner-border spinner-border-sm d-none me-2" id="checkSpinner"></span>
-                            <i class="bi bi-search me-2" id="checkIcon"></i>Check My Price
+                    <div style="margin-top: var(--spacing-4);">
+                        <button class="btn btn-pricevision btn-lg" type="submit" id="checkBtn">
+                            <i class="bi bi-search"></i> Check My Price
                         </button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
 
     {% if analysis %}
     <!-- Analysis Results -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card h-100 border-{{ analysis.verdict_class }}">
-                <div class="card-header bg-{{ analysis.verdict_class }} {% if analysis.verdict_class in ['warning', 'info'] %}text-dark{% else %}text-white{% endif %}">
-                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Price Analysis</h5>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+            <!-- Price Analysis Card -->
+            <div class="card" style="overflow: hidden; border: 2px solid {% if analysis.verdict_class == 'success' %}var(--success){% elif analysis.verdict_class == 'warning' %}var(--warning){% elif analysis.verdict_class == 'danger' %}var(--error){% else %}var(--info){% endif %};">
+                <div style="background: {% if analysis.verdict_class == 'success' %}var(--success){% elif analysis.verdict_class == 'warning' %}var(--warning){% elif analysis.verdict_class == 'danger' %}var(--error){% else %}var(--info){% endif %}; padding: var(--spacing-4);">
+                    <h3 style="color: {% if analysis.verdict_class == 'warning' %}var(--neutral-900){% else %}white{% endif %}; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-graph-up"></i> Price Analysis
+                    </h3>
                 </div>
-                <div class="card-body text-center">
-                    <h1 class="display-4 text-{{ analysis.verdict_class }} mb-3">{{ analysis.verdict }}</h1>
-                    <p class="lead">{{ analysis.explanation }}</p>
+                <div style="padding: var(--spacing-6); text-align: center;">
+                    <div style="font-size: var(--text-4xl); font-weight: 800; color: {% if analysis.verdict_class == 'success' %}var(--success){% elif analysis.verdict_class == 'warning' %}var(--warning){% elif analysis.verdict_class == 'danger' %}var(--error){% else %}var(--info){% endif %}; margin-bottom: var(--spacing-3);">
+                        {{ analysis.verdict }}
+                    </div>
+                    <p style="font-size: var(--text-lg); margin-bottom: var(--spacing-4);">{{ analysis.explanation }}</p>
 
-                    <div class="row text-center mt-4">
-                        <div class="col-6">
-                            <h4>${{ "{:,.0f}".format(analysis.user_price) }}</h4>
-                            <small class="text-muted">Your Price</small>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4); text-align: center; margin: var(--spacing-4) 0;">
+                        <div>
+                            <div style="font-size: var(--text-2xl); font-weight: 700;">${{ "{:,.0f}".format(analysis.user_price) }}</div>
+                            <small style="color: var(--neutral-500);">Your Price</small>
                         </div>
-                        <div class="col-6">
-                            <h4>${{ "{:,.0f}".format(market_stats.mean) }}</h4>
-                            <small class="text-muted">Market Average</small>
+                        <div>
+                            <div style="font-size: var(--text-2xl); font-weight: 700;">${{ "{:,.0f}".format(market_stats.mean) }}</div>
+                            <small style="color: var(--neutral-500);">Market Average</small>
                         </div>
                     </div>
 
                     {% if analysis.potential_savings > 0 %}
-                    <div class="alert alert-info mt-4">
-                        <i class="bi bi-piggy-bank me-2"></i>
+                    <div class="alert alert-info" style="margin-top: var(--spacing-4);">
+                        <i class="bi bi-piggy-bank"></i>
                         <strong>Potential Savings:</strong> Up to ${{ "{:,.0f}".format(analysis.potential_savings) }} if you shop around
                     </div>
                     {% endif %}
 
                     <!-- Gov-only: Advanced Metrics -->
-                    <div class="row mt-4 border-top pt-3">
-                        <div class="col-4">
-                            <h5>{{ "{:.1f}".format(analysis.fairness_score) }}</h5>
-                            <small class="text-muted">Fairness Score</small>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-3); margin-top: var(--spacing-4); padding-top: var(--spacing-4); border-top: 1px solid var(--neutral-200);">
+                        <div>
+                            <div style="font-size: var(--text-xl); font-weight: 700;">{{ "{:.1f}".format(analysis.fairness_score) }}</div>
+                            <small style="color: var(--neutral-500);">Fairness Score</small>
                         </div>
-                        <div class="col-4">
-                            <h5>{{ analysis.z_score }}</h5>
-                            <small class="text-muted">Z-Score</small>
+                        <div>
+                            <div style="font-size: var(--text-xl); font-weight: 700;">{{ analysis.z_score }}</div>
+                            <small style="color: var(--neutral-500);">Z-Score</small>
                         </div>
-                        <div class="col-4">
-                            <h5>{{ analysis.percentile }}%</h5>
-                            <small class="text-muted">Percentile</small>
+                        <div>
+                            <div style="font-size: var(--text-xl); font-weight: 700;">{{ analysis.percentile }}%</div>
+                            <small style="color: var(--neutral-500);">Percentile</small>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Market Statistics</h5>
+            <!-- Market Statistics Card -->
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <i class="bi bi-bar-chart" style="color: var(--pricevision);"></i> Market Statistics
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div style="padding: var(--spacing-5);">
                     {% if procedures %}
-                    <p class="text-muted mb-3">
-                        <strong>Procedure:</strong> {{ procedures[0].get('canonical_description', query) }}
-                        <br><span class="badge bg-primary">{{ procedures[0].get('hcpcs_code', query) }}</span>
-                        {% if state %}<span class="badge bg-secondary ms-1">{{ state }}</span>{% endif %}
-                    </p>
+                    <div style="margin-bottom: var(--spacing-4);">
+                        <strong>{{ procedures[0].get('canonical_description', query) }}</strong>
+                        <br>
+                        <span class="badge" style="background: var(--primary); color: white; margin-top: var(--spacing-1);">{{ procedures[0].get('hcpcs_code', query) }}</span>
+                        {% if state %}<span class="badge" style="background: var(--neutral-200); color: var(--neutral-700); margin-left: var(--spacing-1);">{{ state }}</span>{% endif %}
+                    </div>
                     {% endif %}
 
-                    <table class="table table-sm">
-                        <tr>
-                            <td>Lowest Price</td>
-                            <td class="text-end text-success fw-bold">${{ "{:,.0f}".format(market_stats.min) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Average Price</td>
-                            <td class="text-end">${{ "{:,.0f}".format(market_stats.mean) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Median Price</td>
-                            <td class="text-end">${{ "{:,.0f}".format(market_stats.median) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Highest Price</td>
-                            <td class="text-end text-danger">${{ "{:,.0f}".format(market_stats.max) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Price Variation (Std Dev)</td>
-                            <td class="text-end">${{ "{:,.0f}".format(market_stats.std) }}</td>
-                        </tr>
-                        <tr class="table-light">
-                            <td><strong>Sample Size</strong></td>
-                            <td class="text-end"><strong>{{ market_stats.sample_size }} hospitals</strong></td>
-                        </tr>
-                    </table>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-2);">
+                        <div style="display: flex; justify-content: space-between; padding: var(--spacing-2) 0; border-bottom: 1px solid var(--neutral-100);">
+                            <span>Lowest Price</span>
+                            <span style="color: var(--success); font-weight: 700;">${{ "{:,.0f}".format(market_stats.min) }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: var(--spacing-2) 0; border-bottom: 1px solid var(--neutral-100);">
+                            <span>Average Price</span>
+                            <span style="font-weight: 600;">${{ "{:,.0f}".format(market_stats.mean) }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: var(--spacing-2) 0; border-bottom: 1px solid var(--neutral-100);">
+                            <span>Median Price</span>
+                            <span style="font-weight: 600;">${{ "{:,.0f}".format(market_stats.median) }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: var(--spacing-2) 0; border-bottom: 1px solid var(--neutral-100);">
+                            <span>Highest Price</span>
+                            <span style="color: var(--error); font-weight: 700;">${{ "{:,.0f}".format(market_stats.max) }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: var(--spacing-2) 0; border-bottom: 1px solid var(--neutral-100);">
+                            <span>Price Variation (Std Dev)</span>
+                            <span>${{ "{:,.0f}".format(market_stats.std) }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: var(--spacing-2) 0; background: var(--neutral-50); margin: 0 calc(var(--spacing-2) * -1); padding-left: var(--spacing-2); padding-right: var(--spacing-2); border-radius: var(--radius-md);">
+                            <strong>Sample Size</strong>
+                            <strong>{{ market_stats.sample_size }} hospitals</strong>
+                        </div>
+                    </div>
 
-                    <div class="mt-3">
-                        <small class="text-muted">Your price is higher than {{ analysis.percentile }}% of hospitals</small>
-                        <div class="progress mt-2" style="height: 25px;">
-                            <div class="progress-bar bg-{{ analysis.verdict_class }}" role="progressbar"
-                                 style="width: {{ analysis.percentile }}%;"
-                                 aria-valuenow="{{ analysis.percentile }}" aria-valuemin="0" aria-valuemax="100">
+                    <div style="margin-top: var(--spacing-4);">
+                        <small style="color: var(--neutral-500);">Your price is higher than {{ analysis.percentile }}% of hospitals</small>
+                        <div style="height: 24px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden; margin-top: var(--spacing-2);">
+                            <div style="height: 100%; width: {{ analysis.percentile }}%; background: {% if analysis.verdict_class == 'success' %}var(--success){% elif analysis.verdict_class == 'warning' %}var(--warning){% elif analysis.verdict_class == 'danger' %}var(--error){% else %}var(--info){% endif %}; display: flex; align-items: center; justify-content: center; color: white; font-size: var(--text-sm); font-weight: 600;">
                                 {{ analysis.percentile }}%
                             </div>
                         </div>
@@ -170,122 +186,118 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Comparison Table -->
     {% if prices %}
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Hospital Price Comparison</h5>
-            <span class="badge bg-secondary">{{ prices | length }} hospitals</span>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Hospital</th>
-                            <th>Location</th>
-                            <th>Cash Price</th>
-                            <th>vs Your Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in prices %}
-                        {% set cash = p.get('cash_price', 0) | float %}
-                        {% set diff = analysis.user_price - cash %}
-                        <tr>
-                            <td>
-                                <a href="{{ url_for('gov.pricevision_hospital', npi=p.get('hospital_npi', '')) }}">
-                                    {{ p.get('hospital_name', 'Unknown') }}
-                                </a>
-                            </td>
-                            <td>{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</td>
-                            <td class="fw-bold">${{ "{:,.0f}".format(cash) if cash else 'N/A' }}</td>
-                            <td>
-                                {% if diff > 0 %}
-                                <span class="text-success">-${{ "{:,.0f}".format(diff) }}</span>
-                                <small class="text-muted">(save {{ "{:.0f}".format((diff/analysis.user_price)*100) }}%)</small>
-                                {% elif diff < 0 %}
-                                <span class="text-danger">+${{ "{:,.0f}".format(-diff) }}</span>
-                                {% else %}
-                                <span class="text-muted">Same price</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-hospital" style="color: var(--pricevision);"></i> Hospital Price Comparison
+                </h3>
+                <span class="badge" style="background: var(--pricevision); color: white;">{{ prices | length }} hospitals</span>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Hospital</th>
+                                <th>Location</th>
+                                <th>Cash Price</th>
+                                <th>vs Your Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in prices %}
+                            {% set cash = p.get('cash_price', 0) | float %}
+                            {% set diff = analysis.user_price - cash %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('gov.pricevision_hospital', npi=p.get('hospital_npi', '')) }}" style="font-weight: 600; color: var(--neutral-900);">
+                                        {{ p.get('hospital_name', 'Unknown') }}
+                                    </a>
+                                </td>
+                                <td>{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</td>
+                                <td style="font-weight: 700;">${{ "{:,.0f}".format(cash) if cash else 'N/A' }}</td>
+                                <td>
+                                    {% if diff > 0 %}
+                                    <span style="color: var(--success); font-weight: 600;">-${{ "{:,.0f}".format(diff) }}</span>
+                                    <small style="color: var(--neutral-500);">(save {{ "{:.0f}".format((diff/analysis.user_price)*100) }}%)</small>
+                                    {% elif diff < 0 %}
+                                    <span style="color: var(--error); font-weight: 600;">+${{ "{:,.0f}".format(-diff) }}</span>
+                                    {% else %}
+                                    <span style="color: var(--neutral-500);">Same price</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     {% elif query and user_price %}
     <!-- No data found -->
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <strong>No pricing data found</strong> for procedure "{{ query }}"{% if state %} in {{ state }}{% endif %}.
-        Try a different procedure code or remove the state filter.
-    </div>
+    <section class="section-sm">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>No pricing data found</strong> for procedure "{{ query }}"{% if state %} in {{ state }}{% endif %}.
+            Try a different procedure code or remove the state filter.
+        </div>
+    </section>
 
     {% else %}
     <!-- Initial state - show examples -->
-    <div class="card">
-        <div class="card-body text-center py-5">
-            <i class="bi bi-calculator display-4 text-muted mb-3"></i>
-            <h5>How It Works</h5>
-            <p class="text-muted">Enter a procedure code and the price you were quoted to see how it compares to market rates.</p>
+    <section class="section-sm">
+        <div class="card" style="text-align: center; padding: var(--spacing-8);">
+            <i class="bi bi-calculator" style="font-size: 4rem; color: var(--pricevision); display: block; margin-bottom: var(--spacing-4);"></i>
+            <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--spacing-3);">How It Works</h3>
+            <p style="color: var(--neutral-500); margin-bottom: var(--spacing-6);">Enter a procedure code and the price you were quoted to see how it compares to market rates.</p>
 
-            <div class="row mt-4 justify-content-center">
-                <div class="col-md-8">
-                    <div class="alert alert-light border">
-                        <h6>Example Searches:</h6>
-                        <a href="{{ url_for('gov.pricevision_my_price', procedure='70551', price='2500') }}" class="btn btn-outline-warning btn-sm me-2 mb-2">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div class="card" style="background: var(--neutral-50); padding: var(--spacing-4);">
+                    <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">Example Searches</h4>
+                    <div style="display: flex; gap: var(--spacing-2); justify-content: center; flex-wrap: wrap;">
+                        <a href="{{ url_for('gov.pricevision_my_price', procedure='70551', price='2500') }}" class="btn btn-sm btn-outline" style="border-color: var(--pricevision); color: var(--pricevision);">
                             MRI Brain @ $2,500
                         </a>
-                        <a href="{{ url_for('gov.pricevision_my_price', procedure='27447', price='35000') }}" class="btn btn-outline-warning btn-sm me-2 mb-2">
+                        <a href="{{ url_for('gov.pricevision_my_price', procedure='27447', price='35000') }}" class="btn btn-sm btn-outline" style="border-color: var(--pricevision); color: var(--pricevision);">
                             Knee Replacement @ $35,000
                         </a>
-                        <a href="{{ url_for('gov.pricevision_my_price', procedure='43239', price='3000') }}" class="btn btn-outline-warning btn-sm mb-2">
+                        <a href="{{ url_for('gov.pricevision_my_price', procedure='43239', price='3000') }}" class="btn btn-sm btn-outline" style="border-color: var(--pricevision); color: var(--pricevision);">
                             Colonoscopy @ $3,000
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- Info Card -->
-    <div class="card bg-light mt-4 border-0">
-        <div class="card-body">
-            <h6><i class="bi bi-info-circle me-2"></i>About Price Comparison</h6>
-            <div class="row">
-                <div class="col-md-6">
-                    <ul class="mb-0 small">
-                        <li><strong>Data Source:</strong> Hospital price transparency files required by CMS</li>
-                        <li><strong>Fair Price:</strong> Within 0.5 standard deviations of the market average</li>
-                        <li><strong>Good Price:</strong> Below average but not significantly discounted</li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    <ul class="mb-0 small">
-                        <li><strong>Overpriced:</strong> More than 1.5 standard deviations above average</li>
-                        <li><strong>Great Deal:</strong> More than 1.5 standard deviations below average</li>
-                        <li>Prices shown are cash/self-pay rates - insurance rates may differ</li>
-                    </ul>
-                </div>
+    <section class="section-sm">
+        <div class="card" style="padding: var(--spacing-4); background: var(--neutral-50);">
+            <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">
+                <i class="bi bi-info-circle"></i> About Price Comparison
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                <ul style="font-size: var(--text-sm); margin: 0; padding-left: var(--spacing-4);">
+                    <li style="margin-bottom: var(--spacing-1);"><strong>Data Source:</strong> Hospital price transparency files required by CMS</li>
+                    <li style="margin-bottom: var(--spacing-1);"><strong>Fair Price:</strong> Within 0.5 standard deviations of the market average</li>
+                    <li><strong>Good Price:</strong> Below average but not significantly discounted</li>
+                </ul>
+                <ul style="font-size: var(--text-sm); margin: 0; padding-left: var(--spacing-4);">
+                    <li style="margin-bottom: var(--spacing-1);"><strong>Overpriced:</strong> More than 1.5 standard deviations above average</li>
+                    <li style="margin-bottom: var(--spacing-1);"><strong>Great Deal:</strong> More than 1.5 standard deviations below average</li>
+                    <li>Prices shown are cash/self-pay rates - insurance rates may differ</li>
+                </ul>
             </div>
         </div>
-    </div>
+    </section>
 </div>
-
-<script>
-document.getElementById('priceForm').addEventListener('submit', function() {
-    document.getElementById('checkSpinner').classList.remove('d-none');
-    document.getElementById('checkIcon').classList.add('d-none');
-    document.getElementById('checkBtn').disabled = true;
-});
-</script>
 {% endblock %}
