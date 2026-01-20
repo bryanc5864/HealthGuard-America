@@ -55,35 +55,51 @@ def extract_ml_features(county_data: dict) -> dict:
         except (ValueError, TypeError):
             return default
 
+    def to_per_100k(value):
+        """Convert per-capita rate to per-100k if needed."""
+        val = safe_float(value)
+        # If value < 1, it's likely per-capita; convert to per-100k
+        if 0 < val < 1:
+            return val * 100000
+        return val
+
+    def to_percentage(value):
+        """Convert decimal to percentage if needed."""
+        val = safe_float(value)
+        # If value < 1, it's likely a decimal; convert to percentage
+        if 0 < val < 1:
+            return val * 100
+        return val
+
     features = {
         # Food environment features
         'grocery_stores_per_1000': safe_float(county_data.get('grocery_stores_per_1000')),
         'fast_food_restaurants_per_1000': safe_float(county_data.get('fast_food_restaurants_per_1000')),
         'food_environment_index': safe_float(county_data.get('food_environment_index')),
-        'food_insecurity_rate': safe_float(county_data.get('food_insecurity_rate')),
-        'pct_limited_food_access': safe_float(county_data.get('pct_limited_food_access')),
+        'food_insecurity_rate': to_percentage(county_data.get('food_insecurity_rate')),
+        'pct_limited_food_access': to_percentage(county_data.get('pct_limited_food_access')),
 
-        # Healthcare features
-        'pcp_rate': safe_float(county_data.get('pcp_rate')),
-        'mental_health_provider_rate': safe_float(county_data.get('mental_health_provider_rate')),
-        'pct_uninsured': safe_float(county_data.get('pct_uninsured')),
+        # Healthcare features - convert per-capita to per-100k
+        'pcp_rate': to_per_100k(county_data.get('pcp_rate')),
+        'mental_health_provider_rate': to_per_100k(county_data.get('mental_health_provider_rate')),
+        'pct_uninsured': to_percentage(county_data.get('pct_uninsured')),
         'preventable_hospitalizations': safe_float(county_data.get('preventable_hospitalizations')),
 
         # Socioeconomic features
         'median_household_income': safe_float(county_data.get('median_household_income')),
-        'child_poverty_rate': safe_float(county_data.get('child_poverty_rate')),
+        'child_poverty_rate': to_percentage(county_data.get('child_poverty_rate')),
         'income_inequality_ratio': safe_float(county_data.get('income_inequality_ratio')),
-        'high_school_graduation_rate': safe_float(county_data.get('high_school_graduation_rate')),
-        'pct_some_college': safe_float(county_data.get('pct_some_college')),
+        'high_school_graduation_rate': to_percentage(county_data.get('high_school_graduation_rate')),
+        'pct_some_college': to_percentage(county_data.get('pct_some_college')),
 
         # Behavioral features
-        'physical_inactivity_prevalence': safe_float(county_data.get('physical_inactivity_prevalence')),
-        'excessive_drinking_prevalence': safe_float(county_data.get('excessive_drinking_prevalence')),
-        'smoking_prevalence': safe_float(county_data.get('smoking_prevalence')),
-        'pct_insufficient_sleep': safe_float(county_data.get('pct_insufficient_sleep')),
+        'physical_inactivity_prevalence': to_percentage(county_data.get('physical_inactivity_prevalence')),
+        'excessive_drinking_prevalence': to_percentage(county_data.get('excessive_drinking_prevalence')),
+        'smoking_prevalence': to_percentage(county_data.get('smoking_prevalence')),
+        'pct_insufficient_sleep': to_percentage(county_data.get('pct_insufficient_sleep')),
 
         # Demographics
-        'pct_rural': safe_float(county_data.get('pct_rural')),
+        'pct_rural': to_percentage(county_data.get('pct_rural')),
 
         # Disease burden (for MAHA index calculation)
         'chronic_disease_burden_score': safe_float(county_data.get('chronic_disease_burden_score')),

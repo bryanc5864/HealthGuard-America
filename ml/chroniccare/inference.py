@@ -68,15 +68,17 @@ class ChronicRiskService:
             logger.error(f"Failed to load ChronicRiskService: {e}")
             return False
 
-    # Target scaling parameters (based on US national averages and ranges)
-    # Model outputs need rescaling to valid percentage ranges
-    TARGET_RANGES = {
-        'diabetes_prevalence': (5.0, 20.0, 11.0),      # min, max, mean
-        'obesity_prevalence': (20.0, 50.0, 32.0),      # min, max, mean
-        'heart_disease_prevalence': (3.0, 15.0, 6.5),  # min, max, mean
-        'high_bp_prevalence': (25.0, 45.0, 33.0),      # min, max, mean
-        'copd_prevalence': (4.0, 15.0, 6.5),           # min, max, mean
-        'depression_prevalence': (15.0, 30.0, 20.0),   # min, max, mean
+    # Scaling parameters for inverse sqrt mapping of raw model outputs
+    # Raw outputs are INVERSELY correlated with prevalence (higher raw = healthier)
+    # Format: (sqrt_scale, min_prevalence, max_prevalence)
+    # Formula: prevalence = sqrt_scale / sqrt(raw), clamped to [min, max]
+    SCALING_PARAMS = {
+        'diabetes_prevalence': (1500, 7.0, 20.0),       # raw 5k-22k → 7-20%
+        'obesity_prevalence': (5500, 25.0, 45.0),       # raw 20k-76k → 25-45%
+        'heart_disease_prevalence': (900, 4.0, 12.0),   # raw 3k-13k → 4-12%
+        'high_bp_prevalence': (5200, 28.0, 45.0),       # raw 20k-76k → 28-45%
+        'copd_prevalence': (750, 4.0, 12.0),            # raw 3k-12k → 4-12%
+        'depression_prevalence': (3800, 15.0, 28.0),    # raw 15k-59k → 15-28%
     }
 
     def predict(self, features: Dict[str, float]) -> Dict[str, float]:
@@ -103,16 +105,15 @@ class ChronicRiskService:
 
         raw_predictions = self.model.predict(X_tensor)
 
-        # Scale predictions to valid percentage ranges
-        # Model outputs raw values that need normalization
+        # Scale predictions using inverse sqrt mapping
+        # Higher raw output = healthier = lower disease prevalence
         scaled_predictions = {}
         for name, pred in raw_predictions.items():
             raw_val = float(pred[0])
-            if name in self.TARGET_RANGES:
-                min_val, max_val, mean_val = self.TARGET_RANGES[name]
-                # Use sigmoid-like scaling to map raw output to valid range
-                # Normalize around expected mean, then clamp to range
-                scaled = mean_val + (raw_val / 1000.0)  # Scale down large values
+            if name in self.SCALING_PARAMS and raw_val > 0:
+                sqrt_scale, min_val, max_val = self.SCALING_PARAMS[name]
+                # Inverse sqrt: prevalence = scale / sqrt(raw)
+                scaled = sqrt_scale / np.sqrt(raw_val)
                 scaled = max(min_val, min(max_val, scaled))
             else:
                 # Default: clamp to 0-100
@@ -152,14 +153,16 @@ class ChronicRiskService:
 
         raw_predictions = self.model.predict(X_tensor)
 
-        # Add scaled predictions to dataframe
+        # Add scaled predictions using inverse sqrt mapping (same as predict())
         result = df.copy()
         for name, preds in raw_predictions.items():
             raw_vals = preds.numpy()
-            if name in self.TARGET_RANGES:
-                min_val, max_val, mean_val = self.TARGET_RANGES[name]
-                # Scale down large values and clamp to valid range
-                scaled = mean_val + (raw_vals / 1000.0)
+            if name in self.SCALING_PARAMS:
+                sqrt_scale, min_val, max_val = self.SCALING_PARAMS[name]
+                # Inverse sqrt: prevalence = scale / sqrt(raw)
+                # Avoid division by zero
+                safe_raw = np.maximum(raw_vals, 1.0)
+                scaled = sqrt_scale / np.sqrt(safe_raw)
                 scaled = np.clip(scaled, min_val, max_val)
             else:
                 scaled = np.clip(raw_vals, 0, 100)
