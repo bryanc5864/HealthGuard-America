@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="page-header" style="background: linear-gradient(135deg, #166534, #22c55e);">
+<div class="page-header page-header--public">
     <div class="page-header-content">
         <div class="breadcrumb">
             <a href="{{ url_for('landing') }}">Home</a>
@@ -22,7 +22,7 @@
 
 <div class="container container-xl">
     <!-- Module Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--spacing-6); margin-top: calc(-1 * var(--spacing-16)); position: relative; z-index: 10;">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-6); margin-top: -4rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
         <!-- PriceVision -->
         <div class="module-card module-card--pricevision">
             <div class="module-card-image">
@@ -103,13 +103,13 @@
     </div>
 
     <!-- Stats Section -->
-    <section class="section">
-        <div style="text-align: center; margin-bottom: var(--spacing-8);">
-            <h2 style="font-size: var(--text-2xl); font-weight: 700;">Platform Statistics</h2>
-            <p class="text-muted">Real data powering your healthcare decisions</p>
+    <section class="section-sm">
+        <div style="text-align: center; margin-bottom: var(--spacing-6);">
+            <h2 style="font-size: var(--text-xl); font-weight: 700;">Platform Statistics</h2>
+            <p class="text-muted" style="font-size: var(--text-sm);">Real data powering your healthcare decisions</p>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
             <div class="stat-card stat-card--pricevision">
                 <div class="stat-card-value">30.2M</div>
                 <div class="stat-card-label">Price Records</div>
@@ -138,9 +138,9 @@
     </section>
 
     <!-- Quick Actions -->
-    <section class="section-sm" style="background: var(--neutral-100); border-radius: var(--radius-2xl); padding: var(--spacing-8);">
-        <div style="text-align: center; margin-bottom: var(--spacing-6);">
-            <h2 style="font-size: var(--text-xl); font-weight: 700;">Quick Actions</h2>
+    <section style="background: var(--neutral-100); border-radius: var(--radius-2xl); padding: var(--spacing-6); margin-top: var(--spacing-6);">
+        <div style="text-align: center; margin-bottom: var(--spacing-4);">
+            <h2 style="font-size: var(--text-lg); font-weight: 700;">Quick Actions</h2>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-4);">
@@ -195,12 +195,12 @@
     </section>
 
     <!-- Government Access CTA -->
-    <section class="section-sm" style="margin-top: var(--spacing-8);">
-        <div class="card" style="background: linear-gradient(135deg, var(--primary-900), var(--primary-700)); padding: var(--spacing-8); text-align: center;">
-            <h3 style="color: white; font-size: var(--text-xl); margin-bottom: var(--spacing-2);">
+    <section style="margin-top: var(--spacing-6);">
+        <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 40%, #8b3a3a 100%); padding: var(--spacing-6); text-align: center;">
+            <h3 style="color: white; font-size: var(--text-lg); margin-bottom: var(--spacing-2);">
                 Need More Data?
             </h3>
-            <p style="color: var(--primary-200); margin-bottom: var(--spacing-4);">
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: var(--spacing-4); font-size: var(--text-sm);">
                 Government officials can access RuralAccess and ChronicCare modules for comprehensive healthcare analytics.
             </p>
             <a href="{{ url_for('gov.login') }}" class="btn btn-white">

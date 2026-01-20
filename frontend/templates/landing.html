@@ -8,26 +8,22 @@
 
 {% block content %}
 <div class="hero hero-landing">
-    <!-- Background Pattern -->
-    <div style="position: absolute; inset: 0; opacity: 0.1; background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-
     <div class="hero-content" style="text-align: center;">
         <!-- Logo and Title -->
-        <div style="margin-bottom: var(--spacing-8);">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 24px; margin-bottom: var(--spacing-6);">
-                <i class="bi bi-shield-plus" style="font-size: 3rem; color: white;"></i>
+        <div style="margin-bottom: var(--spacing-4);">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; margin-bottom: var(--spacing-3);">
+                <i class="bi bi-shield-plus" style="font-size: 1.75rem; color: white;"></i>
             </div>
             <h1 class="hero-title">
                 HealthGuard <span>America</span>
             </h1>
-            <p class="hero-subtitle" style="max-width: 700px; margin: 0 auto;">
-                Healthcare Transparency & Analytics Platform. Empowering Americans with
-                data-driven insights for informed health decisions.
+            <p class="hero-subtitle" style="max-width: 500px; margin: 0 auto;">
+                Healthcare transparency and analytics platform for informed health decisions.
             </p>
         </div>
 
         <!-- Stats Row -->
-        <div class="hero-stats" style="justify-content: center; margin-bottom: var(--spacing-12);">
+        <div class="hero-stats" style="justify-content: center; margin-bottom: var(--spacing-6);">
             <div class="hero-stat">
                 <div class="hero-stat-value">30.2M</div>
                 <div class="hero-stat-label">Price Records</div>
@@ -50,7 +46,7 @@
         <div class="portal-cards">
             <!-- Public Portal -->
             <a href="{{ url_for('public.home') }}" class="portal-card">
-                <div class="portal-card-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                <div class="portal-card-icon">
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <h2 class="portal-card-title">Public Portal</h2>
@@ -59,24 +55,24 @@
                     find affordable medications, and check food health scores.
                 </p>
                 <div class="portal-card-modules">
-                    <span class="portal-card-badge" style="background: rgba(34, 197, 94, 0.2);">
+                    <span class="portal-card-badge">
                         <i class="bi bi-currency-dollar"></i> PriceVision
                     </span>
-                    <span class="portal-card-badge" style="background: rgba(239, 68, 68, 0.2);">
+                    <span class="portal-card-badge">
                         <i class="bi bi-capsule"></i> DrugWatch
                     </span>
-                    <span class="portal-card-badge" style="background: rgba(34, 197, 94, 0.2);">
+                    <span class="portal-card-badge">
                         <i class="bi bi-basket"></i> FoodScore
                     </span>
                 </div>
-                <div class="btn btn-white btn-lg" style="margin-top: var(--spacing-4);">
+                <div class="btn btn-white btn-sm" style="font-size: 14px; padding: 12px 24px;">
                     Enter Public Portal <i class="bi bi-arrow-right"></i>
                 </div>
             </a>
 
             <!-- Government Portal -->
             <a href="{{ url_for('gov.home') }}" class="portal-card">
-                <div class="portal-card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <div class="portal-card-icon">
                     <i class="bi bi-building-fill"></i>
                 </div>
                 <h2 class="portal-card-title">Government Portal</h2>
@@ -86,30 +82,30 @@
                 </p>
                 <div class="portal-card-modules">
                     <span class="portal-card-badge">All Public Tools</span>
-                    <span class="portal-card-badge" style="background: rgba(139, 92, 246, 0.2);">
+                    <span class="portal-card-badge">
                         <i class="bi bi-geo-alt"></i> RuralAccess
                     </span>
-                    <span class="portal-card-badge" style="background: rgba(6, 182, 212, 0.2);">
+                    <span class="portal-card-badge">
                         <i class="bi bi-activity"></i> ChronicCare
                     </span>
                 </div>
-                <div class="btn btn-white btn-lg" style="margin-top: var(--spacing-4);">
+                <div class="btn btn-white btn-sm" style="font-size: 14px; padding: 12px 24px;">
                     Enter Gov Portal <i class="bi bi-lock"></i>
                 </div>
             </a>
         </div>
 
         <!-- Data Sources -->
-        <div style="margin-top: var(--spacing-16); padding-top: var(--spacing-8); border-top: 1px solid rgba(255,255,255,0.1);">
-            <p style="color: var(--primary-300); font-size: var(--text-sm); margin-bottom: var(--spacing-4);">
+        <div style="margin-top: var(--spacing-12); padding-top: var(--spacing-4); border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="color: rgba(255,255,255,0.4); font-size: 11px; margin-bottom: var(--spacing-3); letter-spacing: 0.12em;">
                 POWERED BY OFFICIAL DATA SOURCES
             </p>
-            <div style="display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); flex-wrap: wrap; opacity: 0.7;">
-                <span style="color: white; font-weight: 500;">CMS</span>
-                <span style="color: white; font-weight: 500;">CDC PLACES</span>
-                <span style="color: white; font-weight: 500;">HRSA</span>
-                <span style="color: white; font-weight: 500;">FDA</span>
-                <span style="color: white; font-weight: 500;">Open Food Facts</span>
+            <div style="display: flex; justify-content: center; align-items: center; gap: var(--spacing-6); flex-wrap: wrap;">
+                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">CMS</span>
+                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">CDC PLACES</span>
+                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">HRSA</span>
+                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">FDA</span>
+                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">Open Food Facts</span>
             </div>
         </div>
     </div>
@@ -127,7 +123,7 @@
             </p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-6);">
             <!-- PriceVision -->
             <div class="module-card module-card--pricevision">
                 <div class="module-card-image">
@@ -206,8 +202,12 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- Bottom row - centered -->
+        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 1.5rem;">
             <!-- RuralAccess -->
-            <div class="module-card module-card--ruralaccess">
+            <div class="module-card module-card--ruralaccess" style="width: calc(33.333% - 1rem);">
                 <div class="module-card-image">
                     <img src="{{ url_for('static', filename='images/ruralaccess/rural-hospitals.jpg') }}" alt="Rural Healthcare">
                     <div class="module-card-overlay"></div>
@@ -233,7 +233,7 @@
             </div>
 
             <!-- ChronicCare -->
-            <div class="module-card module-card--chroniccare">
+            <div class="module-card module-card--chroniccare" style="width: calc(33.333% - 1rem);">
                 <div class="module-card-image">
                     <img src="{{ url_for('static', filename='images/chroniccare/healthcare.jpg') }}" alt="Healthcare Analytics">
                     <div class="module-card-overlay"></div>
@@ -262,12 +262,12 @@
 </section>
 
 <!-- CTA Section -->
-<section style="background: linear-gradient(135deg, var(--primary-900), var(--primary-700)); padding: var(--spacing-16) 0;">
+<section style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 40%, #8b3a3a 100%); padding: var(--spacing-16) 0;">
     <div class="container container-lg" style="text-align: center;">
         <h2 style="font-size: var(--text-3xl); font-weight: 800; color: white; margin-bottom: var(--spacing-4);">
             Make America Healthy Again
         </h2>
-        <p style="color: var(--primary-200); font-size: var(--text-lg); margin-bottom: var(--spacing-8); max-width: 600px; margin-left: auto; margin-right: auto;">
+        <p style="color: rgba(255, 255, 255, 0.6); font-size: var(--text-base); margin-bottom: var(--spacing-8); max-width: 550px; margin-left: auto; margin-right: auto;">
             Transparency is the first step toward a healthier nation.
             Start exploring healthcare data today.
         </p>
@@ -288,7 +288,7 @@
         <div class="footer-grid">
             <div>
                 <div class="footer-brand">
-                    <i class="bi bi-shield-plus"></i> HealthGuard America
+                    <i class="bi bi-shield-check"></i> HealthGuard America
                 </div>
                 <p class="footer-description">
                     Empowering Americans with transparent healthcare data.

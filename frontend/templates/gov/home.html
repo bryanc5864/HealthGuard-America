@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="page-header" style="background: linear-gradient(135deg, var(--primary-900), var(--primary-700));">
+<div class="page-header" style="background: linear-gradient(135deg, rgba(15, 30, 60, 0.9) 0%, rgba(20, 40, 75, 0.85) 50%, rgba(30, 58, 95, 0.9) 100%), url('{{ url_for('static', filename='images/gov/trump-healthcare-cabinet.webp') }}'); background-size: cover; background-position: center;">
     <div class="page-header-content">
         <div class="breadcrumb">
             <a href="{{ url_for('landing') }}">Home</a>
@@ -34,7 +34,7 @@
 
 <div class="container container-xl">
     <!-- Quick Stats -->
-    <section style="margin-top: calc(-1 * var(--spacing-12)); position: relative; z-index: 10;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
             <div class="stat-card stat-card--pricevision">
                 <div class="stat-card-value">30.2M</div>
@@ -64,13 +64,13 @@
     </section>
 
     <!-- Consumer-Facing Modules -->
-    <section class="section">
-        <div style="margin-bottom: var(--spacing-6);">
-            <h2 style="font-size: var(--text-xl); font-weight: 700;">Consumer-Facing Modules</h2>
-            <p class="text-muted">Core healthcare transparency tools available to the public</p>
+    <section class="section-sm">
+        <div style="margin-bottom: var(--spacing-4);">
+            <h2 style="font-size: var(--text-lg); font-weight: 700;">Consumer-Facing Modules</h2>
+            <p class="text-muted" style="font-size: var(--text-sm);">Core healthcare transparency tools available to the public</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
             <!-- PriceVision -->
             <div class="module-card module-card--pricevision">
                 <div class="module-card-image">
@@ -149,18 +149,18 @@
     </section>
 
     <!-- Government-Only Modules -->
-    <section class="section-sm" style="background: var(--neutral-100); border-radius: var(--radius-2xl); padding: var(--spacing-8); margin-top: var(--spacing-8);">
-        <div style="margin-bottom: var(--spacing-6);">
+    <section style="background: var(--neutral-100); border-radius: var(--radius-2xl); padding: var(--spacing-6); margin-top: var(--spacing-6);">
+        <div style="margin-bottom: var(--spacing-4);">
             <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-                <h2 style="font-size: var(--text-xl); font-weight: 700; margin: 0;">Government-Only Modules</h2>
-                <span class="badge badge-primary">
-                    <i class="bi bi-lock-fill"></i> Restricted Access
+                <h2 style="font-size: var(--text-lg); font-weight: 700; margin: 0;">Government-Only Modules</h2>
+                <span class="badge badge-primary" style="font-size: var(--text-xs);">
+                    <i class="bi bi-lock-fill"></i> Restricted
                 </span>
             </div>
-            <p class="text-muted" style="margin-top: var(--spacing-2);">Advanced analytics for policy makers and public health officials</p>
+            <p class="text-muted" style="margin-top: var(--spacing-1); font-size: var(--text-sm);">Advanced analytics for policy makers and public health officials</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: var(--spacing-6);">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-4);">
             <!-- RuralAccess -->
             <div class="module-card module-card--ruralaccess">
                 <div class="module-card-image">
@@ -216,76 +216,56 @@
     </section>
 
     <!-- ML Models Overview -->
-    <section class="section-sm" style="margin-top: var(--spacing-8);">
-        <div style="margin-bottom: var(--spacing-6);">
-            <h2 style="font-size: var(--text-xl); font-weight: 700;">Machine Learning Models</h2>
-            <p class="text-muted">AI-powered analytics powering the platform</p>
+    <section style="margin-top: var(--spacing-6);">
+        <div style="margin-bottom: var(--spacing-4);">
+            <h2 style="font-size: var(--text-lg); font-weight: 700;">Machine Learning Models</h2>
+            <p class="text-muted" style="font-size: var(--text-sm);">AI-powered analytics powering the platform</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-4);">
-            <div class="card" style="padding: var(--spacing-4);">
-                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-                    <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-cpu" style="color: var(--foodscore); font-size: var(--text-xl);"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600;">NOVA Classifier</div>
-                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">Food processing classification</div>
-                    </div>
-                    <span class="badge badge-success" style="margin-left: auto;">96.2% Accuracy</span>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--spacing-3);">
+            <div class="card" style="padding: var(--spacing-3); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-cpu" style="color: var(--foodscore); font-size: var(--text-lg);"></i>
                 </div>
+                <div style="font-weight: 600; font-size: var(--text-sm);">NOVA Classifier</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Food processing</div>
+                <span class="badge badge-success" style="font-size: 10px;">96.2%</span>
             </div>
 
-            <div class="card" style="padding: var(--spacing-4);">
-                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-                    <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-exclamation-triangle" style="color: var(--foodscore); font-size: var(--text-xl);"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600;">Additive Scorer</div>
-                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">Additive risk assessment</div>
-                    </div>
-                    <span class="badge badge-success" style="margin-left: auto;">85.7% Accuracy</span>
+            <div class="card" style="padding: var(--spacing-3); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-exclamation-triangle" style="color: var(--foodscore); font-size: var(--text-lg);"></i>
                 </div>
+                <div style="font-weight: 600; font-size: var(--text-sm);">Additive Scorer</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Risk assessment</div>
+                <span class="badge badge-success" style="font-size: 10px;">85.7%</span>
             </div>
 
-            <div class="card" style="padding: var(--spacing-4);">
-                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-                    <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-heart-pulse" style="color: var(--chroniccare); font-size: var(--text-xl);"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600;">Chronic Risk Predictor</div>
-                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">Disease prevalence prediction</div>
-                    </div>
-                    <span class="badge badge-success" style="margin-left: auto;">1.76% MAE</span>
+            <div class="card" style="padding: var(--spacing-3); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-heart-pulse" style="color: var(--chroniccare); font-size: var(--text-lg);"></i>
                 </div>
+                <div style="font-weight: 600; font-size: var(--text-sm);">Chronic Risk</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Disease prediction</div>
+                <span class="badge badge-success" style="font-size: 10px;">1.76% MAE</span>
             </div>
 
-            <div class="card" style="padding: var(--spacing-4);">
-                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-                    <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-bullseye" style="color: var(--chroniccare); font-size: var(--text-xl);"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600;">Intervention Prioritizer</div>
-                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">MAHA priority classification</div>
-                    </div>
-                    <span class="badge badge-success" style="margin-left: auto;">93.9% Accuracy</span>
+            <div class="card" style="padding: var(--spacing-3); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-bullseye" style="color: var(--chroniccare); font-size: var(--text-lg);"></i>
                 </div>
+                <div style="font-weight: 600; font-size: var(--text-sm);">Intervention</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">MAHA priority</div>
+                <span class="badge badge-success" style="font-size: 10px;">93.9%</span>
             </div>
 
-            <div class="card" style="padding: var(--spacing-4);">
-                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-                    <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--pricevision-light); display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-search" style="color: var(--pricevision); font-size: var(--text-xl);"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600;">Procedure Encoder</div>
-                        <div style="font-size: var(--text-sm); color: var(--neutral-500);">Semantic procedure matching</div>
-                    </div>
-                    <span class="badge badge-success" style="margin-left: auto;">0.85 MRR</span>
+            <div class="card" style="padding: var(--spacing-3); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--pricevision-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-search" style="color: var(--pricevision); font-size: var(--text-lg);"></i>
                 </div>
+                <div style="font-weight: 600; font-size: var(--text-sm);">Procedure Encoder</div>
+                <div style="font-size: var(--text-xs); color: var(--neutral-500); margin-bottom: var(--spacing-2);">Semantic match</div>
+                <span class="badge badge-success" style="font-size: 10px;">0.85 MRR</span>
             </div>
         </div>
     </section>

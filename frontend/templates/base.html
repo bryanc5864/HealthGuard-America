@@ -27,6 +27,8 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
+    {% block extra_css %}{% endblock %}
+
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -92,6 +94,8 @@
         </div>
     </footer>
     {% endblock %}
+
+    {% block extra_js %}{% endblock %}
 
     {% block scripts %}{% endblock %}
 </body>

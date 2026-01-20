@@ -1,184 +1,183 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}ChronicCare - Chronic Disease Analytics{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item active">ChronicCare</li>
-        </ol>
-    </nav>
-
-    <div class="page-header mb-5">
-        <div class="d-flex align-items-center">
-            <h1><i class="bi bi-activity me-2" style="color: #0dcaf0;"></i>ChronicCare</h1>
-            <span class="badge bg-info ms-3">MAHA Initiative</span>
+<!-- Hero Section -->
+<div class="page-header page-header--chroniccare">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>ChronicCare</span>
         </div>
-        <p class="lead text-muted">Chronic Disease Risk Prediction & Intervention Planning</p>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-4 col-lg-2">
-            <a href="{{ url_for('gov.chroniccare_dashboard') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-speedometer2 display-5 text-info mb-2"></i>
-                    <h6>Dashboard</h6>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 col-lg-2">
-            <a href="{{ url_for('gov.chroniccare_analytics') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-graph-up display-5 text-info mb-2"></i>
-                    <h6>Analytics</h6>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 col-lg-2">
-            <a href="{{ url_for('gov.chroniccare_correlations') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-diagram-3 display-5 text-info mb-2"></i>
-                    <h6>Correlations</h6>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 col-lg-2">
-            <a href="{{ url_for('gov.chroniccare_interventions') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-bullseye display-5 text-info mb-2"></i>
-                    <h6>Interventions</h6>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 col-lg-2">
-            <a href="{{ url_for('gov.chroniccare_simulator') }}" class="card h-100 text-decoration-none border-info">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-sliders display-5 text-info mb-2"></i>
-                    <h6>ML Simulator</h6>
-                    <span class="badge bg-info">New</span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 col-lg-2">
-            <div class="card h-100">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-file-earmark-arrow-down display-5 text-muted mb-2"></i>
-                    <h6>Export</h6>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Search Counties -->
-    <div class="row mb-5">
-        <div class="col-md-6 mx-auto">
-            <div class="card">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-search display-4 text-muted mb-3"></i>
-                    <h5>Search Counties</h5>
-                    <input type="text" class="form-control form-control-sm" placeholder="Enter FIPS code">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ML Model Status -->
-    <div class="card mb-5">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Models Status</h5>
-            <button class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#modelHelp">
-                <i class="bi bi-question-circle me-1"></i>What do these metrics mean?
-            </button>
-        </div>
-        <div class="collapse mb-3" id="modelHelp">
-            <div class="card-body bg-light border-bottom">
-                <h6><i class="bi bi-info-circle me-2"></i>Understanding Model Performance Metrics</h6>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p class="small mb-2"><strong>MAE (Mean Absolute Error):</strong> Average prediction error in percentage points.
-                        An MAE of 1.76 means predictions are typically within 1.76% of actual chronic disease rates.
-                        <span class="text-success">Lower is better.</span></p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="small mb-2"><strong>Accuracy:</strong> Percentage of correct priority classifications.
-                        93.9% accuracy means the model correctly identifies intervention urgency 94 times out of 100.
-                        <span class="text-success">Higher is better.</span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
-                        <div>
-                            <strong>Chronic Risk Predictor</strong>
-                            <br><small class="text-muted">Predicts county-level chronic disease rates using food environment and demographic data</small>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge bg-success">Active</span>
-                            <br><span class="badge bg-info">MAE: 1.76%</span>
-                            <br><small class="text-success">Excellent accuracy</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
-                        <div>
-                            <strong>Intervention Prioritizer</strong>
-                            <br><small class="text-muted">Classifies counties by intervention urgency (High/Medium/Low)</small>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge bg-success">Active</span>
-                            <br><span class="badge bg-info">93.9% Accurate</span>
-                            <br><small class="text-success">94 of 100 correct</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Key Statistics -->
-    <h4 class="mb-3">National Chronic Disease Burden</h4>
-    <div class="row g-4">
-        <div class="col-md-2">
-            <div class="card stat-card border-danger">
-                <div class="stat-value text-danger" style="font-size: 1.5rem;">{{ stats.avg_obesity }}%</div>
-                <div class="stat-label">Obesity Rate</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card stat-card border-warning">
-                <div class="stat-value text-warning" style="font-size: 1.5rem;">{{ stats.avg_diabetes }}%</div>
-                <div class="stat-label">Diabetes</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.5rem;">{{ stats.avg_heart_disease }}%</div>
-                <div class="stat-label">Heart Disease</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.5rem;">{{ stats.critical_counties }}</div>
-                <div class="stat-label">Critical Counties</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card stat-card">
-                <div class="stat-value" style="font-size: 1.5rem;">{{ stats.high_priority_counties }}</div>
-                <div class="stat-label">High Priority</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card stat-card border-success">
-                <div class="stat-value text-success" style="font-size: 1.5rem;">{{ stats.states_covered }}</div>
-                <div class="stat-label">States Covered</div>
-            </div>
-        </div>
+        <h1 class="page-title">
+            <i class="bi bi-activity"></i> ChronicCare
+            <span class="badge" style="background: rgba(255,255,255,0.2); font-size: var(--text-sm); vertical-align: middle; margin-left: var(--spacing-2);">MAHA Initiative</span>
+        </h1>
+        <p class="page-subtitle">
+            Chronic Disease Risk Prediction & Intervention Planning
+        </p>
     </div>
 </div>
+
+<div class="container container-xl">
+    <!-- Stats Section -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
+        <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
+            <div class="stat-card" style="border-left-color: var(--error);">
+                <div class="stat-card-value" style="color: var(--error);">{{ stats.avg_obesity }}%</div>
+                <div class="stat-card-label">Obesity Rate</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">{{ stats.avg_diabetes }}%</div>
+                <div class="stat-card-label">Diabetes</div>
+            </div>
+            <div class="stat-card stat-card--chroniccare">
+                <div class="stat-card-value">{{ stats.avg_heart_disease }}%</div>
+                <div class="stat-card-label">Heart Disease</div>
+            </div>
+            <div class="stat-card stat-card--chroniccare">
+                <div class="stat-card-value">{{ stats.critical_counties }}</div>
+                <div class="stat-card-label">Critical Counties</div>
+            </div>
+            <div class="stat-card stat-card--chroniccare">
+                <div class="stat-card-value">{{ stats.high_priority_counties }}</div>
+                <div class="stat-card-label">High Priority</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">{{ stats.states_covered }}</div>
+                <div class="stat-card-label">States Covered</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--spacing-3);">
+            <a href="{{ url_for('gov.chroniccare_dashboard') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-speedometer2" style="font-size: var(--text-lg); color: var(--chroniccare);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Dashboard</h3>
+            </a>
+
+            <a href="{{ url_for('gov.chroniccare_analytics') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-graph-up" style="font-size: var(--text-lg); color: var(--chroniccare);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Analytics</h3>
+            </a>
+
+            <a href="{{ url_for('gov.chroniccare_correlations') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-diagram-3" style="font-size: var(--text-lg); color: var(--chroniccare);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Correlations</h3>
+            </a>
+
+            <a href="{{ url_for('gov.chroniccare_interventions') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--chroniccare-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-bullseye" style="font-size: var(--text-lg); color: var(--chroniccare);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Interventions</h3>
+            </a>
+
+            <a href="{{ url_for('gov.chroniccare_simulator') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none; border: 2px solid var(--chroniccare);">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--chroniccare); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-sliders" style="font-size: var(--text-lg); color: white;"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">ML Simulator</h3>
+                <span class="badge" style="background: var(--chroniccare); color: white; font-size: 10px; margin-top: var(--spacing-1);">New</span>
+            </a>
+
+            <div class="card" style="padding: var(--spacing-4); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--neutral-100); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-file-earmark-arrow-down" style="font-size: var(--text-lg); color: var(--neutral-500);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Export</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Counties -->
+    <section class="section-sm">
+        <div class="card" style="padding: var(--spacing-6); max-width: 500px; margin: 0 auto; text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--neutral-100); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                <i class="bi bi-search" style="font-size: var(--text-xl); color: var(--neutral-500);"></i>
+            </div>
+            <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-3);">Search Counties</h3>
+            <input type="text" class="form-control" placeholder="Enter FIPS code or county name" style="text-align: center;">
+        </div>
+    </section>
+
+    <!-- ML Model Status -->
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--chroniccare); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-cpu"></i> ML Models Status
+                </h3>
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none;" onclick="document.getElementById('modelHelp').classList.toggle('hidden');">
+                    <i class="bi bi-question-circle"></i> What do these metrics mean?
+                </button>
+            </div>
+
+            <div id="modelHelp" class="hidden" style="background: var(--neutral-50); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">
+                    <i class="bi bi-info-circle"></i> Understanding Model Performance Metrics
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-4);">
+                    <div>
+                        <p style="font-size: var(--text-sm); margin: 0;">
+                            <strong>MAE (Mean Absolute Error):</strong> Average prediction error in percentage points.
+                            An MAE of 1.76 means predictions are typically within 1.76% of actual chronic disease rates.
+                            <span style="color: var(--success);">Lower is better.</span>
+                        </p>
+                    </div>
+                    <div>
+                        <p style="font-size: var(--text-sm); margin: 0;">
+                            <strong>Accuracy:</strong> Percentage of correct priority classifications.
+                            93.9% accuracy means the model correctly identifies intervention urgency 94 times out of 100.
+                            <span style="color: var(--success);">Higher is better.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: var(--spacing-5);">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-4);">
+                    <div style="background: var(--neutral-50); padding: var(--spacing-4); border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: var(--text-sm);">Chronic Risk Predictor</strong>
+                            <p class="text-muted" style="font-size: var(--text-xs); margin: var(--spacing-1) 0 0 0;">Predicts county-level chronic disease rates using food environment and demographic data</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="badge badge-success" style="margin-bottom: var(--spacing-1);">Active</span><br>
+                            <span class="badge" style="background: var(--chroniccare-light); color: var(--chroniccare-dark);">MAE: 1.76%</span><br>
+                            <span style="font-size: var(--text-xs); color: var(--success);">Excellent accuracy</span>
+                        </div>
+                    </div>
+                    <div style="background: var(--neutral-50); padding: var(--spacing-4); border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: var(--text-sm);">Intervention Prioritizer</strong>
+                            <p class="text-muted" style="font-size: var(--text-xs); margin: var(--spacing-1) 0 0 0;">Classifies counties by intervention urgency (High/Medium/Low)</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="badge badge-success" style="margin-bottom: var(--spacing-1);">Active</span><br>
+                            <span class="badge" style="background: var(--chroniccare-light); color: var(--chroniccare-dark);">93.9% Accurate</span><br>
+                            <span style="font-size: var(--text-xs); color: var(--success);">94 of 100 correct</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.hidden { display: none; }
+</style>
 {% endblock %}

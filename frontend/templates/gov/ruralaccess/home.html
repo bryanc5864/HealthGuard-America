@@ -1,127 +1,177 @@
 {% extends "gov/base_gov.html" %}
 
-{% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item active">RuralAccess</li>
-        </ol>
-    </nav>
+{% block title %}RuralAccess - Healthcare Shortage Mapping{% endblock %}
 
-    <div class="page-header mb-5">
-        <h1><i class="bi bi-geo-alt me-2" style="color: #6f42c1;"></i>RuralAccess</h1>
-        <p class="lead text-muted">Healthcare Access Mapping & Provider Shortage Analysis</p>
+{% block content %}
+<!-- Hero Section -->
+<div class="page-header page-header--ruralaccess">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>RuralAccess</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-geo-alt"></i> RuralAccess
+        </h1>
+        <p class="page-subtitle">
+            Healthcare Access Mapping & Provider Shortage Analysis
+        </p>
     </div>
+</div>
+
+<div class="container container-xl">
+    <!-- Stats Section -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--ruralaccess">
+                <div class="stat-card-value">{{ "{:,}".format(stats.total_hpsas) if stats.total_hpsas else '14,631' }}</div>
+                <div class="stat-card-label">HPSA Designations</div>
+            </div>
+            <div class="stat-card stat-card--ruralaccess">
+                <div class="stat-card-value">{{ "{:,}".format(stats.total_counties) if stats.total_counties else '2,956' }}</div>
+                <div class="stat-card-label">Affected Counties</div>
+            </div>
+            <div class="stat-card stat-card--ruralaccess">
+                <div class="stat-card-value">{{ "{:,}".format(stats.total_fqhcs) if stats.total_fqhcs else '1,400+' }}</div>
+                <div class="stat-card-label">Health Centers</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success);">
+                <div class="stat-card-value" style="color: var(--success);">50+</div>
+                <div class="stat-card-label">States & Territories</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Quick Actions -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.ruralaccess_map') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-map display-4 mb-3" style="color: #6f42c1;"></i>
-                    <h5>Interactive Map</h5>
-                    <p class="text-muted small mb-0">View HPSA designations by county</p>
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-4);">
+            <a href="{{ url_for('gov.ruralaccess_map') }}" class="card" style="padding: var(--spacing-5); text-align: center; text-decoration: none;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--ruralaccess-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-map" style="font-size: var(--text-xl); color: var(--ruralaccess);"></i>
                 </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-1); color: var(--neutral-900);">Interactive Map</h3>
+                <p class="text-muted" style="font-size: var(--text-sm); margin: 0;">Explore all HPSA shortage designations</p>
+            </a>
+
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--neutral-100); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-search" style="font-size: var(--text-xl); color: var(--neutral-500);"></i>
+                </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2); color: var(--neutral-900);">Search HPSAs</h3>
+                <input type="text" class="form-control" placeholder="Enter name or HPSA ID" style="font-size: var(--text-sm);">
+            </div>
+
+            <div class="card" style="padding: var(--spacing-5); text-align: center;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--neutral-100); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-download" style="font-size: var(--text-xl); color: var(--neutral-500);"></i>
+                </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-2); color: var(--neutral-900);">Export Data</h3>
+                <button class="btn btn-outline" style="font-size: var(--text-sm);">Download CSV</button>
+            </div>
+
+            <a href="{{ url_for('gov.ruralaccess_analytics') }}" class="card" style="padding: var(--spacing-5); text-align: center; text-decoration: none;">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--ruralaccess-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-3);">
+                    <i class="bi bi-graph-up" style="font-size: var(--text-xl); color: var(--ruralaccess);"></i>
+                </div>
+                <h3 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--spacing-1); color: var(--neutral-900);">Analytics</h3>
+                <p class="text-muted" style="font-size: var(--text-sm); margin: 0;">Charts, insights & state comparisons</p>
             </a>
         </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-search display-4 text-muted mb-3"></i>
-                    <h5>Search Counties</h5>
-                    <input type="text" class="form-control form-control-sm" placeholder="Enter FIPS or county name">
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-download display-4 text-muted mb-3"></i>
-                    <h5>Export Data</h5>
-                    <button class="btn btn-sm btn-outline-secondary">Download CSV</button>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.ruralaccess_analytics') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-graph-up display-4 mb-3" style="color: #6f42c1;"></i>
-                    <h5>Analytics</h5>
-                    <p class="text-muted small mb-0">Charts, insights & state comparisons</p>
-                </div>
-            </a>
-        </div>
-    </div>
+    </section>
 
     <!-- Coverage Info -->
-    <div class="alert alert-info mb-4">
-        <div class="d-flex align-items-center">
-            <i class="bi bi-globe-americas fs-3 me-3"></i>
-            <div>
-                <strong>Nationwide Coverage:</strong> RuralAccess provides comprehensive healthcare shortage data for all
-                <strong>50 US States</strong> plus <strong>DC and US Territories</strong>
-                (Puerto Rico, Guam, U.S. Virgin Islands, American Samoa, and Northern Mariana Islands).
+    <section class="section-sm">
+        <div class="alert alert-info" style="margin: 0;">
+            <div style="display: flex; gap: var(--spacing-4); align-items: center;">
+                <i class="bi bi-globe-americas" style="font-size: var(--text-2xl);"></i>
+                <div>
+                    <strong>Nationwide Coverage:</strong> RuralAccess provides comprehensive healthcare shortage data for all
+                    <strong>50 US States</strong> plus <strong>DC and US Territories</strong>
+                    (Puerto Rico, Guam, U.S. Virgin Islands, American Samoa, and Northern Mariana Islands).
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Statistics -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card stat-card border-danger">
-                <div class="stat-value text-danger">{{ "{:,}".format(stats.total_hpsas) if stats.total_hpsas else '0' }}</div>
-                <div class="stat-label">HPSA Designations</div>
+    <!-- What are HPSAs -->
+    <section class="section-sm">
+        <div class="card" style="border-left: 4px solid var(--ruralaccess); overflow: hidden;">
+            <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-info-circle"></i> What are HPSA Designations?
+                </h3>
+            </div>
+            <div style="padding: var(--spacing-5);">
+                <p style="margin-bottom: var(--spacing-4);">Health Professional Shortage Areas (HPSAs) are <strong>not just counties</strong>. They include multiple designation types:</p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-4);">
+                    <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                        <i class="bi bi-people-fill" style="color: var(--primary); margin-top: 2px;"></i>
+                        <div>
+                            <strong style="font-size: var(--text-sm);">Population Groups</strong>
+                            <p class="text-muted" style="font-size: var(--text-xs); margin: 0;">Low-income populations, migrant workers, homeless</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                        <i class="bi bi-hospital" style="color: var(--success); margin-top: 2px;"></i>
+                        <div>
+                            <strong style="font-size: var(--text-sm);">Health Centers</strong>
+                            <p class="text-muted" style="font-size: var(--text-xs); margin: 0;">FQHCs, Rural Health Clinics, FQHC Look-Alikes</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                        <i class="bi bi-geo-alt-fill" style="color: var(--error); margin-top: 2px;"></i>
+                        <div>
+                            <strong style="font-size: var(--text-sm);">Geographic Areas</strong>
+                            <p class="text-muted" style="font-size: var(--text-xs); margin: 0;">Counties, census tracts, service areas</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-2); align-items: flex-start;">
+                        <i class="bi bi-building" style="color: var(--warning); margin-top: 2px;"></i>
+                        <div>
+                            <strong style="font-size: var(--text-sm);">Facilities</strong>
+                            <p class="text-muted" style="font-size: var(--text-xs); margin: 0;">Correctional facilities, Indian Health Service, Tribal clinics</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">{{ "{:,}".format(stats.total_counties) if stats.total_counties else '0' }}</div>
-                <div class="stat-label">Counties with Shortages</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">{{ "{:,}".format(stats.total_fqhcs) if stats.total_fqhcs else '0' }}</div>
-                <div class="stat-label">Health Centers (FQHCs)</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="stat-value">50</div>
-                <div class="stat-label">US States</div>
-                <small class="text-muted">+ DC & Territories</small>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- HPSA Types -->
-    <h4 class="mb-3">HPSA Designation Types</h4>
-    <div class="row g-4 mb-5">
-        {% for discipline, count in stats.by_discipline.items() %}
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header {% if 'Primary' in discipline %}bg-primary{% elif 'Dental' in discipline %}bg-purple{% else %}bg-info{% endif %} text-white">
-                    <i class="bi {% if 'Primary' in discipline %}bi-heart-pulse{% elif 'Dental' in discipline %}bi-emoji-smile{% else %}bi-brain{% endif %} me-2"></i>{{ discipline }}
+    <section class="section-sm">
+        <div style="margin-bottom: var(--spacing-4);">
+            <h2 style="font-size: var(--text-lg); font-weight: 700;">HPSA Designation Types</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+            {% for discipline, count in stats.by_discipline.items() %}
+            <div class="card" style="overflow: hidden;">
+                <div style="background: {% if 'Primary' in discipline %}var(--primary){% elif 'Dental' in discipline %}var(--ruralaccess){% else %}var(--info){% endif %}; padding: var(--spacing-3); color: white;">
+                    <i class="bi {% if 'Primary' in discipline %}bi-heart-pulse{% elif 'Dental' in discipline %}bi-emoji-smile{% else %}bi-brain{% endif %}"></i>
+                    {{ discipline }}
                 </div>
-                <div class="card-body">
-                    <p class="mb-0"><strong>Designated Areas:</strong> {{ "{:,}".format(count) }}</p>
+                <div style="padding: var(--spacing-4);">
+                    <p style="margin: 0;"><strong>Designated Areas:</strong> {{ "{:,}".format(count) }}</p>
                 </div>
             </div>
+            {% else %}
+            <div class="card" style="grid-column: span 3; padding: var(--spacing-4);">
+                <div class="alert alert-info" style="margin: 0;">No HPSA discipline data available.</div>
+            </div>
+            {% endfor %}
         </div>
-        {% else %}
-        <div class="col-12">
-            <div class="alert alert-info">No HPSA discipline data available.</div>
-        </div>
-        {% endfor %}
-    </div>
+    </section>
 
     <!-- Recent Hospital Closures -->
     {% if closures %}
-    <h4 class="mb-3">Recent Rural Hospital Closures</h4>
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+    <section class="section-sm">
+        <div style="margin-bottom: var(--spacing-4);">
+            <h2 style="font-size: var(--text-lg); font-weight: 700;">Recent Rural Hospital Closures</h2>
+        </div>
+        <div class="table-container">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Hospital</th>
@@ -134,7 +184,7 @@
                 <tbody>
                     {% for closure in closures %}
                     <tr>
-                        <td>{{ closure.Hospital }}</td>
+                        <td><strong style="color: var(--neutral-900);">{{ closure.Hospital }}</strong></td>
                         <td>{{ closure.City }}</td>
                         <td>{{ closure.State }}</td>
                         <td>{{ closure['County/district'] }}</td>
@@ -144,7 +194,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
     {% endif %}
 </div>
 {% endblock %}

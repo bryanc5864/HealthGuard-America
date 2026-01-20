@@ -16,17 +16,19 @@
     </h2>
 
     <!-- Search Box -->
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-sm border-0">
         <div class="card-body">
-            <form action="{{ url_for('gov.pricevision_search') }}" method="get">
+            <form action="{{ url_for('gov.pricevision_search') }}" method="get" id="searchForm">
                 <div class="row g-3">
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small text-muted">Type</label>
                         <select name="type" class="form-select">
                             <option value="procedure" {% if search_type != 'hospital' %}selected{% endif %}>Procedures</option>
                             <option value="hospital" {% if search_type == 'hospital' %}selected{% endif %}>Hospitals</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small text-muted">State</label>
                         <select name="state" class="form-select">
                             <option value="">All States</option>
                             {% for s in states %}
@@ -34,12 +36,19 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" name="q" value="{{ query }}"
-                               placeholder="Search...">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small text-muted">Search</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="q" value="{{ query }}"
+                                   placeholder="Enter procedure name, code, or hospital name...">
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-warning w-100" type="submit">Search</button>
+                    <div class="col-12 col-md-2 d-flex align-items-end">
+                        <button class="btn btn-warning w-100" type="submit" id="searchBtn">
+                            <span class="spinner-border spinner-border-sm d-none" id="searchSpinner"></span>
+                            <span id="searchBtnText">Search</span>
+                        </button>
                     </div>
                 </div>
             </form>
@@ -133,28 +142,40 @@
 
     <!-- ML Related Procedures -->
     {% if ml_related_procedures and search_type != 'hospital' %}
-    <div class="card mt-4 border-info">
-        <div class="card-header bg-info text-white">
-            <h6 class="mb-0"><i class="bi bi-robot me-2"></i>ML-Suggested Related Procedures</h6>
+    <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+            <h6 class="mb-0 text-white"><i class="bi bi-robot me-2"></i>ML-Suggested Related Procedures</h6>
         </div>
         <div class="card-body">
-            <p class="text-muted small mb-3">Based on semantic similarity to your search "{{ query }}":</p>
-            <div class="list-group">
+            <p class="text-muted small mb-3">Based on semantic similarity to "{{ query }}":</p>
+            <div class="row g-2">
                 {% for related in ml_related_procedures %}
-                <a href="{{ url_for('gov.pricevision_compare', procedure=related.code) }}"
-                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{{ related.description }}</strong>
-                        <span class="badge bg-primary ms-2">{{ related.code }}</span>
-                    </div>
-                    <span class="badge bg-{% if related.confidence >= 80 %}success{% elif related.confidence >= 60 %}warning{% else %}secondary{% endif %}">
-                        {{ related.confidence }}% match
-                    </span>
-                </a>
+                <div class="col-12 col-md-6">
+                    <a href="{{ url_for('gov.pricevision_compare', procedure=related.code) }}"
+                       class="card text-decoration-none h-100 border-0 bg-light">
+                        <div class="card-body py-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="text-dark">{{ related.description[:45] }}{% if related.description|length > 45 %}...{% endif %}</strong>
+                                <br><span class="badge bg-primary">{{ related.code }}</span>
+                            </div>
+                            <span class="badge bg-{% if related.confidence >= 80 %}success{% elif related.confidence >= 60 %}warning{% else %}secondary{% endif %} fs-6">
+                                {{ related.confidence }}%
+                            </span>
+                        </div>
+                    </a>
+                </div>
                 {% endfor %}
             </div>
         </div>
     </div>
     {% endif %}
 </div>
+
+<script>
+document.getElementById('searchForm').addEventListener('submit', function() {
+    document.getElementById('searchSpinner').classList.remove('d-none');
+    document.getElementById('searchBtnText').textContent = 'Searching...';
+    document.getElementById('searchBtn').disabled = true;
+});
+</script>
 {% endblock %}

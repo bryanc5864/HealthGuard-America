@@ -1,190 +1,201 @@
 {% extends "gov/base_gov.html" %}
 
+{% block title %}FoodScore - Food Health Scoring{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gov.home') }}">Government Portal</a></li>
-            <li class="breadcrumb-item active">FoodScore</li>
-        </ol>
-    </nav>
-
-    <div class="page-header mb-5">
-        <h1><i class="bi bi-basket me-2" style="color: #28a745;"></i>FoodScore</h1>
-        <p class="lead text-muted">Food Health Scoring with SNAP Analysis</p>
+<!-- Hero Section -->
+<div class="page-header page-header--foodscore">
+    <div class="page-header-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('landing') }}">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ url_for('gov.home') }}">Government Portal</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>FoodScore</span>
+        </div>
+        <h1 class="page-title">
+            <i class="bi bi-basket"></i> FoodScore
+        </h1>
+        <p class="page-subtitle">
+            Food Health Scoring with SNAP Analysis
+        </p>
     </div>
+</div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-2">
-            <a href="{{ url_for('gov.foodscore_search') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-search display-5 text-success mb-2"></i>
-                    <h6>Search</h6>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.foodscore_analyze') }}" class="card h-100 text-decoration-none border-success">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-camera display-5 text-success mb-2"></i>
-                    <h6>Analyze Label</h6>
-                    <span class="badge bg-success">New</span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-2">
-            <a href="{{ url_for('gov.foodscore_snap') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-credit-card display-5 text-success mb-2"></i>
-                    <h6>SNAP</h6>
-                    <span class="badge bg-primary">Gov</span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('gov.foodscore_additives') }}" class="card h-100 text-decoration-none">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-exclamation-triangle display-5 text-success mb-2"></i>
-                    <h6>Additive Alerts</h6>
-                    <span class="badge bg-primary">Gov</span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-2">
-            <div class="card h-100">
-                <div class="card-body text-center p-3">
-                    <i class="bi bi-file-earmark-arrow-down display-5 text-muted mb-2"></i>
-                    <h6>Export</h6>
-                </div>
+<div class="container container-xl">
+    <!-- Stats Section -->
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card stat-card--foodscore">
+                <div class="stat-card-value">500K+</div>
+                <div class="stat-card-label">Products Analyzed</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--primary);">
+                <div class="stat-card-value" style="color: var(--primary);">96.2%</div>
+                <div class="stat-card-label">NOVA Classifier</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--info);">
+                <div class="stat-card-value" style="color: var(--info);">85.7%</div>
+                <div class="stat-card-label">Additive Scorer</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning);">
+                <div class="stat-card-value" style="color: var(--warning);">73%</div>
+                <div class="stat-card-label">Ultra-Processed</div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- ML Models Section with Explanations -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>ML Model Performance</h5>
-            <button class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" data-bs-target="#modelHelp">
-                <i class="bi bi-question-circle me-1"></i>What do these numbers mean?
-            </button>
-        </div>
-        <div class="collapse" id="modelHelp">
-            <div class="card-body bg-light border-bottom">
-                <h6><i class="bi bi-info-circle me-2"></i>Understanding Our ML Models</h6>
-                <div class="row">
-                    <div class="col-md-4">
-                        <p class="small mb-2"><strong>NOVA Classifier (96.16% accuracy):</strong>
-                        Predicts food processing level (NOVA 1-4) from ingredients.
-                        96 out of 100 foods are correctly classified as unprocessed, processed, or ultra-processed.</p>
-                    </div>
-                    <div class="col-md-4">
-                        <p class="small mb-2"><strong>Additive Scorer (85.71% accuracy):</strong>
-                        Identifies and risk-scores food additives.
-                        Correctly flags harmful additives 86 times out of 100, helping identify potentially risky products.</p>
-                    </div>
-                    <div class="col-md-4">
-                        <p class="small mb-2"><strong>Ultra-Processed (73%):</strong>
-                        Not a model metric - this shows that 73% of products in our database are classified as NOVA 4 (ultra-processed),
-                        a concerning finding for public health.</p>
-                    </div>
+    <!-- Quick Actions -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--spacing-3);">
+            <a href="{{ url_for('gov.foodscore_search') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-search" style="font-size: var(--text-lg); color: var(--foodscore);"></i>
                 </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="text-center p-3 bg-light rounded">
-                        <div class="display-6 fw-bold text-success">500K+</div>
-                        <div class="text-muted">Products Analyzed</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3 bg-light rounded">
-                        <div class="display-6 fw-bold text-primary">96.16%</div>
-                        <div class="text-muted">NOVA Classifier</div>
-                        <small class="text-success">Correctly classifies processing level</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3 bg-light rounded">
-                        <div class="display-6 fw-bold text-info">85.71%</div>
-                        <div class="text-muted">Additive Scorer</div>
-                        <small class="text-success">Correctly identifies risky additives</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3 bg-light rounded border border-warning">
-                        <div class="display-6 fw-bold text-warning">73%</div>
-                        <div class="text-muted">Ultra-Processed</div>
-                        <small class="text-danger">Concerning public health finding</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Search</h3>
+            </a>
 
-    <!-- Quick Stats -->
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h6 class="mb-0">NOVA Distribution</h6>
+            <a href="{{ url_for('gov.foodscore_analyze') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none; border: 2px solid var(--foodscore);">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-camera" style="font-size: var(--text-lg); color: white;"></i>
                 </div>
-                <div class="card-body">
-                    <div class="mb-2">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small>NOVA 1 - Unprocessed</small>
-                            <small>12%</small>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-success" style="width: 12%"></div>
-                        </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Analyze Label</h3>
+                <span class="badge badge-success" style="font-size: 10px; margin-top: var(--spacing-1);">New</span>
+            </a>
+
+            <a href="{{ url_for('gov.foodscore_snap') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-credit-card" style="font-size: var(--text-lg); color: var(--foodscore);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">SNAP</h3>
+                <span class="badge" style="background: var(--primary); color: white; font-size: 10px; margin-top: var(--spacing-1);">Gov</span>
+            </a>
+
+            <a href="{{ url_for('gov.foodscore_additives') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore-light); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-exclamation-triangle" style="font-size: var(--text-lg); color: var(--foodscore);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Additives</h3>
+                <span class="badge" style="background: var(--primary); color: white; font-size: 10px; margin-top: var(--spacing-1);">Gov</span>
+            </a>
+
+            <div class="card" style="padding: var(--spacing-4); text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--neutral-100); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
+                    <i class="bi bi-file-earmark-arrow-down" style="font-size: var(--text-lg); color: var(--neutral-500);"></i>
+                </div>
+                <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Export</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- ML Models Section -->
+    <section class="section-sm">
+        <div class="card" style="overflow: hidden;">
+            <div style="background: var(--foodscore); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <i class="bi bi-cpu"></i> ML Model Performance
+                </h3>
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none;" onclick="document.getElementById('modelHelp').classList.toggle('hidden');">
+                    <i class="bi bi-question-circle"></i> What do these numbers mean?
+                </button>
+            </div>
+
+            <div id="modelHelp" class="hidden" style="background: var(--neutral-50); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
+                <h4 style="font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--spacing-3);">
+                    <i class="bi bi-info-circle"></i> Understanding Our ML Models
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
+                    <div>
+                        <p style="font-size: var(--text-sm); margin: 0;">
+                            <strong>NOVA Classifier (96.16%):</strong>
+                            Predicts food processing level (NOVA 1-4) from ingredients.
+                            96 out of 100 foods are correctly classified.
+                        </p>
                     </div>
-                    <div class="mb-2">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small>NOVA 2 - Culinary Ingredients</small>
-                            <small>2%</small>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-info" style="width: 2%"></div>
-                        </div>
+                    <div>
+                        <p style="font-size: var(--text-sm); margin: 0;">
+                            <strong>Additive Scorer (85.71%):</strong>
+                            Identifies and risk-scores food additives.
+                            Correctly flags harmful additives 86 times out of 100.
+                        </p>
                     </div>
-                    <div class="mb-2">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small>NOVA 3 - Processed</small>
-                            <small>13%</small>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-warning" style="width: 13%"></div>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small>NOVA 4 - Ultra-Processed</small>
-                            <small>73%</small>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-danger" style="width: 73%"></div>
-                        </div>
+                    <div>
+                        <p style="font-size: var(--text-sm); margin: 0;">
+                            <strong>Ultra-Processed (73%):</strong>
+                            Not a model metric - shows that 73% of products are NOVA 4,
+                            a concerning finding for public health.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h6 class="mb-0">Key Insights</h6>
+    </section>
+
+    <!-- NOVA Distribution and Insights -->
+    <section class="section-sm">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-4);">
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-3); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-sm); font-weight: 600; margin: 0;">NOVA Distribution</h3>
                 </div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li><strong>73% ultra-processed:</strong> Nearly 3 in 4 products contain industrial ingredients not found in home cooking</li>
-                        <li><strong>344 additives tracked:</strong> Including emulsifiers, preservatives, and artificial colors</li>
-                        <li><strong>MAHA score:</strong> Composite health score (0-100) combining NOVA, nutrients, and additive risks</li>
+                <div style="padding: var(--spacing-4);">
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-1);">
+                            <span style="font-size: var(--text-sm);">NOVA 1 - Unprocessed</span>
+                            <span style="font-size: var(--text-sm);">12%</span>
+                        </div>
+                        <div style="background: var(--neutral-200); height: 8px; border-radius: var(--radius-full);">
+                            <div style="background: var(--success); height: 100%; width: 12%; border-radius: var(--radius-full);"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-1);">
+                            <span style="font-size: var(--text-sm);">NOVA 2 - Culinary Ingredients</span>
+                            <span style="font-size: var(--text-sm);">2%</span>
+                        </div>
+                        <div style="background: var(--neutral-200); height: 8px; border-radius: var(--radius-full);">
+                            <div style="background: var(--info); height: 100%; width: 2%; border-radius: var(--radius-full);"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: var(--spacing-3);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-1);">
+                            <span style="font-size: var(--text-sm);">NOVA 3 - Processed</span>
+                            <span style="font-size: var(--text-sm);">13%</span>
+                        </div>
+                        <div style="background: var(--neutral-200); height: 8px; border-radius: var(--radius-full);">
+                            <div style="background: var(--warning); height: 100%; width: 13%; border-radius: var(--radius-full);"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-1);">
+                            <span style="font-size: var(--text-sm);">NOVA 4 - Ultra-Processed</span>
+                            <span style="font-size: var(--text-sm);">73%</span>
+                        </div>
+                        <div style="background: var(--neutral-200); height: 8px; border-radius: var(--radius-full);">
+                            <div style="background: var(--error); height: 100%; width: 73%; border-radius: var(--radius-full);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="overflow: hidden;">
+                <div style="background: var(--neutral-100); padding: var(--spacing-3); border-bottom: 1px solid var(--neutral-200);">
+                    <h3 style="font-size: var(--text-sm); font-weight: 600; margin: 0;">Key Insights</h3>
+                </div>
+                <div style="padding: var(--spacing-4);">
+                    <ul style="margin: 0; padding-left: var(--spacing-4); font-size: var(--text-sm);">
+                        <li style="margin-bottom: var(--spacing-2);"><strong>73% ultra-processed:</strong> Nearly 3 in 4 products contain industrial ingredients not found in home cooking</li>
+                        <li style="margin-bottom: var(--spacing-2);"><strong>344 additives tracked:</strong> Including emulsifiers, preservatives, and artificial colors</li>
+                        <li style="margin-bottom: var(--spacing-2);"><strong>MAHA score:</strong> Composite health score (0-100) combining NOVA, nutrients, and additive risks</li>
                         <li><strong>Policy impact:</strong> Data supports SNAP reform to incentivize healthier choices</li>
                     </ul>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
+
+<style>
+.hidden { display: none; }
+</style>
 {% endblock %}

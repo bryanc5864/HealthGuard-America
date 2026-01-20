@@ -265,7 +265,10 @@ def chroniccare_dashboard():
     import pandas as pd
 
     state = request.args.get('state', '')
-    limit = int(request.args.get('limit', 100))
+    try:
+        limit = int(request.args.get('limit', 100) or 100)
+    except (ValueError, TypeError):
+        limit = 100
     stats = ChronicCareService.get_stats()
     trends = ChronicCareService.get_national_trends()
 
@@ -415,7 +418,10 @@ def chroniccare_dashboard():
 def chroniccare_correlations():
     """Food-disease correlation analysis"""
     state = request.args.get('state', '')
-    limit = int(request.args.get('limit', 100))
+    try:
+        limit = int(request.args.get('limit', 100) or 100)
+    except (ValueError, TypeError):
+        limit = 100
 
     # Get correlations - filter by state if specified
     correlations = ChronicCareService.get_correlations()
@@ -438,7 +444,10 @@ def chroniccare_interventions():
     """ML-prioritized intervention targets"""
     state = request.args.get('state', '')
     priority = request.args.get('priority', '')
-    limit = int(request.args.get('limit', 50))
+    try:
+        limit = int(request.args.get('limit', 50) or 50)
+    except (ValueError, TypeError):
+        limit = 50
 
     # Get all priorities - fetch enough to cover filtering
     # If showing all (~3000), fetch all data
@@ -545,7 +554,10 @@ def chroniccare_interventions():
 def chroniccare_analytics():
     """State-by-state analytics and statistics"""
     state = request.args.get('state', '')
-    limit = int(request.args.get('limit', 100))
+    try:
+        limit = int(request.args.get('limit', 100) or 100)
+    except (ValueError, TypeError):
+        limit = 100
 
     # Get state-level statistics
     state_stats = ChronicCareService.get_state_statistics()
@@ -676,7 +688,10 @@ def chroniccare_county(fips):
 def api_chronic_counties():
     """API: Get county health data"""
     state = request.args.get('state', '')
-    limit = int(request.args.get('limit', 100))
+    try:
+        limit = int(request.args.get('limit', 100) or 100)
+    except (ValueError, TypeError):
+        limit = 100
     counties = ChronicCareService.get_county_health(
         state=state if state else None, limit=limit
     )
@@ -695,7 +710,10 @@ def api_correlations():
 @gov_required
 def api_interventions():
     """API: Get intervention priorities"""
-    limit = int(request.args.get('limit', 50))
+    try:
+        limit = int(request.args.get('limit', 50) or 50)
+    except (ValueError, TypeError):
+        limit = 50
     priorities = ChronicCareService.get_intervention_priorities(limit=limit)
     return jsonify(priorities)
 
@@ -757,7 +775,11 @@ def chroniccare_simulator():
                     # Get disease prevalence predictions
                     if ml_service.risk_service.is_loaded:
                         risk_predictions = ml_service.risk_service.predict(features)
-                        predictions = {k: round(v, 1) for k, v in risk_predictions.items()}
+                        # Clamp predictions to valid percentage ranges (0-100%)
+                        predictions = {
+                            k: round(max(0, min(100, v)), 1)
+                            for k, v in risk_predictions.items()
+                        }
 
                         # Calculate composite risk score
                         ml_risk_score = (
@@ -782,9 +804,9 @@ def chroniccare_simulator():
                         priority_result = ml_service.prioritization_service.prioritize(features)
                         priority = {
                             'tier': priority_result.get('priority', 'Medium'),
-                            'confidence': round(priority_result.get('confidence', 0.85) * 100, 1),
-                            'maha_index': round(priority_result.get('maha_index', 40), 1),
-                            'ml_risk_score': round(ml_risk_score, 2),
+                            'confidence': round(min(100, max(0, priority_result.get('confidence', 0.85) * 100)), 1),
+                            'maha_index': round(min(100, max(0, priority_result.get('maha_index', 40))), 1),
+                            'ml_risk_score': round(min(100, max(0, ml_risk_score)), 2),
                         }
                     else:
                         # Derive tier from risk score
@@ -799,8 +821,8 @@ def chroniccare_simulator():
                         priority = {
                             'tier': tier,
                             'confidence': 85.0,
-                            'maha_index': round(ml_risk_score * 4, 1),
-                            'ml_risk_score': round(ml_risk_score, 2),
+                            'maha_index': round(min(100, max(0, ml_risk_score * 2)), 1),
+                            'ml_risk_score': round(min(100, max(0, ml_risk_score)), 2),
                         }
 
                     # Get risk breakdown
@@ -835,8 +857,8 @@ def chroniccare_simulator():
             priority = {
                 'tier': tier,
                 'confidence': 75.0,
-                'maha_index': round(ml_risk_score * 4, 1),
-                'ml_risk_score': round(ml_risk_score, 2),
+                'maha_index': round(min(100, max(0, ml_risk_score * 2)), 1),
+                'ml_risk_score': round(min(100, max(0, ml_risk_score)), 2),
             }
             risk_breakdown = get_risk_breakdown(priority, features)
             recommendations = get_intervention_recommendations(priority, risk_breakdown, features)

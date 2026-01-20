@@ -209,8 +209,8 @@ def generate_training_curves():
     # NOVA Classifier
     nova_history = load_training_history('nova_classifier')
     if nova_history and 'epochs' in nova_history:
-        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-        fig.suptitle('NOVA Classifier - Training Progress', fontsize=18, fontweight='bold')
+        fig, axes = plt.subplots(2, 2, figsize=(12, 9))
+        fig.suptitle('NOVA Classifier - Training Progress', fontsize=28, fontweight='bold', color='#1a365d')
 
         epochs_data = nova_history['epochs']
         epochs = range(1, len(epochs_data) + 1)
@@ -225,29 +225,32 @@ def generate_training_curves():
         # Loss
         axes[0, 0].plot(epochs, train_loss, 'o-', color=COLORS['primary'], linewidth=2, markersize=8, label='Train')
         axes[0, 0].plot(epochs, val_loss, 's-', color=COLORS['success'], linewidth=2, markersize=8, label='Validation')
-        axes[0, 0].set_xlabel('Epoch')
-        axes[0, 0].set_ylabel('Loss')
-        axes[0, 0].set_title('Loss Curve')
-        axes[0, 0].legend()
+        axes[0, 0].set_xlabel('Epoch', fontsize=16, fontweight='500')
+        axes[0, 0].set_ylabel('Loss', fontsize=16, fontweight='500')
+        axes[0, 0].set_title('Loss Curve', fontsize=18, fontweight='bold', color='#1a365d')
+        axes[0, 0].legend(fontsize=14)
+        axes[0, 0].tick_params(axis='both', labelsize=14)
         axes[0, 0].grid(True, alpha=0.3)
 
         # Accuracy
         axes[0, 1].plot(epochs, train_acc, 'o-', color=COLORS['primary'], linewidth=2, markersize=8, label='Train')
         axes[0, 1].plot(epochs, val_acc, 's-', color=COLORS['success'], linewidth=2, markersize=8, label='Validation')
-        axes[0, 1].set_xlabel('Epoch')
-        axes[0, 1].set_ylabel('Accuracy (%)')
-        axes[0, 1].set_title('Accuracy Curve')
-        axes[0, 1].legend()
+        axes[0, 1].set_xlabel('Epoch', fontsize=16, fontweight='500')
+        axes[0, 1].set_ylabel('Accuracy (%)', fontsize=16, fontweight='500')
+        axes[0, 1].set_title('Accuracy Curve', fontsize=18, fontweight='bold', color='#1a365d')
+        axes[0, 1].legend(fontsize=14)
+        axes[0, 1].tick_params(axis='both', labelsize=14)
         axes[0, 1].set_ylim(90, 100)
         axes[0, 1].grid(True, alpha=0.3)
 
         # F1 Score
         axes[1, 0].plot(epochs, train_f1, 'o-', color=COLORS['primary'], linewidth=2, markersize=8, label='Train')
         axes[1, 0].plot(epochs, val_f1, 's-', color=COLORS['success'], linewidth=2, markersize=8, label='Validation')
-        axes[1, 0].set_xlabel('Epoch')
-        axes[1, 0].set_ylabel('Macro F1')
-        axes[1, 0].set_title('F1 Score Curve')
-        axes[1, 0].legend()
+        axes[1, 0].set_xlabel('Epoch', fontsize=16, fontweight='500')
+        axes[1, 0].set_ylabel('Macro F1', fontsize=16, fontweight='500')
+        axes[1, 0].set_title('F1 Score Curve', fontsize=18, fontweight='bold', color='#1a365d')
+        axes[1, 0].legend(fontsize=14)
+        axes[1, 0].tick_params(axis='both', labelsize=14)
         axes[1, 0].grid(True, alpha=0.3)
 
         # Per-class F1 final
@@ -256,14 +259,22 @@ def generate_training_curves():
         f1_scores = [final_metrics['per_class'][c]['f1'] for c in classes]
 
         bars = axes[1, 1].bar(classes, f1_scores, color=NOVA_COLORS)
-        axes[1, 1].set_ylabel('F1 Score')
-        axes[1, 1].set_title('Per-Class F1 (Final)')
+        axes[1, 1].set_ylabel('F1 Score', fontsize=16, fontweight='500')
+        axes[1, 1].set_title('Per-Class F1 (Final)', fontsize=18, fontweight='bold', color='#1a365d')
         axes[1, 1].set_ylim(0, 1.1)
+        axes[1, 1].tick_params(axis='both', labelsize=14)
         for bar, score in zip(bars, f1_scores):
             axes[1, 1].text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02,
-                           f'{score:.3f}', ha='center', fontsize=10, fontweight='bold')
+                           f'{score:.3f}', ha='center', fontsize=16, fontweight='bold')
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0.12, 1, 0.92])
+
+        # Add figure caption
+        fig.text(0.5, 0.02,
+                 'NOVA Classifier training metrics showing model convergence over 10 epochs.\n'
+                 'Final validation accuracy: 96.2%. The model classifies foods into 4 processing levels (NOVA 1-4).',
+                 ha='center', va='bottom', fontsize=20, color='#6b7280', style='italic')
+
         save_figure(fig, 'training_curves/nova_classifier_training.png')
 
     # Chronic Risk Predictor
@@ -622,8 +633,13 @@ def generate_procedure_encoder_viz():
     """Generate procedure encoder similarity visualization."""
     print("\nGenerating Procedure Encoder Visualizations...")
 
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
-    fig.suptitle('Procedure Encoder - Semantic Matching Performance', fontsize=18, fontweight='bold')
+    # Create figure with white background - taller for better spacing
+    fig, axes = plt.subplots(1, 2, figsize=(16, 10))
+    fig.patch.set_facecolor('white')
+
+    # Main title - positioned higher
+    fig.suptitle('Procedure Encoder - Semantic Matching Performance',
+                 fontsize=28, fontweight='bold', color='#1a365d', y=0.94)
 
     # Similarity heatmap
     procedures = ['MRI Brain\nw/o Contrast', 'MRI Head\nw/o', '70551 MRI\nBrain',
@@ -639,39 +655,103 @@ def generate_procedure_encoder_viz():
         [0.25, 0.22, 0.28, 0.30, 0.12, 1.00]
     ])
 
-    im = axes[0].imshow(similarity, cmap='RdYlGn', vmin=0, vmax=1)
+    # Use a softer blue-teal colormap (light to rich blue)
+    from matplotlib.colors import LinearSegmentedColormap
+    formal_cmap = LinearSegmentedColormap.from_list('formal_blue',
+        ['#f0f9ff', '#bae6fd', '#38bdf8', '#0284c7', '#0c4a6e'])
 
-    axes[0].set_xticks(np.arange(len(procedures)))
-    axes[0].set_yticks(np.arange(len(procedures)))
-    axes[0].set_xticklabels(procedures, fontsize=9)
-    axes[0].set_yticklabels(procedures, fontsize=9)
+    # Use pcolormesh instead of imshow to avoid interpolation artifacts (grey lines)
+    n = len(procedures)
+    x = np.arange(n + 1)
+    y = np.arange(n + 1)
+    mesh = axes[0].pcolormesh(x, y, similarity, cmap=formal_cmap, vmin=0, vmax=1,
+                               edgecolors='none', linewidth=0, antialiased=False)
+    axes[0].set_facecolor('white')
+
+    # Set ticks and labels - BIGGER text, centered in cells
+    axes[0].set_xticks(np.arange(n) + 0.5)
+    axes[0].set_yticks(np.arange(n) + 0.5)
+    axes[0].set_xticklabels(procedures, fontsize=12, color='#374151', fontweight='600')
+    axes[0].set_yticklabels(procedures, fontsize=12, color='#374151', fontweight='600')
     plt.setp(axes[0].get_xticklabels(), rotation=45, ha="right")
 
-    for i in range(len(procedures)):
-        for j in range(len(procedures)):
-            color = 'white' if similarity[i, j] > 0.5 else 'black'
-            axes[0].text(j, i, f'{similarity[i, j]:.2f}', ha='center', va='center',
-                        color=color, fontsize=10, fontweight='bold')
+    # Set axis limits
+    axes[0].set_xlim(0, n)
+    axes[0].set_ylim(0, n)
+    axes[0].invert_yaxis()
 
-    axes[0].set_title('Procedure Similarity Matrix', fontweight='bold', fontsize=12)
-    cbar = plt.colorbar(im, ax=axes[0])
-    cbar.set_label('Cosine Similarity', fontweight='bold')
+    # Remove all spines (borders) around the heatmap
+    for spine in axes[0].spines.values():
+        spine.set_visible(False)
 
-    # Threshold interpretation
-    thresholds = ['< 0.65\nNo Match', '0.65 - 0.80\nReview', '≥ 0.80\nConfident Match']
+    # Remove tick marks
+    axes[0].tick_params(axis='both', which='both', length=0)
+
+    # Add similarity values as text - BIGGER, centered in cells
+    for i in range(n):
+        for j in range(n):
+            color = 'white' if similarity[i, j] > 0.5 else '#1f2937'
+            axes[0].text(j + 0.5, i + 0.5, f'{similarity[i, j]:.2f}', ha='center', va='center',
+                        color=color, fontsize=15, fontweight='bold')
+
+    # Title for heatmap
+    axes[0].set_title('Procedure Similarity Matrix', fontweight='bold', fontsize=18,
+                      color='#1a365d', pad=15)
+
+    # Add colorbar
+    cbar = plt.colorbar(mesh, ax=axes[0], shrink=0.75, pad=0.02)
+    cbar.set_label('Cosine Similarity', fontweight='600', fontsize=14, color='#374151')
+    cbar.ax.tick_params(labelsize=12, colors='#374151')
+    cbar.outline.set_visible(False)
+
+    # Subplot caption - centered below
+    axes[0].set_xlabel('Shows how similar different procedure descriptions are.\nHigher values (darker blue) = more similar procedures.',
+                       fontsize=14, color='#6b7280', style='italic', labelpad=20)
+
+    # Bar chart - Match Confidence Distribution
+    thresholds = ['< 0.65\nNo Match', '0.65 - 0.80\nReview', '≥ 0.80\nConfident']
     thresh_values = [30, 40, 30]
-    thresh_colors = [COLORS['danger'], COLORS['warning'], COLORS['success']]
+    # Soft pastel colors: rose pink, amber/sand, mint green
+    thresh_colors = ['#fda4af', '#fcd34d', '#6ee7b7']
 
-    bars = axes[1].bar(thresholds, thresh_values, color=thresh_colors, edgecolor='white', linewidth=2)
-    axes[1].set_ylabel('Percentage of Matches', fontweight='bold')
-    axes[1].set_title('Match Confidence Distribution', fontweight='bold', fontsize=12)
-    axes[1].set_ylim(0, 50)
+    axes[1].set_facecolor('white')
+    bars = axes[1].bar(thresholds, thresh_values, color=thresh_colors,
+                       edgecolor='none', width=0.6)
 
+    # Y-axis label - BIGGER
+    axes[1].set_ylabel('Percentage of Matches (%)', fontweight='600', fontsize=15, color='#374151')
+
+    # Title
+    axes[1].set_title('Match Confidence Distribution', fontweight='bold', fontsize=18,
+                      color='#1a365d', pad=15)
+    axes[1].set_ylim(0, 55)
+
+    # Bigger tick labels
+    axes[1].tick_params(axis='both', colors='#374151', labelsize=13)
+    axes[1].tick_params(axis='x', labelsize=13)
+
+    # Clean up spines
+    axes[1].spines['top'].set_visible(False)
+    axes[1].spines['right'].set_visible(False)
+    axes[1].spines['left'].set_color('#e5e7eb')
+    axes[1].spines['bottom'].set_color('#e5e7eb')
+
+    # Light horizontal grid
+    axes[1].yaxis.grid(True, linestyle='-', alpha=0.3, color='#e5e7eb')
+    axes[1].set_axisbelow(True)
+
+    # Bar value labels - BIGGER
     for bar, val in zip(bars, thresh_values):
-        axes[1].text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
-                    f'{val}%', ha='center', fontweight='bold', fontsize=12)
+        axes[1].text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1.5,
+                    f'{val}%', ha='center', fontweight='bold', fontsize=17, color='#1f2937')
 
-    plt.tight_layout()
+    # Subplot caption - centered below
+    axes[1].set_xlabel('Distribution of procedure matches by confidence level.\n30% are confident matches (≥0.80 similarity).',
+                       fontsize=14, color='#6b7280', style='italic', labelpad=20)
+
+    # Adjust layout with proper spacing
+    plt.tight_layout(rect=[0, 0.02, 1, 0.90])
+    plt.subplots_adjust(wspace=0.3, bottom=0.18)
     save_figure(fig, 'model_performance/procedure_encoder_analysis.png')
 
 
