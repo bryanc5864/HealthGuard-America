@@ -1,0 +1,21 @@
+{
+  "total_records": 30200589,
+  "unique_hospitals": 1002,
+  "columns": [
+    "description",
+    "procedure_code",
+    "revenue_code",
+    "gross_charge",
+    "payer_name",
+    "plan_name",
+    "setting",
+    "hospital_npi",
+    "source_file",
+    "cash_price",
+    "min_price",
+    "max_price",
+    "code_type",
+    "negotiated_rate"
+  ],
+  "processed_at": "2026-01-04T14:16:22.149210"
+}

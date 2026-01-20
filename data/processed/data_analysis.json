@@ -1,0 +1,447 @@
+{
+  "generated_at": "2026-01-04T14:25:24.278991",
+  "pricevision": {
+    "total_records": 30200589,
+    "unique_hospitals": 1002,
+    "columns": [
+      "description",
+      "procedure_code",
+      "revenue_code",
+      "gross_charge",
+      "payer_name",
+      "plan_name",
+      "setting",
+      "hospital_npi",
+      "source_file",
+      "cash_price",
+      "min_price",
+      "max_price",
+      "code_type",
+      "negotiated_rate"
+    ],
+    "price_statistics": {
+      "gross_charge": {
+        "count": 22298063,
+        "mean": 29442.478301312236,
+        "median": 517.62,
+        "std": 408010.75382368074,
+        "min": 0.0,
+        "max": 9960013.0,
+        "p25": 97.0,
+        "p75": 2826.0,
+        "p95": 22615.0
+      },
+      "cash_price": {
+        "count": 20303428,
+        "mean": 3518.913675656891,
+        "median": 356.58,
+        "std": 46604.52125958226,
+        "min": 0.0,
+        "max": 9965976.42,
+        "p25": 68.4,
+        "p75": 1980.0,
+        "p95": 14081.66
+      },
+      "min_price": {
+        "count": 16880100,
+        "mean": 1120.5666631059873,
+        "median": 63.2,
+        "std": 13021.363676241594,
+        "min": 0.0,
+        "max": 4887658.12,
+        "p25": 11.91,
+        "p75": 354.52,
+        "p95": 4175.066499999855
+      },
+      "max_price": {
+        "count": 17000684,
+        "mean": 6464.988355016755,
+        "median": 435.87,
+        "std": 43478.96369632112,
+        "min": 0.0,
+        "max": 8835750.0,
+        "p25": 90.0,
+        "p75": 2590.84,
+        "p95": 23269.0
+      },
+      "negotiated_rate": {
+        "count": 10718830,
+        "mean": 1288.0492942734932,
+        "median": 170.84,
+        "std": 8655.183692456098,
+        "min": 0.0016,
+        "max": 8207066.0,
+        "p25": 38.65,
+        "p75": 780.0,
+        "p95": 5395.73
+      }
+    },
+    "code_types": {
+      "": 17753597,
+      "CDM": 10971951,
+      "HCPCS": 486379,
+      " Rev Code ": 250000,
+      "RC": 212948,
+      "APR-DRG": 167974,
+      "LOCAL": 82681,
+      "CPT/HCPCS": 55233,
+      "Hospital Charge Master": 49400,
+      "CPT/HCPCS Code": 29608
+    },
+    "settings": {
+      "": 18145110,
+      "outpatient": 9903020,
+      "Both": 791038,
+      "Outpatient": 450003,
+      "Inpatient": 329506,
+      "inpatient": 314004,
+      "both": 265728,
+      "inpatient ": 2159,
+      "None": 21
+    },
+    "top_payers": {
+      "CIGNA-ALL PLANS": 175000,
+      "UHC MCR ADV": 159357,
+      "69% BC max $1,980": 156989,
+      "MULTIPLAN-ALL PLANS": 124794,
+      "AETNA-ALL PLANS": 123662,
+      "Aetna": 114458,
+      "UHC-ALL PLANS": 111746,
+      "CIGNA - ALL PLANS": 104520,
+      "AETNA MCR ADV": 102484,
+      "Aetna Better Health 20220901": 86068,
+      "Aetna 20220701": 82866,
+      "AETNA": 77817,
+      "MIDLANDS CHOICE-ALL PLANS": 72136,
+      "AETNA - ALL PLANS": 68805,
+      "ANTHEM": 63047,
+      "AETNA-ALL OTHER PLANS": 62592,
+      "HUMANA MCR ADV": 61981,
+      "MEDI-CAL": 61669,
+      "MULTIPLAN - ALL PLANS": 58739,
+      "UHC - ALL PLANS": 57885
+    }
+  },
+  "drugwatch": {
+    "us_medicare_part_d": {
+      "total_drugs": 3598,
+      "total_spending_2023": 275924520550.87,
+      "top_drugs_by_spending": [
+        {
+          "brand": "Eliquis",
+          "generic": "Apixaban",
+          "spending": 18273451967.0
+        },
+        {
+          "brand": "Ozempic",
+          "generic": "Semaglutide",
+          "spending": 9194048435.1
+        },
+        {
+          "brand": "Jardiance",
+          "generic": "Empagliflozin",
+          "spending": 8839935063.3
+        },
+        {
+          "brand": "Trulicity",
+          "generic": "Dulaglutide",
+          "spending": 7363856224.3
+        },
+        {
+          "brand": "Xarelto",
+          "generic": "Rivaroxaban",
+          "spending": 6309246822.6
+        },
+        {
+          "brand": "Trelegy Ellipta",
+          "generic": "Fluticasone/Umeclidin/Vilanter",
+          "spending": 4455884009.7
+        },
+        {
+          "brand": "Humira(Cf) Pen",
+          "generic": "Adalimumab",
+          "spending": 4419828188.3
+        },
+        {
+          "brand": "Farxiga",
+          "generic": "Dapagliflozin Propanediol",
+          "spending": 4342182307.3
+        },
+        {
+          "brand": "Januvia",
+          "generic": "Sitagliptin Phosphate",
+          "spending": 4090836820.7
+        },
+        {
+          "brand": "Revlimid",
+          "generic": "Lenalidomide",
+          "spending": 3859804788.6
+        }
+      ],
+      "price_per_unit": {
+        "mean": 563.020158874531,
+        "median": 8.8627184582,
+        "max": 239745.72701,
+        "min": 0.0042373802
+      },
+      "most_expensive_drugs": [
+        {
+          "brand": "Amvuttra",
+          "generic": "Vutrisiran Sodium",
+          "price_per_unit": 239745.72701
+        },
+        {
+          "brand": "Vabysmo",
+          "generic": "Faricimab-Svoa",
+          "price_per_unit": 46702.421862
+        },
+        {
+          "brand": "Givlaari",
+          "generic": "Givosiran Sodium",
+          "price_per_unit": 41427.374831
+        },
+        {
+          "brand": "Beovu",
+          "generic": "Brolucizumab-Dbll",
+          "price_per_unit": 40425.233053
+        },
+        {
+          "brand": "Eylea Hd",
+          "generic": "Aflibercept",
+          "price_per_unit": 40244.022685
+        },
+        {
+          "brand": "Eylea",
+          "generic": "Aflibercept",
+          "price_per_unit": 39673.662713
+        },
+        {
+          "brand": "Lucentis",
+          "generic": "Ranibizumab",
+          "price_per_unit": 37071.411534
+        },
+        {
+          "brand": "Gattex",
+          "generic": "Teduglutide",
+          "price_per_unit": 35921.056232
+        },
+        {
+          "brand": "Lemtrada",
+          "generic": "Alemtuzumab",
+          "price_per_unit": 31448.723699
+        },
+        {
+          "brand": "Krystexxa",
+          "generic": "PEGloticase",
+          "price_per_unit": 28509.167967
+        }
+      ],
+      "total_beneficiaries": 478580886
+    },
+    "australia_pbs": {
+      "total_drugs": 14598,
+      "price_usd": {
+        "mean": 5509.441859927973,
+        "median": 17.5955,
+        "max": 1643053.0155000002
+      }
+    },
+    "canada": {
+      "total_drug_records": 57658,
+      "columns": [
+        "drug_code",
+        "class_name",
+        "drug_identification_number",
+        "brand_name",
+        "descriptor",
+        "number_of_ais",
+        "ai_group_no",
+        "company_name",
+        "last_update_date",
+        "country"
+      ]
+    }
+  },
+  "foodscore": {
+    "total_products": 50000,
+    "maha_score": {
+      "mean": 76.5627851579823,
+      "median": 83.0,
+      "std": 23.30316790055823,
+      "min": 0.0,
+      "max": 100.0
+    },
+    "maha_distribution": {
+      "excellent_90_100": 22221,
+      "good_75_90": 5526,
+      "moderate_50_75": 15007,
+      "poor_25_50": 6106,
+      "very_poor_0_25": 1140
+    },
+    "nova_distribution": {
+      "4": 22277,
+      "3": 4825,
+      "1": 3943,
+      "2": 625
+    },
+    "nova_percentages": {
+      "4": 70.3,
+      "3": 15.2,
+      "1": 12.5,
+      "2": 2.0
+    },
+    "nutriscore_distribution": {
+      "unknown": 21367,
+      "e": 9107,
+      "d": 6295,
+      "a": 5370,
+      "c": 4656,
+      "b": 2760,
+      "not-applicable": 381
+    },
+    "products_with_additives": 25105,
+    "avg_additives_per_product": 3.62628,
+    "top_categories": {
+      "Undefined": 6583,
+      "Snacks": 1544,
+      "Null": 1152,
+      "Condiments,Sauces,Groceries": 1044,
+      "Snacks,Sweet snacks,Confectioneries": 883,
+      "Dairies,Fermented foods,Fermented milk products,Cheeses": 788,
+      "Frozen foods": 719,
+      "Desserts,Frozen foods,Frozen desserts": 686,
+      "Snacks,Sweet snacks,Biscuits and cakes,Biscuits": 578,
+      "Plant-based foods and beverages,Plant-based foods,Cereals and potatoes,Cereals and their products": 496,
+      "Beverages,Carbonated drinks,Sodas": 486,
+      "Plant-based foods and beverages,Plant-based foods,Cereals and potatoes,Cereals and their products,Pastas": 478,
+      "Plant-based foods and beverages,Plant-based foods,Fruits and vegetables based foods,Vegetables based foods,Frozen foods,Frozen plant-based foods,Frozen vegetables": 473,
+      "Plant-based foods and beverages,Beverages,Plant-based beverages": 453,
+      "Snacks,Sweet snacks,Biscuits and cakes,Cakes": 432
+    },
+    "top_brands": {
+      "Kroger": 4550,
+      "Spartan": 1340,
+      "Roundy's": 1314,
+      "Private Selection": 1077,
+      "Simple Truth": 762,
+      "Simple Truth Organic": 637,
+      "The Kroger Co.": 527,
+      "General Mills": 385,
+      "Western Family": 327,
+      "Birds Eye": 308,
+      "Kroger,  The Kroger Co.": 287,
+      "Giant Eagle": 284,
+      "Annie's": 283,
+      "Pepperidge Farm": 280,
+      "Deep": 271
+    },
+    "nutrition_averages": {
+      "sugars_100g": {
+        "mean": 20.67847435396206,
+        "median": 6.125
+      },
+      "sodium_100g": {
+        "mean": 0.9206873246147709,
+        "median": 0.167
+      },
+      "fat_100g": {
+        "mean": 17.25649609110359,
+        "median": 4.32
+      },
+      "energy-kcal_100g": {
+        "mean": 429.3549714466475,
+        "median": 265.0
+      }
+    }
+  },
+  "ruralaccess": {
+    "total_hpsa_designations": 14631,
+    "by_state": {
+      "NY": 1820,
+      "CA": 1246,
+      "OH": 1071,
+      "AZ": 700,
+      "TX": 692,
+      "IL": 530,
+      "WI": 506,
+      "MN": 483,
+      "TN": 480,
+      "KY": 368,
+      "FL": 354,
+      "PA": 343,
+      "NC": 337,
+      "AK": 331,
+      "MO": 319,
+      "IA": 308,
+      "MI": 299,
+      "WA": 285,
+      "LA": 254,
+      "ME": 219,
+      "IN": 209,
+      "VA": 207,
+      "CO": 198,
+      "OR": 171,
+      "OK": 170,
+      "GA": 168,
+      "MS": 161,
+      "DC": 156,
+      "SC": 155,
+      "MA": 155,
+      "NE": 141,
+      "KS": 138,
+      "AR": 134,
+      "WV": 123,
+      "MT": 115,
+      "CT": 110,
+      "ND": 104,
+      "AL": 99,
+      "SD": 96,
+      "NV": 91,
+      "ID": 90,
+      "NM": 87,
+      "DE": 86,
+      "NH": 74,
+      "MD": 67,
+      "UT": 63,
+      "HI": 63,
+      "NJ": 60,
+      "WY": 46,
+      "PR": 42,
+      "MH": 32,
+      "PW": 17,
+      "VT": 15,
+      "RI": 15,
+      "FM": 8,
+      "AS": 6,
+      "VI": 5,
+      "MP": 5,
+      "GU": 4
+    },
+    "states_with_shortages": 59,
+    "by_discipline": {
+      "Primary Care": 14631
+    },
+    "rural_status": {
+      "Non-Rural": 7953,
+      "Rural": 5322,
+      "Partially Rural": 1232,
+      "Unknown": 122,
+      "Not Applicable": 2
+    },
+    "hpsa_score": {
+      "mean": 15.122958102658739,
+      "median": 16.0,
+      "max": 25.0,
+      "min": 0.0
+    },
+    "population_affected": {
+      "total": 957031727,
+      "mean_per_hpsa": 65451
+    },
+    "poverty_rate": {
+      "mean": 23.570322843466748,
+      "median": 16.8
+    },
+    "unique_counties": 2833
+  }
+}

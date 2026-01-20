@@ -1,0 +1,21 @@
+{
+  "total_counties": 2956,
+  "timestamp": "2026-01-14T15:36:14.080333",
+  "diabetes_prevalence_mean": 12.36,
+  "diabetes_prevalence_median": 12.1,
+  "diabetes_prevalence_max": 25.1,
+  "obesity_prevalence_mean": 37.52,
+  "obesity_prevalence_median": 38.1,
+  "obesity_prevalence_max": 54.0,
+  "heart_disease_prevalence_mean": 6.89,
+  "heart_disease_prevalence_median": 6.6,
+  "heart_disease_prevalence_max": 13.1,
+  "avg_food_environment_score": 49.88,
+  "pct_population_low_food_access": 18.16,
+  "intervention_tiers": {
+    "medium": 1673,
+    "low": 1063,
+    "high": 211,
+    "critical": 0
+  }
+}
