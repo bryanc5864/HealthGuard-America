@@ -188,13 +188,33 @@ class PriceVisionService:
 
     @classmethod
     def get_hospitals_with_mrf(cls):
-        """Get set of hospital IDs that have MRF/pricing data"""
+        """Get set of hospital IDs that have MRF/pricing data (with file cache)"""
         if 'hospitals_with_mrf' not in cls._cache:
             price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+            # Try to load from pre-computed cache file first (instant)
+            cache_file = DATA_DIR / 'processed/pricevision/hospital_npi_cache.txt'
+            if cache_file.exists():
+                try:
+                    with open(cache_file, 'r') as f:
+                        cls._cache['hospitals_with_mrf'] = set(line.strip() for line in f if line.strip())
+                    return cls._cache['hospitals_with_mrf']
+                except Exception:
+                    pass
+
             if price_file.exists():
                 try:
+                    # Read just the NPI column with pandas (faster than pyarrow for this)
                     df = pd.read_parquet(price_file, columns=['hospital_npi'])
                     cls._cache['hospitals_with_mrf'] = set(df['hospital_npi'].astype(str).unique())
+
+                    # Cache to file for future fast loading
+                    try:
+                        cache_file.parent.mkdir(parents=True, exist_ok=True)
+                        with open(cache_file, 'w') as f:
+                            for npi in sorted(cls._cache['hospitals_with_mrf']):
+                                f.write(npi + '\n')
+                    except Exception:
+                        pass
                 except Exception as e:
                     print(f"Error loading MRF hospital IDs: {e}")
                     cls._cache['hospitals_with_mrf'] = set()
@@ -203,46 +223,52 @@ class PriceVisionService:
         return cls._cache['hospitals_with_mrf']
 
     @classmethod
-    def get_batch_transparency_data(cls, hospital_ids):
-        """Get transparency data for multiple hospitals in one query (avoids N+1)."""
-        if not hospital_ids:
-            return {}
+    def _get_all_transparency_data(cls):
+        """Pre-compute and cache transparency data for ALL hospitals (one-time load)."""
+        if 'all_transparency' in cls._cache:
+            return cls._cache['all_transparency']
 
         price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
         if not price_file.exists():
+            cls._cache['all_transparency'] = {}
             return {}
 
         try:
-            # Read all prices for the specified hospitals in one query
+            # Read only the columns we need for aggregation
             df = pd.read_parquet(price_file, columns=[
-                'hospital_npi', 'cash_price', 'gross_charge', 'payer_name', 'description'
+                'hospital_npi', 'cash_price', 'gross_charge', 'payer_name'
             ])
 
-            # Filter to only requested hospitals
-            hospital_ids_str = set(str(h) for h in hospital_ids)
-            df = df[df['hospital_npi'].astype(str).isin(hospital_ids_str)]
+            # Pre-aggregate by hospital using vectorized operations
+            df['hospital_npi'] = df['hospital_npi'].astype(str)
+            df['has_cash'] = df['cash_price'].notna().astype(int)
+            df['has_gross'] = df['gross_charge'].notna().astype(int)
+            df['has_payer'] = df['payer_name'].notna().astype(int)
 
-            # Group by hospital and calculate transparency metrics
+            # Group and aggregate in one pass
+            agg = df.groupby('hospital_npi').agg({
+                'has_cash': ['sum', 'count'],
+                'has_gross': 'sum',
+                'has_payer': 'sum'
+            }).reset_index()
+
+            agg.columns = ['hospital_npi', 'prices_with_cash', 'total_prices', 'prices_with_gross', 'prices_with_payer']
+
+            # Calculate transparency scores vectorized
             result = {}
-            for npi, group in df.groupby(df['hospital_npi'].astype(str)):
-                total = len(group)
+            for _, row in agg.iterrows():
+                npi = row['hospital_npi']
+                total = row['total_prices']
                 if total == 0:
                     continue
 
-                prices_with_cash = group['cash_price'].notna().sum()
-                prices_with_gross = group['gross_charge'].notna().sum()
-                prices_with_payer = group['payer_name'].notna().sum()
+                cash_ratio = row['prices_with_cash'] / total
+                gross_ratio = row['prices_with_gross'] / total
+                payer_ratio = row['prices_with_payer'] / total
 
-                # Calculate transparency score (same logic as calculate_transparency_score)
-                score = 30  # Base score for having data
-
-                cash_ratio = prices_with_cash / total
+                score = 30  # Base score
                 score += int(cash_ratio * 20)
-
-                gross_ratio = prices_with_gross / total
                 score += int(gross_ratio * 15)
-
-                payer_ratio = prices_with_payer / total
                 score += int(payer_ratio * 15)
 
                 # Volume bonus
@@ -257,25 +283,42 @@ class PriceVisionService:
 
                 result[npi] = {
                     'transparency_score': min(score, 100),
-                    'total_prices': total,
-                    'prices_with_cash': int(prices_with_cash),
+                    'total_prices': int(total),
+                    'prices_with_cash': int(row['prices_with_cash']),
                     'cash_ratio': cash_ratio
                 }
 
+            cls._cache['all_transparency'] = result
             return result
         except Exception as e:
-            print(f"Error in batch transparency: {e}")
+            print(f"Error computing transparency data: {e}")
+            cls._cache['all_transparency'] = {}
             return {}
 
     @classmethod
+    def get_batch_transparency_data(cls, hospital_ids):
+        """Get transparency data for multiple hospitals (uses cached data)."""
+        if not hospital_ids:
+            return {}
+
+        # Use cached aggregated data
+        all_data = cls._get_all_transparency_data()
+
+        # Filter to requested hospitals
+        hospital_ids_str = set(str(h) for h in hospital_ids)
+        return {npi: data for npi, data in all_data.items() if npi in hospital_ids_str}
+
+    @classmethod
     def get_stats(cls):
-        """Get summary statistics"""
-        hospitals = cls.get_hospitals(limit=10000)
-        procedures = cls.get_procedures(limit=10000)
-        hospitals_with_mrf = cls.get_hospitals_with_mrf()
-        return {
-            'total_hospitals': len(hospitals),
-            'total_procedures': len(procedures),
-            'states_covered': len(cls.get_states()),
-            'hospitals_with_mrf': len(hospitals_with_mrf)
-        }
+        """Get summary statistics (cached)"""
+        if 'stats' not in cls._cache:
+            hospitals = cls.get_hospitals(limit=10000)
+            procedures = cls.get_procedures(limit=10000)
+            hospitals_with_mrf = cls.get_hospitals_with_mrf()
+            cls._cache['stats'] = {
+                'total_hospitals': len(hospitals),
+                'total_procedures': len(procedures),
+                'states_covered': len(cls.get_states()),
+                'hospitals_with_mrf': len(hospitals_with_mrf)
+            }
+        return cls._cache['stats']
