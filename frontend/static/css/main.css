@@ -161,7 +161,6 @@ h1, h2, h3, h4, h5, h6 {
 a {
   color: var(--primary-700);
   text-decoration: none;
-  transition: color var(--transition-fast);
 }
 
 a:hover {
@@ -283,7 +282,6 @@ a:hover {
   font-weight: 500;
   color: var(--neutral-600);
   border-radius: var(--radius-lg);
-  transition: all var(--transition-fast);
 }
 
 .nav-link:hover {
@@ -341,7 +339,7 @@ a:hover {
 .hero-landing {
   min-height: 100vh;
   background: linear-gradient(135deg, rgba(15, 30, 60, 0.95) 0%, rgba(20, 40, 75, 0.95) 60%, rgba(120, 30, 30, 0.93) 100%),
-              url('/static/images/trump-healthcare.jpeg');
+              url('/static/images/trump-healthcare.webp');
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -430,7 +428,6 @@ a:hover {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  transition: all var(--transition-base);
 }
 
 .card:hover {
@@ -473,7 +470,6 @@ a:hover {
   border-radius: var(--radius-2xl);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
-  transition: all var(--transition-base);
   height: 100%;
 }
 
@@ -493,6 +489,7 @@ a:hover {
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow);
+  will-change: transform;
 }
 
 .module-card:hover .module-card-image img {
@@ -590,7 +587,6 @@ a:hover {
   border-radius: var(--radius-xl);
   padding: var(--spacing-8);
   text-align: center;
-  transition: all var(--transition-base);
   cursor: pointer;
   text-decoration: none;
 }
@@ -663,7 +659,7 @@ a:hover {
   border-radius: var(--radius-lg);
   border: none;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  
   text-decoration: none;
 }
 
@@ -760,7 +756,6 @@ a:hover {
   padding: var(--spacing-6);
   box-shadow: var(--shadow-lg);
   border-left: 5px solid var(--primary-700);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .stat-card:hover {
@@ -821,7 +816,7 @@ a:hover {
   border: 1px solid var(--neutral-300);
   border-radius: var(--radius-lg);
   background: var(--white);
-  transition: all var(--transition-fast);
+  
 }
 
 .form-control:focus {
@@ -1037,31 +1032,31 @@ a:hover {
 /* Module-specific page headers with image backgrounds */
 .page-header--pricevision {
   background: linear-gradient(135deg, rgba(120, 53, 15, 0.88) 0%, rgba(180, 83, 9, 0.85) 50%, rgba(245, 158, 11, 0.82) 100%),
-              url('/static/images/pricevision/UF-Health-Shands-Hospital-North-Tower.jpg');
+              url('/static/images/pricevision/UF-Health-Shands-Hospital-North-Tower.webp');
   background-size: cover;
   background-position: center;
 }
 .page-header--drugwatch {
   background: linear-gradient(135deg, rgba(127, 29, 29, 0.85) 0%, rgba(185, 28, 44, 0.82) 50%, rgba(239, 68, 68, 0.78) 100%),
-              url('/static/images/drugwatch/angled-pharmacy-shelves-gravity-feed-systems.jpg');
+              url('/static/images/drugwatch/angled-pharmacy-shelves-gravity-feed-systems.webp');
   background-size: cover;
   background-position: center top;
 }
 .page-header--foodscore {
   background: linear-gradient(135deg, rgba(20, 83, 45, 0.88) 0%, rgba(22, 101, 52, 0.85) 50%, rgba(34, 197, 94, 0.82) 100%),
-              url('/static/images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.jpg');
+              url('/static/images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.webp');
   background-size: cover;
   background-position: center;
 }
 .page-header--ruralaccess {
   background: linear-gradient(135deg, rgba(76, 29, 149, 0.88) 0%, rgba(109, 40, 217, 0.85) 50%, rgba(139, 92, 246, 0.82) 100%),
-              url('/static/images/ruralaccess/rural-hospitals.jpg');
+              url('/static/images/ruralaccess/rural-hospitals.webp');
   background-size: cover;
   background-position: center;
 }
 .page-header--chroniccare {
   background: linear-gradient(135deg, rgba(22, 78, 99, 0.88) 0%, rgba(8, 145, 178, 0.85) 50%, rgba(6, 182, 212, 0.82) 100%),
-              url('/static/images/chroniccare/healthcare.jpg');
+              url('/static/images/chroniccare/healthcare.webp');
   background-size: cover;
   background-position: center;
 }
@@ -1069,7 +1064,7 @@ a:hover {
 /* Public Portal header with patient image */
 .page-header--public {
   background: linear-gradient(135deg, rgba(22, 101, 52, 0.88) 0%, rgba(34, 197, 94, 0.82) 50%, rgba(74, 222, 128, 0.78) 100%),
-              url('/static/images/chroniccare/provider-holding-hand-of-senior-patient.jpg');
+              url('/static/images/chroniccare/provider-holding-hand-of-senior-patient.webp');
   background-size: 120%;
   background-position: center 30%;
 }
@@ -1332,21 +1327,53 @@ a:hover {
    Animations & Transitions
    ============================================ */
 
-/* Global smooth transitions for interactive elements */
-a,
-.btn,
-.card,
-.badge,
-.nav-link,
-.stat-card,
+/* Global smooth transitions for interactive elements -- specific properties only */
+a {
+  transition: color var(--transition-fast);
+}
+
+.btn {
+  transition: transform var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  will-change: transform;
+}
+
+.card {
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  will-change: transform;
+}
+
+.badge {
+  transition: filter var(--transition-fast), transform var(--transition-fast);
+}
+
+.nav-link {
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.stat-card {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  will-change: transform;
+}
+
 .form-control,
-.portal-card,
-.module-card,
-.table tbody tr,
 input,
 select,
 textarea {
-  transition: all var(--transition-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.portal-card {
+  transition: background-color var(--transition-base), border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-slow);
+  will-change: transform;
+}
+
+.module-card {
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  will-change: transform;
+}
+
+.table tbody tr {
+  transition: background-color var(--transition-fast);
 }
 
 /* Button hover effects */
@@ -1369,10 +1396,6 @@ textarea {
   transition: transform 0.1s ease;
 }
 
-/* Badge hover glow */
-.badge {
-  transition: all var(--transition-fast);
-}
 
 a.badge:hover,
 .badge:hover {
@@ -1380,15 +1403,9 @@ a.badge:hover,
   transform: scale(1.05);
 }
 
-/* Table row highlight */
-.table tbody tr {
-  transition: background-color var(--transition-fast);
-}
+/* table row transitions consolidated above */
 
-/* Form focus animations */
-.form-control {
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
-}
+/* form-control transitions consolidated above */
 
 .form-control:hover {
   border-color: var(--neutral-400);
@@ -1428,7 +1445,7 @@ a.badge:hover,
   width: 0;
   height: 2px;
   background: currentColor;
-  transition: all var(--transition-fast);
+  transition: width var(--transition-fast), opacity var(--transition-fast);
   transform: translateX(-50%);
   opacity: 0;
 }
@@ -1440,9 +1457,7 @@ a.badge:hover,
 }
 
 /* Portal card glow effect */
-.portal-card {
-  transition: all var(--transition-base), box-shadow var(--transition-slow);
-}
+/* portal-card transitions consolidated above */
 
 .portal-card:hover {
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
@@ -1460,6 +1475,7 @@ a.badge:hover,
 /* Module card image zoom is already defined, add overlay fade */
 .module-card-overlay {
   transition: opacity var(--transition-base);
+  will-change: opacity;
 }
 
 .module-card:hover .module-card-overlay {
@@ -1706,7 +1722,7 @@ a.badge:hover,
   background: var(--white);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
-  transition: all var(--transition-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), color var(--transition-base);
 }
 
 .action-card:hover {
@@ -1801,7 +1817,7 @@ a.badge:hover,
   border-radius: var(--radius-xl);
   background: var(--white);
   box-shadow: var(--shadow-md);
-  transition: all var(--transition-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .nova-card:hover {
@@ -1836,12 +1852,11 @@ a.badge:hover,
 
 /* Improved page header with animated gradient */
 .page-header {
-  background-attachment: fixed;
 }
 
 /* Smooth scroll-linked header shrink */
 .navbar {
-  transition: height var(--transition-base), box-shadow var(--transition-base);
+  transition: box-shadow var(--transition-base);
 }
 
 /* Mobile nav hamburger */
@@ -1908,7 +1923,7 @@ a.badge:hover,
   font-size: var(--text-xs);
   white-space: nowrap;
   z-index: 100;
-  transition: all var(--transition-fast);
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
 }
 
 /* Focus visible styles for accessibility */
@@ -1988,7 +2003,7 @@ a.badge:hover,
   top: 50%;
   left: var(--spacing-4);
   transform: translateY(-50%);
-  transition: all var(--transition-fast);
+  transition: top var(--transition-fast), font-size var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
   pointer-events: none;
   color: var(--neutral-400);
   margin: 0;
@@ -2006,7 +2021,6 @@ a.badge:hover,
    ============================================ */
 .count-up {
   display: inline-block;
-  transition: all 0.3s ease;
 }
 
 /* ============================================
@@ -2026,14 +2040,7 @@ main {
 /* ============================================
    Subtle Parallax for Hero Sections
    ============================================ */
-@media (prefers-reduced-motion: no-preference) {
-  .page-header {
-    background-attachment: fixed;
-  }
-  .hero-landing {
-    background-attachment: fixed;
-  }
-}
+/* Parallax removed: background-attachment:fixed causes severe repaint storms on scroll */
 
 /* ============================================
    Badge Pill Styles
@@ -2067,4 +2074,180 @@ main {
     box-shadow: none;
     border: 1px solid var(--neutral-300);
   }
+}
+
+/* ============================================
+   Scroll Reveal Animations (JS-driven classes)
+   ============================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .reveal-on-scroll.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stagger-child {
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .stagger-revealed .stagger-child {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   Landing Page Classes (replace inline styles)
+   ============================================ */
+.hero-content--centered {
+  text-align: center;
+}
+
+.hero-logo-wrap {
+  margin-bottom: var(--spacing-4);
+}
+
+.hero-logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  margin-bottom: var(--spacing-3);
+}
+
+.hero-logo-icon i {
+  font-size: 1.75rem;
+  color: white;
+}
+
+.hero-subtitle--centered {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.hero-stats--centered {
+  justify-content: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.portal-card-btn {
+  font-size: 14px;
+  padding: 12px 24px;
+}
+
+.data-sources {
+  margin-top: var(--spacing-12);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.data-sources-label {
+  color: rgba(255,255,255,0.4);
+  font-size: 11px;
+  margin-bottom: var(--spacing-3);
+  letter-spacing: 0.12em;
+}
+
+.data-sources-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.data-sources-list span {
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.section--white {
+  background: white;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--spacing-12);
+}
+
+.section-title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  margin-bottom: var(--spacing-4);
+}
+
+.section-subtitle {
+  color: var(--neutral-600);
+  font-size: var(--text-lg);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.module-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-6);
+}
+
+.module-grid-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.module-grid-bottom .module-card {
+  width: calc(33.333% - 1rem);
+}
+
+.cta-section {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 40%, #8b3a3a 100%);
+  padding: var(--spacing-16) 0;
+}
+
+.cta-content {
+  text-align: center;
+}
+
+.cta-title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  color: white;
+  margin-bottom: var(--spacing-4);
+}
+
+.cta-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: var(--text-base);
+  margin-bottom: var(--spacing-8);
+  max-width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: var(--spacing-4);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.footer--flush {
+  margin-top: 0;
+}
+
+.footer-flag {
+  height: 20px;
+  width: auto;
 }

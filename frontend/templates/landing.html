@@ -8,22 +8,22 @@
 
 {% block content %}
 <div class="hero hero-landing page-enter">
-    <div class="hero-content" style="text-align: center;">
+    <div class="hero-content hero-content--centered">
         <!-- Logo and Title -->
-        <div style="margin-bottom: var(--spacing-4);">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; margin-bottom: var(--spacing-3);">
-                <i class="bi bi-shield-plus" style="font-size: 1.75rem; color: white;"></i>
+        <div class="hero-logo-wrap">
+            <div class="hero-logo-icon">
+                <i class="bi bi-shield-plus"></i>
             </div>
             <h1 class="hero-title">
                 HealthGuard <span>America</span>
             </h1>
-            <p class="hero-subtitle" style="max-width: 500px; margin: 0 auto;">
+            <p class="hero-subtitle hero-subtitle--centered">
                 Healthcare transparency and analytics platform for informed health decisions.
             </p>
         </div>
 
         <!-- Stats Row -->
-        <div class="hero-stats" style="justify-content: center; margin-bottom: var(--spacing-6);">
+        <div class="hero-stats hero-stats--centered">
             <div class="hero-stat">
                 <div class="hero-stat-value">30M</div>
                 <div class="hero-stat-label">Price Records</div>
@@ -65,7 +65,7 @@
                         <i class="bi bi-basket"></i> FoodScore
                     </span>
                 </div>
-                <div class="btn btn-white btn-sm" style="font-size: 14px; padding: 12px 24px;">
+                <div class="btn btn-white btn-sm portal-card-btn">
                     Enter Public Portal <i class="bi bi-arrow-right"></i>
                 </div>
             </a>
@@ -89,45 +89,41 @@
                         <i class="bi bi-activity"></i> ChronicCare
                     </span>
                 </div>
-                <div class="btn btn-white btn-sm" style="font-size: 14px; padding: 12px 24px;">
+                <div class="btn btn-white btn-sm portal-card-btn">
                     Enter Gov Portal <i class="bi bi-lock"></i>
                 </div>
             </a>
         </div>
 
         <!-- Data Sources -->
-        <div style="margin-top: var(--spacing-12); padding-top: var(--spacing-4); border-top: 1px solid rgba(255,255,255,0.1);">
-            <p style="color: rgba(255,255,255,0.4); font-size: 11px; margin-bottom: var(--spacing-3); letter-spacing: 0.12em;">
-                POWERED BY OFFICIAL DATA SOURCES
-            </p>
-            <div style="display: flex; justify-content: center; align-items: center; gap: var(--spacing-6); flex-wrap: wrap;">
-                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">CMS</span>
-                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">CDC PLACES</span>
-                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">HRSA</span>
-                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">FDA</span>
-                <span style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 14px;">Open Food Facts</span>
+        <div class="data-sources">
+            <p class="data-sources-label">POWERED BY OFFICIAL DATA SOURCES</p>
+            <div class="data-sources-list">
+                <span>CMS</span>
+                <span>CDC PLACES</span>
+                <span>HRSA</span>
+                <span>FDA</span>
+                <span>Open Food Facts</span>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Features Section -->
-<section class="section" style="background: white;">
+<section class="section section--white">
     <div class="container container-xl">
-        <div style="text-align: center; margin-bottom: var(--spacing-12);">
-            <h2 style="font-size: var(--text-3xl); font-weight: 800; margin-bottom: var(--spacing-4);">
-                Five Powerful Modules
-            </h2>
-            <p style="color: var(--neutral-600); font-size: var(--text-lg); max-width: 600px; margin: 0 auto;">
+        <div class="section-header">
+            <h2 class="section-title">Five Powerful Modules</h2>
+            <p class="section-subtitle">
                 Comprehensive healthcare transparency tools for consumers and policy makers
             </p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-6);">
+        <div class="module-grid-3">
             <!-- PriceVision -->
             <div class="module-card module-card--pricevision">
                 <div class="module-card-image">
-                    <img src="{{ url_for('static', filename='images/pricevision/UF-Health-Shands-Hospital-North-Tower.jpg') }}" alt="Hospital">
+                    <img width="800" height="568" loading="lazy" src="{{ url_for('static', filename='images/pricevision/UF-Health-Shands-Hospital-North-Tower.webp') }}" alt="Hospital">
                     <div class="module-card-overlay"></div>
                     <div class="module-card-icon">
                         <i class="bi bi-currency-dollar"></i>
@@ -153,7 +149,7 @@
             <!-- DrugWatch -->
             <div class="module-card module-card--drugwatch">
                 <div class="module-card-image">
-                    <img src="{{ url_for('static', filename='images/drugwatch/Pill-Bottles.jpg') }}" alt="Medications">
+                    <img width="750" height="504" loading="lazy" src="{{ url_for('static', filename='images/drugwatch/Pill-Bottles.webp') }}" alt="Medications">
                     <div class="module-card-overlay"></div>
                     <div class="module-card-icon">
                         <i class="bi bi-capsule"></i>
@@ -179,7 +175,7 @@
             <!-- FoodScore -->
             <div class="module-card module-card--foodscore">
                 <div class="module-card-image">
-                    <img src="{{ url_for('static', filename='images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.jpg') }}" alt="Healthy Food">
+                    <img width="800" height="517" loading="lazy" src="{{ url_for('static', filename='images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.webp') }}" alt="Healthy Food">
                     <div class="module-card-overlay"></div>
                     <div class="module-card-icon">
                         <i class="bi bi-basket"></i>
@@ -201,15 +197,14 @@
                     </a>
                 </div>
             </div>
-
         </div>
 
         <!-- Bottom row - centered -->
-        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 1.5rem;">
+        <div class="module-grid-bottom">
             <!-- RuralAccess -->
-            <div class="module-card module-card--ruralaccess" style="width: calc(33.333% - 1rem);">
+            <div class="module-card module-card--ruralaccess">
                 <div class="module-card-image">
-                    <img src="{{ url_for('static', filename='images/ruralaccess/rural-hospitals.jpg') }}" alt="Rural Healthcare">
+                    <img width="800" height="533" loading="lazy" src="{{ url_for('static', filename='images/ruralaccess/rural-hospitals.webp') }}" alt="Rural Healthcare">
                     <div class="module-card-overlay"></div>
                     <div class="module-card-icon">
                         <i class="bi bi-geo-alt"></i>
@@ -233,9 +228,9 @@
             </div>
 
             <!-- ChronicCare -->
-            <div class="module-card module-card--chroniccare" style="width: calc(33.333% - 1rem);">
+            <div class="module-card module-card--chroniccare">
                 <div class="module-card-image">
-                    <img src="{{ url_for('static', filename='images/chroniccare/healthcare.jpg') }}" alt="Healthcare Analytics">
+                    <img width="800" height="386" loading="lazy" src="{{ url_for('static', filename='images/chroniccare/healthcare.webp') }}" alt="Healthcare Analytics">
                     <div class="module-card-overlay"></div>
                     <div class="module-card-icon">
                         <i class="bi bi-activity"></i>
@@ -262,16 +257,14 @@
 </section>
 
 <!-- CTA Section -->
-<section style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 40%, #8b3a3a 100%); padding: var(--spacing-16) 0;">
-    <div class="container container-lg" style="text-align: center;">
-        <h2 style="font-size: var(--text-3xl); font-weight: 800; color: white; margin-bottom: var(--spacing-4);">
-            Make America Healthy Again
-        </h2>
-        <p style="color: rgba(255, 255, 255, 0.6); font-size: var(--text-base); margin-bottom: var(--spacing-8); max-width: 550px; margin-left: auto; margin-right: auto;">
+<section class="cta-section">
+    <div class="container container-lg cta-content">
+        <h2 class="cta-title">Make America Healthy Again</h2>
+        <p class="cta-text">
             Transparency is the first step toward a healthier nation.
             Start exploring healthcare data today.
         </p>
-        <div style="display: flex; gap: var(--spacing-4); justify-content: center; flex-wrap: wrap;">
+        <div class="cta-buttons">
             <a href="{{ url_for('public.home') }}" class="btn btn-white btn-lg">
                 <i class="bi bi-arrow-right-circle"></i> Get Started Free
             </a>
@@ -283,7 +276,7 @@
 </section>
 
 <!-- Footer for landing page -->
-<footer class="footer" style="margin-top: 0;">
+<footer class="footer footer--flush">
     <div class="container container-2xl">
         <div class="footer-grid">
             <div>
@@ -331,7 +324,7 @@
                 &copy; 2026 HealthGuard America. A healthcare transparency initiative.
             </p>
             <div class="flex items-center gap-4">
-                <img src="{{ url_for('static', filename='images/gov/Flag_of_the_United_States (1).png') }}" alt="US Flag" style="height: 20px; width: auto;">
+                <img width="1200" height="631" loading="lazy" src="{{ url_for('static', filename='images/gov/Flag_of_the_United_States (1).webp') }}" alt="US Flag" class="footer-flag">
                 <span class="text-sm">Made in the USA</span>
             </div>
         </div>
