@@ -1,5 +1,9 @@
 {% extends "gov/base_gov.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
 {% block title %}HPSA Details - RuralAccess{% endblock %}
 
 {% block content %}
@@ -163,7 +167,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var map = L.map('hpsa-map').setView([{{ hpsa.latitude }}, {{ hpsa.longitude }}], 10);
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+var map = L.map('hpsa-map').setView([{{ hpsa.latitude }}, {{ hpsa.longitude }}], 10);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);

@@ -1,219 +1,219 @@
 /**
- * HealthGuard UI Animations
- * Smooth transitions and micro-interactions
+ * HealthGuard UI Animations -- Performance-optimized
+ * Uses CSS classes instead of inline styles, consolidated IntersectionObserver,
+ * respects prefers-reduced-motion.
  */
+(function () {
+  'use strict';
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Fade in cards on scroll
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate-in');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
+  /**
+   * Scroll-reveal: fade-in cards and stat-cards when they enter the viewport.
+   * Uses a single IntersectionObserver for all revealable elements.
+   */
+  function initScrollReveal() {
+    if (prefersReducedMotion) return;
 
-    // Observe cards and stat cards
-    document.querySelectorAll('.card, .stat-card').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        observer.observe(el);
-    });
-
-    // Add animate-in class styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .animate-in {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
         }
-    `;
-    document.head.appendChild(style);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-    // Smooth number counting for stat values
-    document.querySelectorAll('.stat-card-value').forEach(el => {
-        const text = el.textContent.trim();
-        const match = text.match(/^([\d,]+)/);
-        if (match) {
-            const target = parseInt(match[1].replace(/,/g, ''));
-            if (target > 0 && target < 1000000) {
-                animateValue(el, 0, target, 1000, text);
-            }
+    document.querySelectorAll('.card, .stat-card').forEach(function (el) {
+      el.classList.add('reveal-on-scroll');
+      observer.observe(el);
+    });
+  }
+
+  /**
+   * Staggered grid reveal: children of .stats-grid and .grid-auto
+   * animate in with increasing delay.
+   */
+  function initStaggeredReveal() {
+    if (prefersReducedMotion) return;
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('stagger-revealed');
+          observer.unobserve(entry.target);
         }
-    });
-
-    // Button hover effects
-    document.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-1px)';
-        });
-        btn.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-    });
-});
-
-/**
- * Animate a number from start to end
- */
-function animateValue(el, start, end, duration, originalText) {
-    const suffix = originalText.replace(/^[\d,]+/, '');
-    const startTime = performance.now();
-
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const current = Math.floor(start + (end - start) * easeOut);
-        el.textContent = current.toLocaleString() + suffix;
-
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
-    }
-
-    requestAnimationFrame(update);
-}
-
-/**
- * Loading spinner for forms
- */
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function() {
-        const btn = this.querySelector('button[type="submit"]');
-        if (btn && !btn.disabled) {
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
-            btn.disabled = true;
-
-            // Re-enable after 10s in case of error
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }, 10000);
-        }
-    });
-});
-/**
- * Debounce helper - delays function execution until user stops typing
- */
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-/**
- * Auto-submit search forms after debounce
- */
-document.querySelectorAll('.search-box input[type="text"], .search-box input[type="search"]').forEach(input => {
-    const form = input.closest('form');
-    if (form) {
-        input.addEventListener('input', debounce(function() {
-            if (input.value.length >= 2 || input.value.length === 0) {
-                form.submit();
-            }
-        }, 500));
-    }
-});
-
-/**
- * Smooth page transitions
- */
-document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"]):not([href^="javascript"])').forEach(link => {
-    link.addEventListener('click', function(e) {
-        const href = this.getAttribute('href');
-        if (href && href.startsWith('/') || href.startsWith(window.location.origin)) {
-            document.body.style.opacity = '0.97';
-            document.body.style.transition = 'opacity 0.15s ease';
-        }
-    });
-});
-
-/**
- * Mobile hamburger menu
- */
-document.addEventListener('click', function(e) {
-    const navToggle = document.querySelector('.navbar-toggle');
-    const navMenu = document.querySelector('.navbar-nav');
-    if (navToggle && navMenu && !navToggle.contains(e.target) && !navMenu.contains(e.target)) {
-        navMenu.classList.remove('active');
-    }
-});
-
-/**
- * Staggered card reveal on scroll
- */
-document.querySelectorAll('.stats-grid, .grid-auto').forEach(grid => {
-    const cards = grid.children;
-    Array.from(cards).forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(15px)';
-        card.style.transition = `opacity 0.4s ease ${index * 0.08}s, transform 0.4s ease ${index * 0.08}s`;
-    });
-
-    const gridObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                Array.from(entry.target.children).forEach(card => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                });
-                gridObserver.unobserve(entry.target);
-            }
-        });
+      });
     }, { threshold: 0.1 });
 
-    gridObserver.observe(grid);
-});
-
-/**
- * Animate progress bars when they come into view
- */
-const progressObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            const bar = entry.target;
-            const targetWidth = bar.style.width;
-            bar.style.width = '0%';
-            bar.style.transition = 'width 0.8s ease-out';
-            requestAnimationFrame(() => {
-                bar.style.width = targetWidth;
-            });
-            progressObserver.unobserve(bar);
-        }
+    document.querySelectorAll('.stats-grid, .grid-auto').forEach(function (grid) {
+      var children = grid.children;
+      for (var i = 0; i < children.length; i++) {
+        children[i].classList.add('stagger-child');
+        children[i].style.transitionDelay = (i * 0.08) + 's';
+      }
+      observer.observe(grid);
     });
-}, { threshold: 0.1 });
+  }
 
-document.querySelectorAll('[style*="width:"][style*="height: 100%"]').forEach(bar => {
-    if (bar.parentElement && bar.parentElement.style.overflow === 'hidden') {
-        progressObserver.observe(bar);
-    }
-});
+  /**
+   * Animate stat numbers counting up when they enter the viewport.
+   */
+  function initCountUp() {
+    if (prefersReducedMotion) return;
 
-/**
- * Add shadow to navbar on scroll
- */
-const navbar = document.querySelector('.navbar');
-if (navbar) {
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 10) {
-            navbar.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-        } else {
-            navbar.style.boxShadow = 'var(--shadow-sm)';
+    document.querySelectorAll('.stat-card-value').forEach(function (el) {
+      var text = el.textContent.trim();
+      var match = text.match(/^([\d,]+)/);
+      if (match) {
+        var target = parseInt(match[1].replace(/,/g, ''), 10);
+        if (target > 0 && target < 1000000) {
+          var suffix = text.replace(/^[\d,]+/, '');
+          animateValue(el, 0, target, 1000, suffix);
         }
+      }
+    });
+  }
+
+  function animateValue(el, start, end, duration, suffix) {
+    var startTime = performance.now();
+    function update(currentTime) {
+      var elapsed = currentTime - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      var easeOut = 1 - Math.pow(1 - progress, 3);
+      var current = Math.floor(start + (end - start) * easeOut);
+      el.textContent = current.toLocaleString() + suffix;
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+    requestAnimationFrame(update);
+  }
+
+  /**
+   * Progress bar animation when bars enter the viewport.
+   */
+  function initProgressBars() {
+    if (prefersReducedMotion) return;
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var bar = entry.target;
+          var targetWidth = bar.style.width;
+          bar.style.width = '0%';
+          bar.style.transition = 'width 0.8s ease-out';
+          requestAnimationFrame(function () {
+            bar.style.width = targetWidth;
+          });
+          observer.unobserve(bar);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('[style*="width:"][style*="height: 100%"]').forEach(function (bar) {
+      if (bar.parentElement && bar.parentElement.style.overflow === 'hidden') {
+        observer.observe(bar);
+      }
+    });
+  }
+
+  /**
+   * Navbar shadow on scroll -- uses requestAnimationFrame to avoid
+   * expensive per-frame style recalculations.
+   */
+  function initNavbarShadow() {
+    var navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
+    var ticking = false;
+    var lastScrolled = false;
+
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        requestAnimationFrame(function () {
+          var scrolled = window.scrollY > 10;
+          if (scrolled !== lastScrolled) {
+            navbar.style.boxShadow = scrolled
+              ? '0 4px 12px rgba(0,0,0,0.1)'
+              : 'var(--shadow-sm)';
+            lastScrolled = scrolled;
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
     }, { passive: true });
-}
+  }
+
+  /**
+   * Form submit loading spinner.
+   */
+  function initFormLoading() {
+    document.querySelectorAll('form').forEach(function (form) {
+      form.addEventListener('submit', function () {
+        var btn = this.querySelector('button[type="submit"]');
+        if (btn && !btn.disabled) {
+          var originalText = btn.innerHTML;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+          btn.disabled = true;
+          setTimeout(function () {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }, 10000);
+        }
+      });
+    });
+  }
+
+  /**
+   * Debounced auto-submit for search inputs.
+   */
+  function initSearchAutoSubmit() {
+    function debounce(func, wait) {
+      var timeout;
+      return function () {
+        var args = arguments;
+        var context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(function () { func.apply(context, args); }, wait);
+      };
+    }
+
+    document.querySelectorAll('.search-box input[type="text"], .search-box input[type="search"]').forEach(function (input) {
+      var form = input.closest('form');
+      if (form) {
+        input.addEventListener('input', debounce(function () {
+          if (input.value.length >= 2 || input.value.length === 0) {
+            form.submit();
+          }
+        }, 500));
+      }
+    });
+  }
+
+  /**
+   * Mobile hamburger menu close on outside click.
+   */
+  function initMobileMenu() {
+    document.addEventListener('click', function (e) {
+      var navToggle = document.querySelector('.navbar-toggle');
+      var navMenu = document.querySelector('.navbar-nav');
+      if (navToggle && navMenu && !navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+        navMenu.classList.remove('active');
+      }
+    });
+  }
+
+  // Initialize all modules on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function () {
+    initScrollReveal();
+    initStaggeredReveal();
+    initCountUp();
+    initProgressBars();
+    initNavbarShadow();
+    initFormLoading();
+    initSearchAutoSubmit();
+    initMobileMenu();
+  });
+})();

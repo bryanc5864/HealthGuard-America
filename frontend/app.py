@@ -34,10 +34,16 @@ app.register_blueprint(gov_bp)
 
 @app.after_request
 def add_cache_headers(response):
-    """Add caching headers for static assets and compress responses"""
+    """Add caching and security headers"""
     if 'static' in request.path:
-        # Cache static files for 1 hour
-        response.headers['Cache-Control'] = 'public, max-age=3600'
+        if any(request.path.endswith(ext) for ext in ('.webp', '.jpg', '.png', '.avif', '.woff2')):
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        elif request.path.endswith(('.css', '.js')):
+            response.headers['Cache-Control'] = 'public, max-age=604800'
+        else:
+            response.headers['Cache-Control'] = 'public, max-age=86400'
+    elif request.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'public, max-age=300'
     if response.content_type and ('text/' in response.content_type or
         'application/json' in response.content_type or
         'application/javascript' in response.content_type):
@@ -51,6 +57,7 @@ def inject_common_data():
     return {
         'current_year': 2026,
         'app_version': '1.0',
+        'asset_version': app.config.get('DATA_VERSION', 'v1'),
     }
 
 
