@@ -17,6 +17,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from services.pricevision import PriceVisionService
 
+# Cache for analytics page (state_stats, suspicious_gaps, hospital list)
+_analytics_cache = {}
+_ANALYTICS_CACHE_MAX = 50
+
+# Cache for hospital list generation by state
+_hospital_list_cache = {}
+_HOSPITAL_LIST_CACHE_MAX = 60
+
 # ML Service singleton (lazy loaded)
 _procedure_matching_service = None
 
@@ -486,44 +494,69 @@ def pricevision_analytics():
     stats = PriceVisionService.get_stats()
     states = PriceVisionService.get_states()
 
-    # Get set of hospitals that have MRF/pricing data (fast - cached)
-    hospitals_with_mrf = PriceVisionService.get_hospitals_with_mrf()
-
-    # Fetch hospitals (cached after first call)
-    all_hospitals = PriceVisionService.get_hospitals(limit=10000)
-
-    # Filter for display if state filter is applied
-    if state_filter:
-        filtered_hospitals = [h for h in all_hospitals if h.get('State', '') == state_filter]
-        hospitals = filtered_hospitals[:limit] if limit != 10000 else filtered_hospitals
+    # Use cached state_stats if available (computed once, reused across requests)
+    if 'state_stats' in _analytics_cache:
+        state_stats = _analytics_cache['state_stats']
     else:
-        hospitals = all_hospitals[:limit] if limit != 10000 else all_hospitals
+        # Get set of hospitals that have MRF/pricing data (fast - cached)
+        hospitals_with_mrf = PriceVisionService.get_hospitals_with_mrf()
 
-    # Calculate compliance by state - use simple count (no transparency scoring)
-    state_stats = {}
-    for h in all_hospitals:
-        st = h.get('State', '')
-        if not st or len(str(st)) != 2:
-            continue
-        if st not in state_stats:
-            state_stats[st] = {'total': 0, 'compliant': 0}
-        state_stats[st]['total'] += 1
+        # Fetch hospitals (cached after first call)
+        all_hospitals = PriceVisionService.get_hospitals(limit=10000)
 
-    # Simple compliance: count hospitals with pricing data
-    # Note: hospitals_with_mrf contains NPIs from price file
-    total_compliant = len(hospitals_with_mrf)
-    for st in state_stats:
-        # Estimate state compliance based on hospital count ratio
-        state_ratio = state_stats[st]['total'] / len(all_hospitals) if all_hospitals else 0
-        state_stats[st]['compliant'] = int(total_compliant * state_ratio)
+        # Calculate compliance by state - use simple count (no transparency scoring)
+        state_stats = {}
+        for h in all_hospitals:
+            st = h.get('State', '')
+            if not st or len(str(st)) != 2:
+                continue
+            if st not in state_stats:
+                state_stats[st] = {'total': 0, 'compliant': 0}
+            state_stats[st]['total'] += 1
 
-    # For displayed hospitals, mark compliance simply
-    for h in hospitals:
-        # Use simple compliance indicator (no heavy transparency scoring)
-        h['ml_transparency_score'] = 50  # Default score
+        # Simple compliance: count hospitals with pricing data
+        # Note: hospitals_with_mrf contains NPIs from price file
+        total_compliant = len(hospitals_with_mrf)
+        for st in state_stats:
+            # Estimate state compliance based on hospital count ratio
+            state_ratio = state_stats[st]['total'] / len(all_hospitals) if all_hospitals else 0
+            state_stats[st]['compliant'] = int(total_compliant * state_ratio)
+
+        # Cache state_stats and suspicious_gaps for subsequent requests
+        _analytics_cache['state_stats'] = state_stats
+        _analytics_cache['suspicious_gaps'] = []
+
+    # Use cached suspicious_gaps
+    suspicious_gaps = _analytics_cache.get('suspicious_gaps', [])
+
+    # Get hospital list - use cache keyed by (state_filter, limit)
+    hospital_list_key = (state_filter, limit)
+    if hospital_list_key in _hospital_list_cache:
+        hospitals = _hospital_list_cache[hospital_list_key]
+    else:
+        all_hospitals = PriceVisionService.get_hospitals(limit=10000)
+
+        # Filter for display if state filter is applied
+        if state_filter:
+            filtered_hospitals = [h for h in all_hospitals if h.get('State', '') == state_filter]
+            hospitals = filtered_hospitals[:limit] if limit != 10000 else filtered_hospitals
+        else:
+            hospitals = all_hospitals[:limit] if limit != 10000 else all_hospitals
+
+        # For displayed hospitals, mark compliance simply
+        for h in hospitals:
+            # Use simple compliance indicator (no heavy transparency scoring)
+            h['ml_transparency_score'] = 50  # Default score
+
+        # Cache hospital list (evict oldest half if at capacity)
+        if len(_hospital_list_cache) >= _HOSPITAL_LIST_CACHE_MAX:
+            keys = list(_hospital_list_cache.keys())
+            for k in keys[:len(keys) // 2]:
+                del _hospital_list_cache[k]
+        _hospital_list_cache[hospital_list_key] = hospitals
 
     return render_template('gov/pricevision/analytics.html',
                           stats=stats, hospitals=hospitals, states=states,
                           state_stats=state_stats, selected_state=state_filter,
                           selected_limit=selected_limit,
-                          suspicious_gaps=[])
+                          suspicious_gaps=suspicious_gaps)

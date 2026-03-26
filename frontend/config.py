@@ -67,8 +67,12 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    TEMPLATES_AUTO_RELOAD = True  # Only in dev
+    SEND_FILE_MAX_AGE_DEFAULT = 3600  # Cache static files 1hr
 
 
 class ProductionConfig(Config):
     DEBUG = False
     SECRET_KEY = os.environ.get('SECRET_KEY')  # Must be set in production
+    TEMPLATES_AUTO_RELOAD = False
+    SEND_FILE_MAX_AGE_DEFAULT = 3600  # Cache static files 1hr

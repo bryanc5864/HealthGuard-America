@@ -2,6 +2,7 @@
 ChronicCare Data Service
 Load chronic disease and food environment data - OPTIMIZED
 """
+import numpy as np
 import pandas as pd
 from pathlib import Path
 from . import VALID_US_STATES
@@ -36,6 +37,22 @@ class ChronicCareService:
         return cls._df_cache['county_health_df']
 
     @classmethod
+    def _ensure_fips_index(cls):
+        """Build a FIPS -> DataFrame row index for O(1) county lookups."""
+        if 'fips_index' not in cls._cache:
+            df = cls._get_county_health_df()
+            if df.empty:
+                cls._cache['fips_index'] = {}
+            else:
+                fips_col = 'fips' if 'fips' in df.columns else 'FIPS'
+                fips_index = {}
+                fips_series = df[fips_col].astype(str)
+                for idx, fips_val in enumerate(fips_series):
+                    fips_index[fips_val] = idx
+                cls._cache['fips_index'] = fips_index
+        return cls._cache['fips_index']
+
+    @classmethod
     def get_county_health(cls, state=None, limit=100):
         """Get county-level chronic disease data"""
         df = cls._get_county_health_df()
@@ -56,17 +73,25 @@ class ChronicCareService:
 
     @classmethod
     def get_county(cls, fips):
-        """Get single county by FIPS"""
+        """Get single county by FIPS - O(1) lookup via cached index"""
         df = cls._get_county_health_df()
         if df.empty:
             return None
 
         fips_str = str(fips)
-        fips_col = 'fips' if 'fips' in df.columns else 'FIPS'
-        matches = df[df[fips_col].astype(str) == fips_str]
-        if not matches.empty:
-            return matches.iloc[0].to_dict()
+        fips_index = cls._ensure_fips_index()
+        idx = fips_index.get(fips_str)
+        if idx is not None:
+            return df.iloc[idx].to_dict()
         return None
+
+    @classmethod
+    def get_county_health_by_state_cached(cls, state):
+        """Get county health data for a state, cached per state."""
+        cache_key = f'health_state_{state}'
+        if cache_key not in cls._cache:
+            cls._cache[cache_key] = cls.get_county_health(state=state, limit=5000)
+        return cls._cache[cache_key]
 
     @classmethod
     def get_cdc_places(cls, state=None, limit=100):
@@ -122,30 +147,46 @@ class ChronicCareService:
 
     @classmethod
     def get_correlations(cls):
-        """Get disease-food correlations (cached) - all counties, no artificial cap"""
+        """Get disease-food correlations (cached) - vectorized pandas operations"""
         if 'correlations' not in cls._cache:
             df = cls._get_county_health_df()
             if df.empty:
                 cls._cache['correlations'] = []
             else:
-                correlations = []
-                # Process all counties - no artificial cap
-                for _, row in df.iterrows():
-                    diabetes = row.get('diabetes_prevalence', 0)
-                    obesity = row.get('obesity_prevalence', 0)
-                    fast_food = row.get('fast_food_restaurants_per_1000', row.get('FFRPTH16', 0))
-                    food_insecurity = row.get('food_insecurity_rate', 0)
+                work = df.copy()
 
-                    if diabetes and obesity:
-                        correlations.append({
-                            'fips': row.get('fips', ''),
-                            'county': row.get('county_name', ''),
-                            'state': row.get('state_abbr', ''),
-                            'diabetes': float(diabetes) if diabetes else 0,
-                            'obesity': float(obesity) if obesity else 0,
-                            'fast_food': float(fast_food) if fast_food else 0,
-                            'food_insecurity': float(food_insecurity) if food_insecurity else 0
-                        })
+                # Extract columns with fallbacks - vectorized
+                work['_diabetes'] = pd.to_numeric(work.get('diabetes_prevalence', pd.Series(dtype=float)), errors='coerce').fillna(0)
+                work['_obesity'] = pd.to_numeric(work.get('obesity_prevalence', pd.Series(dtype=float)), errors='coerce').fillna(0)
+
+                # fast_food: try primary column, fall back to FFRPTH16
+                if 'fast_food_restaurants_per_1000' in work.columns:
+                    work['_fast_food'] = pd.to_numeric(work['fast_food_restaurants_per_1000'], errors='coerce').fillna(0)
+                elif 'FFRPTH16' in work.columns:
+                    work['_fast_food'] = pd.to_numeric(work['FFRPTH16'], errors='coerce').fillna(0)
+                else:
+                    work['_fast_food'] = 0.0
+
+                work['_food_insecurity'] = pd.to_numeric(work.get('food_insecurity_rate', pd.Series(dtype=float)), errors='coerce').fillna(0)
+
+                # Filter: both diabetes and obesity must be non-zero
+                mask = (work['_diabetes'] != 0) & (work['_obesity'] != 0)
+                filtered = work[mask]
+
+                # Build result using vectorized column access
+                correlations = []
+                if not filtered.empty:
+                    result_df = pd.DataFrame({
+                        'fips': filtered.get('fips', pd.Series('', index=filtered.index)).fillna(''),
+                        'county': filtered.get('county_name', pd.Series('', index=filtered.index)).fillna(''),
+                        'state': filtered.get('state_abbr', pd.Series('', index=filtered.index)).fillna(''),
+                        'diabetes': filtered['_diabetes'].astype(float),
+                        'obesity': filtered['_obesity'].astype(float),
+                        'fast_food': filtered['_fast_food'].astype(float),
+                        'food_insecurity': filtered['_food_insecurity'].astype(float),
+                    })
+                    correlations = result_df.to_dict('records')
+
                 cls._cache['correlations'] = correlations
         return cls._cache['correlations']
 

@@ -13,6 +13,9 @@
             <span class="badge" style="background: rgba(255,255,255,0.2); color: white; font-size: var(--text-xs); margin-left: var(--spacing-2);">GOV</span>
         </a>
 
+        <button class="navbar-toggle" onclick="this.nextElementSibling.classList.toggle('active')" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
         <ul class="navbar-nav">
             <li>
                 <a href="{{ url_for('gov.home') }}" class="nav-link {% if request.endpoint == 'gov.home' %}active{% endif %}">

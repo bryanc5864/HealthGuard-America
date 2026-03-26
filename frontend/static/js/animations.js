@@ -101,3 +101,119 @@ document.querySelectorAll('form').forEach(form => {
         }
     });
 });
+/**
+ * Debounce helper - delays function execution until user stops typing
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+/**
+ * Auto-submit search forms after debounce
+ */
+document.querySelectorAll('.search-box input[type="text"], .search-box input[type="search"]').forEach(input => {
+    const form = input.closest('form');
+    if (form) {
+        input.addEventListener('input', debounce(function() {
+            if (input.value.length >= 2 || input.value.length === 0) {
+                form.submit();
+            }
+        }, 500));
+    }
+});
+
+/**
+ * Smooth page transitions
+ */
+document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"]):not([href^="javascript"])').forEach(link => {
+    link.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href && href.startsWith('/') || href.startsWith(window.location.origin)) {
+            document.body.style.opacity = '0.97';
+            document.body.style.transition = 'opacity 0.15s ease';
+        }
+    });
+});
+
+/**
+ * Mobile hamburger menu
+ */
+document.addEventListener('click', function(e) {
+    const navToggle = document.querySelector('.navbar-toggle');
+    const navMenu = document.querySelector('.navbar-nav');
+    if (navToggle && navMenu && !navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+        navMenu.classList.remove('active');
+    }
+});
+
+/**
+ * Staggered card reveal on scroll
+ */
+document.querySelectorAll('.stats-grid, .grid-auto').forEach(grid => {
+    const cards = grid.children;
+    Array.from(cards).forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(15px)';
+        card.style.transition = `opacity 0.4s ease ${index * 0.08}s, transform 0.4s ease ${index * 0.08}s`;
+    });
+
+    const gridObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                Array.from(entry.target.children).forEach(card => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                });
+                gridObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    gridObserver.observe(grid);
+});
+
+/**
+ * Animate progress bars when they come into view
+ */
+const progressObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const bar = entry.target;
+            const targetWidth = bar.style.width;
+            bar.style.width = '0%';
+            bar.style.transition = 'width 0.8s ease-out';
+            requestAnimationFrame(() => {
+                bar.style.width = targetWidth;
+            });
+            progressObserver.unobserve(bar);
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('[style*="width:"][style*="height: 100%"]').forEach(bar => {
+    if (bar.parentElement && bar.parentElement.style.overflow === 'hidden') {
+        progressObserver.observe(bar);
+    }
+});
+
+/**
+ * Add shadow to navbar on scroll
+ */
+const navbar = document.querySelector('.navbar');
+if (navbar) {
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 10) {
+            navbar.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        } else {
+            navbar.style.boxShadow = 'var(--shadow-sm)';
+        }
+    }, { passive: true });
+}

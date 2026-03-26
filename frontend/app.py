@@ -31,6 +31,29 @@ from blueprints.gov import gov_bp
 app.register_blueprint(public_bp)
 app.register_blueprint(gov_bp)
 
+
+@app.after_request
+def add_cache_headers(response):
+    """Add caching headers for static assets and compress responses"""
+    if 'static' in request.path:
+        # Cache static files for 1 hour
+        response.headers['Cache-Control'] = 'public, max-age=3600'
+    if response.content_type and ('text/' in response.content_type or
+        'application/json' in response.content_type or
+        'application/javascript' in response.content_type):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
+
+@app.context_processor
+def inject_common_data():
+    """Inject commonly used data into all templates"""
+    return {
+        'current_year': 2026,
+        'app_version': '1.0',
+    }
+
+
 # Data paths
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / 'data/raw'
@@ -250,20 +273,30 @@ def api_urls():
     return jsonify(urls)
 
 
+_api_stats_cache = {}
+
 @app.route('/api/stats')
 def api_stats():
+    import time as _time
+    now = _time.time()
+    if 'data' in _api_stats_cache and now - _api_stats_cache.get('ts', 0) < 300:
+        return jsonify(_api_stats_cache['data'])
+
     inventory = get_data_inventory()
     hospitals = get_hospitals()
     urls = get_mrf_urls()
 
-    return jsonify({
+    result = {
         'modules': {name: {'files': m['total_files'], 'size': m['total_size_human']}
                    for name, m in inventory.items()},
         'hospitals_downloaded': len(hospitals),
         'urls_available': len(urls),
         'cms_hospitals': 5421,
         'coverage_percent': round(len(hospitals)/5421*100, 1)
-    })
+    }
+    _api_stats_cache['data'] = result
+    _api_stats_cache['ts'] = now
+    return jsonify(result)
 
 
 @app.route('/download/<path:filepath>')
@@ -272,9 +305,44 @@ def download_file(filepath):
     return send_from_directory(DATA_DIR, filepath)
 
 
-def preload_ml_models():
-    """Pre-load ML models at startup for faster first requests"""
+def preload_all():
+    """Pre-load data and ML models at startup for faster first requests"""
     import threading
+
+    def _load_data():
+        try:
+            from services import (PriceVisionService, DrugWatchService,
+                                  FoodScoreService, RuralAccessService, ChronicCareService)
+
+            print("  Loading PriceVision data...")
+            PriceVisionService.get_procedures(limit=1)
+            PriceVisionService._ensure_hospital_cache()
+            PriceVisionService.get_hospital_info_cache()
+            PriceVisionService.get_states()
+            PriceVisionService.get_hospitals_with_mrf()
+
+            print("  Loading DrugWatch data...")
+            DrugWatchService._get_us_drugs_df()
+            DrugWatchService.get_international_prices()
+
+            print("  Loading FoodScore data...")
+            FoodScoreService._get_products_df()
+            FoodScoreService.get_additives(limit=1)
+            FoodScoreService.get_categories()
+            FoodScoreService.get_nova_distribution()
+
+            print("  Loading RuralAccess data...")
+            RuralAccessService._get_hpsa_df()
+            RuralAccessService._get_counties_df()
+            RuralAccessService.get_states()
+
+            print("  Loading ChronicCare data...")
+            ChronicCareService._get_county_health_df()
+            ChronicCareService.get_states()
+
+            print("  All data loaded successfully!")
+        except Exception as e:
+            print(f"  Warning: Data preload failed: {e}")
 
     def _load_models():
         try:
@@ -294,17 +362,23 @@ def preload_ml_models():
         except Exception as e:
             print(f"  Warning: ML model preload failed: {e}")
 
-    # Load in background thread to not block startup
-    thread = threading.Thread(target=_load_models, daemon=True)
-    thread.start()
+    import hashlib
+    import time
+    app.config['DATA_VERSION'] = hashlib.md5(str(time.time()).encode()).hexdigest()[:8]
+
+    # Load data first (faster, more critical), then ML models
+    data_thread = threading.Thread(target=_load_data, daemon=True)
+    model_thread = threading.Thread(target=_load_models, daemon=True)
+    data_thread.start()
+    model_thread.start()
 
 
 if __name__ == '__main__':
     print("="*60)
     print("HealthGuard America - Dual Portal Application")
     print("="*60)
-    print("Pre-loading ML models for faster response times...")
-    preload_ml_models()
+    print("Pre-loading data and ML models...")
+    preload_all()
     print("")
     print("Starting server at http://localhost:5000")
     print("")

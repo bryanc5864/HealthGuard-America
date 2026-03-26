@@ -13,6 +13,8 @@ DATA_DIR = BASE_DIR / 'data'
 class RuralAccessService:
     _cache = {}
     _df_cache = {}
+    _hpsa_by_id = None
+    _county_by_fips = None
 
     @classmethod
     def _get_hpsa_df(cls):
@@ -129,17 +131,27 @@ class RuralAccessService:
         return len(df)
 
     @classmethod
+    def _ensure_hpsa_index(cls):
+        """Build HPSA ID -> row index for O(1) lookup"""
+        if cls._hpsa_by_id is None:
+            df = cls._get_hpsa_df()
+            if df.empty:
+                cls._hpsa_by_id = {}
+            else:
+                id_col = 'hpsa_id' if 'hpsa_id' in df.columns else 'HPSA ID'
+                cls._hpsa_by_id = {str(v): i for i, v in enumerate(df[id_col].values)}
+
+    @classmethod
     def get_hpsa(cls, hpsa_id):
-        """Get single HPSA by ID"""
+        """Get single HPSA by ID - O(1) indexed lookup"""
         df = cls._get_hpsa_df()
         if df.empty:
             return None
 
-        hpsa_str = str(hpsa_id)
-        id_col = 'hpsa_id' if 'hpsa_id' in df.columns else 'HPSA ID'
-        matches = df[df[id_col].astype(str) == hpsa_str]
-        if not matches.empty:
-            return matches.iloc[0].to_dict()
+        cls._ensure_hpsa_index()
+        idx = cls._hpsa_by_id.get(str(hpsa_id))
+        if idx is not None:
+            return df.iloc[idx].to_dict()
         return None
 
     @classmethod
@@ -176,16 +188,26 @@ class RuralAccessService:
         return len(df)
 
     @classmethod
+    def _ensure_county_fips_index(cls):
+        """Build county FIPS -> row index for O(1) lookup"""
+        if cls._county_by_fips is None:
+            df = cls._get_counties_df()
+            if df.empty:
+                cls._county_by_fips = {}
+            else:
+                cls._county_by_fips = {str(v): i for i, v in enumerate(df['county_fips'].values)}
+
+    @classmethod
     def get_county(cls, fips):
-        """Get single county by FIPS code"""
+        """Get single county by FIPS code - O(1) indexed lookup"""
         df = cls._get_counties_df()
         if df.empty:
             return None
 
-        fips_str = str(fips)
-        matches = df[df['county_fips'].astype(str) == fips_str]
-        if not matches.empty:
-            return matches.iloc[0].to_dict()
+        cls._ensure_county_fips_index()
+        idx = cls._county_by_fips.get(str(fips))
+        if idx is not None:
+            return df.iloc[idx].to_dict()
         return None
 
     @classmethod
@@ -264,29 +286,27 @@ class RuralAccessService:
 
     @classmethod
     def get_shortage_map_data(cls):
-        """Get data formatted for map visualization (cached)"""
+        """Get data formatted for map visualization (cached, vectorized)"""
         if 'map_data' not in cls._cache:
             df = cls._get_hpsa_df()
             if df.empty or 'latitude' not in df.columns or 'longitude' not in df.columns:
                 cls._cache['map_data'] = []
             else:
-                # Filter for valid coordinates
                 df_valid = df.dropna(subset=['latitude', 'longitude']).head(5000)
-                map_data = []
-                for _, row in df_valid.iterrows():
-                    map_data.append({
-                        'hpsa_id': row.get('hpsa_id'),
-                        'name': row.get('hpsa_name'),
-                        'state': row.get('state'),
-                        'county': row.get('county'),
-                        'county_fips': row.get('county_fips'),
-                        'lat': row.get('latitude'),
-                        'lng': row.get('longitude'),
-                        'shortage_score': row.get('hpsa_score', 0),
-                        'population': row.get('population', 0),
-                        'discipline': row.get('discipline')
-                    })
-                cls._cache['map_data'] = map_data
+                col_map = {
+                    'hpsa_id': 'hpsa_id', 'hpsa_name': 'name',
+                    'state': 'state', 'county': 'county',
+                    'county_fips': 'county_fips', 'latitude': 'lat',
+                    'longitude': 'lng', 'hpsa_score': 'shortage_score',
+                    'population': 'population', 'discipline': 'discipline'
+                }
+                avail_cols = [c for c in col_map if c in df_valid.columns]
+                result_df = df_valid[avail_cols].rename(columns=col_map)
+                if 'shortage_score' not in result_df.columns:
+                    result_df['shortage_score'] = 0
+                if 'population' not in result_df.columns:
+                    result_df['population'] = 0
+                cls._cache['map_data'] = result_df.to_dict('records')
         return cls._cache['map_data']
 
     @classmethod

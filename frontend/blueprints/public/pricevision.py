@@ -19,6 +19,18 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from services.pricevision import PriceVisionService
 
+# Cache for ML procedure match results (key: query text, value: results)
+_ml_search_cache = {}
+_ML_CACHE_MAX = 200
+
+# Cache for hospital detail pricing analysis (key: npi, value: analysis dict)
+_hospital_detail_cache = {}
+_HOSPITAL_DETAIL_CACHE_MAX = 100
+
+# Cache for price fairness analysis (key: (procedure_code, state), value: analysis dict)
+_price_fairness_cache = {}
+_PRICE_FAIRNESS_CACHE_MAX = 200
+
 # ML Service singleton (lazy loaded)
 _procedure_matching_service = None
 
@@ -188,11 +200,25 @@ def pricevision_search():
         # ML semantic matching for procedure search
         if query and results:
             try:
+                # Check ML cache first
+                cache_key = query.lower().strip()
                 service = get_procedure_matching_service()
-                if service:
-                    # Get semantic matches for the query
-                    similar = service.find_similar(query, top_k=10)
+                if cache_key in _ml_search_cache:
+                    similar = _ml_search_cache[cache_key]
+                else:
+                    if service:
+                        similar = service.find_similar(query, top_k=10)
+                        # Cache result
+                        if len(_ml_search_cache) >= _ML_CACHE_MAX:
+                            # Simple eviction: clear oldest half
+                            keys = list(_ml_search_cache.keys())
+                            for k in keys[:len(keys)//2]:
+                                del _ml_search_cache[k]
+                        _ml_search_cache[cache_key] = similar
+                    else:
+                        similar = []
 
+                if similar:
                     # Create a mapping of code -> confidence
                     ml_scores = {}
                     for code, desc, confidence in similar:
@@ -303,11 +329,21 @@ def pricevision_hospital(npi):
     prices = PriceVisionService.get_prices(hospital_npi=npi, limit=100)
     pricing_analysis = {}
 
-    # ML pricing pattern analysis
-    try:
-        pricing_analysis = analyze_hospital_pricing(prices)
-    except Exception as e:
-        logger.warning(f"Hospital pricing analysis failed: {e}")
+    # Check route-level cache for pricing analysis
+    if npi in _hospital_detail_cache:
+        pricing_analysis = _hospital_detail_cache[npi]
+    else:
+        # ML pricing pattern analysis
+        try:
+            pricing_analysis = analyze_hospital_pricing(prices)
+            # Cache the result (evict oldest half if at capacity)
+            if len(_hospital_detail_cache) >= _HOSPITAL_DETAIL_CACHE_MAX:
+                keys = list(_hospital_detail_cache.keys())
+                for k in keys[:len(keys) // 2]:
+                    del _hospital_detail_cache[k]
+            _hospital_detail_cache[npi] = pricing_analysis
+        except Exception as e:
+            logger.warning(f"Hospital pricing analysis failed: {e}")
 
     return render_template('public/pricevision/hospital.html',
                           hospital=hospital or {}, npi=npi, prices=prices,
@@ -353,81 +389,97 @@ def pricevision_my_price():
                 first_match = procedures[0]
                 procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
 
-            # Get market prices for comparison
-            prices = PriceVisionService.get_prices(
-                procedure_code=procedure_code,
-                state=state if state else None,
-                limit=100
-            )
+            # Check price fairness cache for market data
+            fairness_cache_key = (str(procedure_code), str(state) if state else '')
+            cached_fairness = _price_fairness_cache.get(fairness_cache_key)
 
-            if prices:
-                # Calculate market statistics
-                cash_prices = [p['cash_price'] for p in prices if p.get('cash_price')]
+            if cached_fairness:
+                # Use cached market prices and stats
+                prices = cached_fairness['prices']
+                cash_prices = cached_fairness['cash_prices']
+            else:
+                # Get market prices for comparison
+                prices = PriceVisionService.get_prices(
+                    procedure_code=procedure_code,
+                    state=state if state else None,
+                    limit=100
+                )
+                cash_prices = [p['cash_price'] for p in prices if p.get('cash_price')] if prices else []
 
-                if cash_prices:
-                    mean_price = np.mean(cash_prices)
-                    std_price = np.std(cash_prices) if len(cash_prices) > 1 else mean_price * 0.2
-                    min_price = min(cash_prices)
-                    max_price = max(cash_prices)
-                    median_price = np.median(cash_prices)
+                # Cache the fetched data (evict oldest half if at capacity)
+                if len(_price_fairness_cache) >= _PRICE_FAIRNESS_CACHE_MAX:
+                    keys = list(_price_fairness_cache.keys())
+                    for k in keys[:len(keys) // 2]:
+                        del _price_fairness_cache[k]
+                _price_fairness_cache[fairness_cache_key] = {
+                    'prices': prices,
+                    'cash_prices': cash_prices,
+                }
 
-                    # Calculate z-score for user's price
-                    if std_price > 0:
-                        z_score = (user_price_float - mean_price) / std_price
-                    else:
-                        z_score = 0
+            if prices and cash_prices:
+                mean_price = np.mean(cash_prices)
+                std_price = np.std(cash_prices) if len(cash_prices) > 1 else mean_price * 0.2
+                min_price = min(cash_prices)
+                max_price = max(cash_prices)
+                median_price = np.median(cash_prices)
 
-                    # Determine fairness
-                    if z_score > 1.5:
-                        verdict = 'Overpriced'
-                        verdict_class = 'danger'
-                        explanation = f"Your price is ${user_price_float - mean_price:,.0f} above the average market rate."
-                    elif z_score < -1.5:
-                        verdict = 'Great Deal'
-                        verdict_class = 'success'
-                        explanation = f"Your price is ${mean_price - user_price_float:,.0f} below the average market rate!"
-                    elif z_score < -0.5:
-                        verdict = 'Good Price'
-                        verdict_class = 'info'
-                        explanation = "Your price is below average - a reasonable deal."
-                    elif z_score > 0.5:
-                        verdict = 'Above Average'
-                        verdict_class = 'warning'
-                        explanation = "Your price is above average - consider negotiating or shopping around."
-                    else:
-                        verdict = 'Fair Price'
-                        verdict_class = 'success'
-                        explanation = "Your price is close to the market average."
+                # Calculate z-score for user's price
+                if std_price > 0:
+                    z_score = (user_price_float - mean_price) / std_price
+                else:
+                    z_score = 0
 
-                    # Calculate potential savings
-                    if user_price_float > min_price:
-                        potential_savings = user_price_float - min_price
-                    else:
-                        potential_savings = 0
+                # Determine fairness
+                if z_score > 1.5:
+                    verdict = 'Overpriced'
+                    verdict_class = 'danger'
+                    explanation = f"Your price is ${user_price_float - mean_price:,.0f} above the average market rate."
+                elif z_score < -1.5:
+                    verdict = 'Great Deal'
+                    verdict_class = 'success'
+                    explanation = f"Your price is ${mean_price - user_price_float:,.0f} below the average market rate!"
+                elif z_score < -0.5:
+                    verdict = 'Good Price'
+                    verdict_class = 'info'
+                    explanation = "Your price is below average - a reasonable deal."
+                elif z_score > 0.5:
+                    verdict = 'Above Average'
+                    verdict_class = 'warning'
+                    explanation = "Your price is above average - consider negotiating or shopping around."
+                else:
+                    verdict = 'Fair Price'
+                    verdict_class = 'success'
+                    explanation = "Your price is close to the market average."
 
-                    # Percentile ranking
-                    prices_below = sum(1 for p in cash_prices if p < user_price_float)
-                    percentile = (prices_below / len(cash_prices)) * 100
+                # Calculate potential savings
+                if user_price_float > min_price:
+                    potential_savings = user_price_float - min_price
+                else:
+                    potential_savings = 0
 
-                    market_stats = {
-                        'mean': mean_price,
-                        'median': median_price,
-                        'min': min_price,
-                        'max': max_price,
-                        'std': std_price,
-                        'sample_size': len(cash_prices)
-                    }
+                # Percentile ranking
+                prices_below = sum(1 for p in cash_prices if p < user_price_float)
+                percentile = (prices_below / len(cash_prices)) * 100
 
-                    analysis = {
-                        'user_price': user_price_float,
-                        'verdict': verdict,
-                        'verdict_class': verdict_class,
-                        'explanation': explanation,
-                        'z_score': round(z_score, 2),
-                        'percentile': round(percentile, 1),
-                        'potential_savings': potential_savings,
-                        'fairness_score': max(0, min(100, 100 - abs(z_score) * 25))
-                    }
+                market_stats = {
+                    'mean': mean_price,
+                    'median': median_price,
+                    'min': min_price,
+                    'max': max_price,
+                    'std': std_price,
+                    'sample_size': len(cash_prices)
+                }
+
+                analysis = {
+                    'user_price': user_price_float,
+                    'verdict': verdict,
+                    'verdict_class': verdict_class,
+                    'explanation': explanation,
+                    'z_score': round(z_score, 2),
+                    'percentile': round(percentile, 1),
+                    'potential_savings': potential_savings,
+                    'fairness_score': max(0, min(100, 100 - abs(z_score) * 25))
+                }
 
     states = PriceVisionService.get_states()
     return render_template('public/pricevision/my_price.html',

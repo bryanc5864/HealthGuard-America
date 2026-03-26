@@ -19,6 +19,11 @@ _nova_service = None
 _additive_service = None
 logger = logging.getLogger(__name__)
 
+# Route-level caches
+_snap_cache = {}
+_analyze_cache = {}
+_ANALYZE_CACHE_MAX = 100
+
 
 def get_nova_service():
     """Lazy load NOVA classification service."""
@@ -307,7 +312,12 @@ def foodscore_product(barcode):
 @gov_bp.route('/foodscore/snap')
 @gov_required
 def foodscore_snap():
-    """SNAP eligibility health analysis (gov-only)"""
+    """SNAP eligibility health analysis (gov-only) - cached"""
+    import time as _time
+    now = _time.time()
+    if 'data' in _snap_cache and now - _snap_cache.get('ts', 0) < 300:
+        return render_template('gov/foodscore/snap.html', **_snap_cache['data'])
+
     stats = FoodScoreService.get_stats()
     nova_dist = FoodScoreService.get_nova_distribution()
     products = FoodScoreService.get_products(limit=100)
@@ -339,11 +349,14 @@ def foodscore_snap():
     # ML Analysis: Additive risk patterns
     ml_additive_patterns = analyze_additive_patterns(products)
 
-    return render_template('gov/foodscore/snap.html',
-                          stats=stats, snap_analysis=snap_analysis,
-                          high_risk=high_risk, nova_dist=nova_dist,
-                          ml_nova_analysis=ml_nova_analysis,
-                          ml_additive_patterns=ml_additive_patterns)
+    template_data = dict(stats=stats, snap_analysis=snap_analysis,
+                         high_risk=high_risk, nova_dist=nova_dist,
+                         ml_nova_analysis=ml_nova_analysis,
+                         ml_additive_patterns=ml_additive_patterns)
+    _snap_cache['data'] = template_data
+    _snap_cache['ts'] = now
+
+    return render_template('gov/foodscore/snap.html', **template_data)
 
 
 @gov_bp.route('/foodscore/analyze')
