@@ -59,24 +59,22 @@ class PriceVisionService:
                 cls._cache['hospitals'] = clean_nan_records(df.to_dict('records'))
             else:
                 cls._cache['hospitals'] = []
-            # Build fast lookup index
-            cls._hospital_by_id = {
-                str(h.get('Facility ID', '')): h for h in cls._cache['hospitals']
-            }
+            # Build fast lookup index AND hospital info cache in one pass
+            cls._hospital_by_id = {}
+            cls._cache['hospital_info'] = {}
+            for h in cls._cache['hospitals']:
+                fid = str(h.get('Facility ID', ''))
+                cls._hospital_by_id[fid] = h
+                cls._cache['hospital_info'][fid] = {
+                    'name': h.get('Facility Name', ''),
+                    'city': h.get('City/Town', ''),
+                    'state': h.get('State', '')
+                }
 
     @classmethod
     def get_hospital_info_cache(cls):
         """Get cached hospital info dict for fast lookups"""
         cls._ensure_hospital_cache()
-        if 'hospital_info' not in cls._cache:
-            cls._cache['hospital_info'] = {
-                str(h.get('Facility ID', '')): {
-                    'name': h.get('Facility Name', ''),
-                    'city': h.get('City/Town', ''),
-                    'state': h.get('State', '')
-                }
-                for h in cls._cache['hospitals']
-            }
         return cls._cache['hospital_info']
 
     @classmethod
@@ -322,3 +320,130 @@ class PriceVisionService:
                 'hospitals_with_mrf': len(hospitals_with_mrf)
             }
         return cls._cache['stats']
+
+    @classmethod
+    def get_top_hospitals(cls, limit=50):
+        """Get hospitals with the most pricing data (highest transparency scores).
+        Cached as 'top_hospitals' in _cache."""
+        if 'top_hospitals' not in cls._cache:
+            all_transparency = cls._get_all_transparency_data()
+            hospital_info = cls.get_hospital_info_cache()
+
+            # Build list of hospitals ranked by transparency score
+            ranked = []
+            for npi, tdata in all_transparency.items():
+                info = hospital_info.get(npi, {})
+                ranked.append({
+                    'npi': npi,
+                    'name': info.get('name', ''),
+                    'city': info.get('city', ''),
+                    'state': info.get('state', ''),
+                    'transparency_score': tdata.get('transparency_score', 0),
+                    'total_prices': tdata.get('total_prices', 0),
+                    'prices_with_cash': tdata.get('prices_with_cash', 0),
+                    'cash_ratio': tdata.get('cash_ratio', 0)
+                })
+
+            # Sort by transparency score descending, then total_prices descending
+            ranked.sort(key=lambda x: (x['transparency_score'], x['total_prices']), reverse=True)
+            cls._cache['top_hospitals'] = ranked
+
+        return cls._cache['top_hospitals'][:limit]
+
+    @classmethod
+    def get_procedure_stats(cls, procedure_code):
+        """Get mean/median/min/max price statistics for a procedure code.
+        Cached per procedure code in _cache."""
+        cache_key = f'proc_stats_{procedure_code}'
+        if cache_key not in cls._cache:
+            price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+            if not price_file.exists():
+                cls._cache[cache_key] = {}
+                return cls._cache[cache_key]
+
+            try:
+                filters = [('procedure_code', '==', str(procedure_code))]
+                df = pd.read_parquet(
+                    price_file,
+                    columns=['procedure_code', 'cash_price', 'gross_charge'],
+                    filters=filters
+                )
+
+                cash_prices = df['cash_price'].dropna()
+                gross_charges = df['gross_charge'].dropna()
+
+                stats = {
+                    'procedure_code': str(procedure_code),
+                    'sample_size': len(df),
+                }
+
+                if len(cash_prices) > 0:
+                    stats.update({
+                        'cash_mean': float(np.mean(cash_prices)),
+                        'cash_median': float(np.median(cash_prices)),
+                        'cash_min': float(np.min(cash_prices)),
+                        'cash_max': float(np.max(cash_prices)),
+                        'cash_std': float(np.std(cash_prices)) if len(cash_prices) > 1 else 0.0,
+                        'cash_count': int(len(cash_prices)),
+                    })
+                else:
+                    stats.update({
+                        'cash_mean': 0, 'cash_median': 0,
+                        'cash_min': 0, 'cash_max': 0,
+                        'cash_std': 0, 'cash_count': 0,
+                    })
+
+                if len(gross_charges) > 0:
+                    stats.update({
+                        'gross_mean': float(np.mean(gross_charges)),
+                        'gross_median': float(np.median(gross_charges)),
+                        'gross_min': float(np.min(gross_charges)),
+                        'gross_max': float(np.max(gross_charges)),
+                        'gross_count': int(len(gross_charges)),
+                    })
+                else:
+                    stats.update({
+                        'gross_mean': 0, 'gross_median': 0,
+                        'gross_min': 0, 'gross_max': 0,
+                        'gross_count': 0,
+                    })
+
+                cls._cache[cache_key] = stats
+            except Exception as e:
+                print(f'Error computing procedure stats for {procedure_code}: {e}')
+                cls._cache[cache_key] = {}
+
+        return cls._cache[cache_key]
+
+    @classmethod
+    def get_state_stats(cls):
+        """Get per-state hospital counts and compliance data.
+        Cached as 'state_stats' in _cache."""
+        if 'state_stats' not in cls._cache:
+            hospital_info = cls.get_hospital_info_cache()
+            hospitals_with_mrf = cls.get_hospitals_with_mrf()
+
+            # Count hospitals per state from hospital_info cache
+            state_counts = {}
+            for npi, info in hospital_info.items():
+                state = info.get('state', '')
+                if not state or len(str(state)) != 2:
+                    continue
+                if state not in state_counts:
+                    state_counts[state] = {'total': 0, 'compliant': 0, 'npis': []}
+                state_counts[state]['total'] += 1
+                state_counts[state]['npis'].append(npi)
+
+            # Cross-reference with hospitals_with_mrf for compliance rates
+            for state, data in state_counts.items():
+                compliant = sum(1 for npi in data['npis'] if npi in hospitals_with_mrf)
+                data['compliant'] = compliant
+                data['compliance_rate'] = round(
+                    (compliant / data['total'] * 100) if data['total'] > 0 else 0, 1
+                )
+                # Remove npis list to keep cache lightweight
+                del data['npis']
+
+            cls._cache['state_stats'] = state_counts
+
+        return cls._cache['state_stats']

@@ -77,18 +77,29 @@ class FoodScoreService:
         return clean_nan_records(df.head(limit).to_dict('records'))
 
     @classmethod
+    def _ensure_barcode_index(cls):
+        """Build barcode index for O(1) product lookup"""
+        if 'barcode_index' not in cls._cache:
+            df = cls._get_products_df()
+            if not df.empty and 'code' in df.columns:
+                cls._cache['barcode_index'] = {
+                    str(code): idx for idx, code in enumerate(df['code'].values)
+                }
+            else:
+                cls._cache['barcode_index'] = {}
+
+    @classmethod
     def get_product(cls, barcode):
-        """Get single product by barcode"""
+        """Get single product by barcode - O(1) indexed lookup"""
         df = cls._get_products_df()
         if df.empty:
             return None
 
-        # Direct lookup is faster
+        cls._ensure_barcode_index()
         barcode_str = str(barcode)
-        matches = df[df['code'].astype(str) == barcode_str]
-        if not matches.empty:
-            record = matches.iloc[0].to_dict()
-            # Clean NaN values
+        idx = cls._cache['barcode_index'].get(barcode_str)
+        if idx is not None:
+            record = df.iloc[idx].to_dict()
             for key, value in record.items():
                 if pd.isna(value):
                     record[key] = None
@@ -125,15 +136,25 @@ class FoodScoreService:
         return additives[:limit]
 
     @classmethod
+    def _ensure_additive_index(cls):
+        """Build additive index for O(1) lookup by e_number or name"""
+        if 'additive_index' not in cls._cache:
+            additives = cls.get_additives(limit=1000)
+            index = {}
+            for a in additives:
+                e_num = str(a.get('e_number', ''))
+                name = a.get('name', a.get('additive_name', ''))
+                if e_num:
+                    index[e_num] = a
+                if name:
+                    index[name] = a
+            cls._cache['additive_index'] = index
+
+    @classmethod
     def get_additive(cls, additive_id):
-        """Get single additive by E-number or name"""
-        additives = cls.get_additives(limit=1000)
-        for a in additives:
-            if str(a.get('e_number', '')) == str(additive_id):
-                return a
-            if a.get('name', a.get('additive_name', '')) == additive_id:
-                return a
-        return None
+        """Get single additive by E-number or name - O(1) indexed lookup"""
+        cls._ensure_additive_index()
+        return cls._cache['additive_index'].get(str(additive_id))
 
     @classmethod
     def get_categories(cls):
@@ -174,15 +195,52 @@ class FoodScoreService:
 
     @classmethod
     def get_high_risk_products(cls, limit=20):
-        """Get products with lowest MAHA scores (highest risk)"""
-        df = cls._get_products_df()
-        if df.empty:
-            return []
+        """Get products with lowest MAHA scores (highest risk) - cached"""
+        cache_key = f'high_risk_{limit}'
+        if cache_key not in cls._cache:
+            df = cls._get_products_df()
+            if df.empty:
+                cls._cache[cache_key] = []
+            else:
+                df = df[df['product_name'].notna() & (df['product_name'] != '')]
+                df_sorted = df.dropna(subset=['maha_score']).sort_values('maha_score', ascending=True)
+                cls._cache[cache_key] = clean_nan_records(df_sorted.head(limit).to_dict('records'))
+        return cls._cache[cache_key]
 
-        # Filter out products with null names and sort by MAHA score ascending (lower = worse)
-        df = df[df['product_name'].notna() & (df['product_name'] != '')]
-        df_sorted = df.dropna(subset=['maha_score']).sort_values('maha_score', ascending=True)
-        return clean_nan_records(df_sorted.head(limit).to_dict('records'))
+    @classmethod
+    def get_products_by_nova(cls, nova_group, limit=20):
+        """Get top products for a specific NOVA group - cached"""
+        cache_key = f'nova_products_{nova_group}'
+        if cache_key not in cls._cache:
+            df = cls._get_products_df()
+            if df.empty:
+                cls._cache[cache_key] = []
+            else:
+                df = df[df['product_name'].notna() & (df['product_name'] != '')]
+                if 'nova_group' in df.columns:
+                    nova_df = df[df['nova_group'].astype(str).str.replace('en:', '').str.strip() == str(nova_group)]
+                    cls._cache[cache_key] = clean_nan_records(nova_df.head(limit).to_dict('records'))
+                else:
+                    cls._cache[cache_key] = []
+        return cls._cache[cache_key]
+
+    @classmethod
+    def get_category_stats(cls):
+        """Get product counts by category - cached"""
+        if 'category_stats' not in cls._cache:
+            df = cls._get_products_df()
+            if df.empty:
+                cls._cache['category_stats'] = {}
+            else:
+                cat_col = 'categories_en' if 'categories_en' in df.columns else 'categories'
+                cat_counts = {}
+                for cats in df[cat_col].dropna().head(10000):
+                    for c in str(cats).split(','):
+                        c = c.strip()
+                        if c and len(c) > 2:
+                            cat_counts[c] = cat_counts.get(c, 0) + 1
+                cls._cache['category_stats'] = dict(sorted(cat_counts.items(), key=lambda x: -x[1])[:50])
+        return cls._cache['category_stats']
 
     @classmethod
     def get_stats(cls):

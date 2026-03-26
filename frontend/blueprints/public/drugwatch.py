@@ -15,14 +15,21 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from services.drugwatch import DrugWatchService
 
+# Module-level cache for route results
+_route_cache = {}
+
 
 @public_bp.route('/drugwatch/')
 def drugwatch_home():
-    """DrugWatch module home"""
-    stats = DrugWatchService.get_stats()
-    top_drugs = DrugWatchService.get_top_expensive(limit=10)
+    """DrugWatch module home - cached stats and top drugs"""
+    if 'home_data' not in _route_cache:
+        _route_cache['home_data'] = {
+            'stats': DrugWatchService.get_stats(),
+            'top_drugs': DrugWatchService.get_top_expensive_cached(limit=10),
+        }
+    data = _route_cache['home_data']
     return render_template('public/drugwatch/home.html',
-                          stats=stats, top_drugs=top_drugs)
+                          stats=data['stats'], top_drugs=data['top_drugs'])
 
 
 @public_bp.route('/drugwatch/search')
@@ -37,24 +44,25 @@ def drugwatch_search():
 @public_bp.route('/drugwatch/compare')
 @public_bp.route('/drugwatch/compare/<drug_id>')
 def drugwatch_compare(drug_id=None):
-    """Compare drug prices across countries"""
+    """Compare drug prices across countries - cached by drug name"""
     # Support both /compare/aspirin and /compare?drug=aspirin
     if not drug_id:
         drug_id = request.args.get('drug', '')
     if not drug_id:
         return render_template('public/drugwatch/compare.html',
                               drug_id=None, drug=None, comparison=None)
+    # Use cached comparison and drug detail lookups
     drug = DrugWatchService.get_drug(drug_id)
-    comparison = DrugWatchService.compare_prices(drug_id)
+    comparison = DrugWatchService.get_cached_comparison(drug_id)
     return render_template('public/drugwatch/compare.html',
                           drug_id=drug_id, drug=drug, comparison=comparison)
 
 
 @public_bp.route('/drugwatch/drug/<drug_id>')
 def drugwatch_drug(drug_id):
-    """View single drug details"""
+    """View single drug details - cached drug and comparison"""
     drug = DrugWatchService.get_drug(drug_id)
-    comparison = DrugWatchService.compare_prices(drug_id)
+    comparison = DrugWatchService.get_cached_comparison(drug_id)
     return render_template('public/drugwatch/drug.html',
                           drug_id=drug_id, drug=drug, comparison=comparison)
 
@@ -74,6 +82,6 @@ def api_drugs():
 
 @public_bp.route('/api/drugwatch/compare/<drug_name>')
 def api_compare(drug_name):
-    """API: Compare drug prices"""
-    comparison = DrugWatchService.compare_prices(drug_name)
+    """API: Compare drug prices - cached"""
+    comparison = DrugWatchService.get_cached_comparison(drug_name)
     return jsonify(comparison)

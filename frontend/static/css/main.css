@@ -1606,6 +1606,450 @@ a.badge:hover,
 }
 
 /* ============================================
+   Responsive Grid Utilities
+   ============================================ */
+.grid-auto {
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+.grid-auto-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-auto-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-auto-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-auto-5 { grid-template-columns: repeat(5, 1fr); }
+.grid-auto-6 { grid-template-columns: repeat(6, 1fr); }
+
+@media (max-width: 1024px) {
+  .grid-auto-5, .grid-auto-6 { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-auto-3, .grid-auto-4, .grid-auto-5, .grid-auto-6 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .grid-auto-2, .grid-auto-3, .grid-auto-4, .grid-auto-5, .grid-auto-6 { grid-template-columns: 1fr; }
+}
+
+/* Icon Containers */
+.icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.icon-circle-sm { width: 40px; height: 40px; font-size: var(--text-lg); }
+.icon-circle-md { width: 48px; height: 48px; font-size: var(--text-xl); }
+.icon-circle-lg { width: 64px; height: 64px; font-size: var(--text-2xl); }
+
+.icon-circle--pricevision { background: var(--pricevision-light); color: var(--pricevision-dark); }
+.icon-circle--drugwatch { background: var(--drugwatch-light); color: var(--drugwatch-dark); }
+.icon-circle--foodscore { background: var(--foodscore-light); color: var(--foodscore-dark); }
+.icon-circle--ruralaccess { background: var(--ruralaccess-light); color: var(--ruralaccess-dark); }
+.icon-circle--chroniccare { background: var(--chroniccare-light); color: var(--chroniccare-dark); }
+
+/* Card Variants */
+.card-centered {
+  padding: var(--spacing-8);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card-bordered-left {
+  border-left: 4px solid var(--primary-700);
+}
+
+.card-bordered-left--pricevision { border-left-color: var(--pricevision); }
+.card-bordered-left--drugwatch { border-left-color: var(--drugwatch); }
+.card-bordered-left--foodscore { border-left-color: var(--foodscore); }
+.card-bordered-left--ruralaccess { border-left-color: var(--ruralaccess); }
+.card-bordered-left--chroniccare { border-left-color: var(--chroniccare); }
+
+.card-gradient--pricevision {
+  background: linear-gradient(135deg, var(--pricevision), var(--pricevision-dark));
+  color: white;
+}
+.card-gradient--drugwatch {
+  background: linear-gradient(135deg, var(--drugwatch), var(--drugwatch-dark));
+  color: white;
+}
+.card-gradient--foodscore {
+  background: linear-gradient(135deg, var(--foodscore), var(--foodscore-dark));
+  color: white;
+}
+.card-gradient--ruralaccess {
+  background: linear-gradient(135deg, var(--ruralaccess), var(--ruralaccess-dark));
+  color: white;
+}
+.card-gradient--chroniccare {
+  background: linear-gradient(135deg, var(--chroniccare), var(--chroniccare-dark));
+  color: white;
+}
+
+/* Stats Section Overlap */
+.stats-section-overlap {
+  margin-top: -3rem;
+  position: relative;
+  z-index: 10;
+  margin-bottom: var(--spacing-8);
+}
+
+/* Quick Action Cards */
+.action-card {
+  display: block;
+  padding: var(--spacing-5);
+  text-align: center;
+  text-decoration: none;
+  color: var(--neutral-700);
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  color: var(--neutral-900);
+}
+
+.action-card-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-top: var(--spacing-2);
+}
+
+.action-card-subtitle {
+  font-size: var(--text-xs);
+  color: var(--neutral-500);
+}
+
+.action-card--highlighted {
+  border: 2px solid var(--primary-700);
+}
+
+/* Text Color Utilities */
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-error { color: var(--error); }
+.text-info { color: var(--info); }
+.text-pricevision { color: var(--pricevision-dark); }
+.text-drugwatch { color: var(--drugwatch-dark); }
+.text-foodscore { color: var(--foodscore-dark); }
+.text-ruralaccess { color: var(--ruralaccess-dark); }
+.text-chroniccare { color: var(--chroniccare-dark); }
+
+/* Enhanced Module Card with subtle gradient border */
+.module-card {
+  border: 1px solid var(--neutral-200);
+}
+
+.module-card--pricevision { border-top: 3px solid var(--pricevision); }
+.module-card--drugwatch { border-top: 3px solid var(--drugwatch); }
+.module-card--foodscore { border-top: 3px solid var(--foodscore); }
+.module-card--ruralaccess { border-top: 3px solid var(--ruralaccess); }
+.module-card--chroniccare { border-top: 3px solid var(--chroniccare); }
+
+/* Glassmorphism for hero overlays */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Improved table styles */
+.table-container {
+  border: 1px solid var(--neutral-200);
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+/* Better scrollbar styling */
+.table-container {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.table-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: var(--neutral-100);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--neutral-300);
+  border-radius: var(--radius-full);
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-400);
+}
+
+/* NOVA classification card styles */
+.nova-card {
+  padding: var(--spacing-4);
+  text-align: center;
+  border-radius: var(--radius-xl);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.nova-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.nova-card--1 { border-left: 4px solid var(--success); }
+.nova-card--2 { border-left: 4px solid var(--info); }
+.nova-card--3 { border-left: 4px solid var(--warning); }
+.nova-card--4 { border-left: 4px solid var(--error); }
+
+.nova-value {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: var(--spacing-1);
+}
+
+/* Enhanced search input */
+.search-box .form-control {
+  font-size: var(--text-lg);
+  padding: var(--spacing-4) var(--spacing-4) var(--spacing-4) 3rem;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--neutral-200);
+}
+
+.search-box .form-control:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 4px var(--primary-100);
+}
+
+/* Improved page header with animated gradient */
+.page-header {
+  background-attachment: fixed;
+}
+
+/* Smooth scroll-linked header shrink */
+.navbar {
+  transition: height var(--transition-base), box-shadow var(--transition-base);
+}
+
+/* Mobile nav hamburger */
+.navbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: var(--text-2xl);
+  color: inherit;
+  cursor: pointer;
+  padding: var(--spacing-2);
+}
+
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: inherit;
+    flex-direction: column;
+    padding: var(--spacing-4);
+    box-shadow: var(--shadow-lg);
+    border-top: 1px solid var(--neutral-200);
+  }
+
+  .navbar-nav.active {
+    display: flex;
+  }
+
+  .navbar-gov .navbar-nav {
+    background: var(--primary-900);
+    border-top-color: rgba(255,255,255,0.1);
+  }
+}
+
+/* Tooltip styles */
+.tooltip-wrapper {
+  position: relative;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--neutral-900);
+  color: white;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  z-index: 100;
+  transition: all var(--transition-fast);
+}
+
+/* Focus visible styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+/* ============================================
+   Skeleton Loading Screens
+   ============================================ */
+.skeleton-text {
+  height: 1em;
+  background: linear-gradient(90deg, var(--neutral-200) 25%, var(--neutral-100) 50%, var(--neutral-200) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: var(--radius-sm);
+  width: 80%;
+}
+.skeleton-text-sm { width: 40%; }
+.skeleton-text-lg { width: 100%; }
+.skeleton-circle {
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--neutral-200) 25%, var(--neutral-100) 50%, var(--neutral-200) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+/* ============================================
+   Progress Bar Animations
+   ============================================ */
+.progress-bar-animated {
+  position: relative;
+  overflow: hidden;
+}
+.progress-bar-animated::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  100% { left: 100%; }
+}
+
+/* ============================================
+   Card Hover Accent Effects
+   ============================================ */
+.card-hover-accent:hover {
+  border-left: 3px solid var(--primary-500);
+}
+.card-hover-accent--pricevision:hover { border-left-color: var(--pricevision); }
+.card-hover-accent--drugwatch:hover { border-left-color: var(--drugwatch); }
+.card-hover-accent--foodscore:hover { border-left-color: var(--foodscore); }
+.card-hover-accent--ruralaccess:hover { border-left-color: var(--ruralaccess); }
+.card-hover-accent--chroniccare:hover { border-left-color: var(--chroniccare); }
+
+/* ============================================
+   Floating Label Input Style
+   ============================================ */
+.float-label {
+  position: relative;
+}
+.float-label .form-control {
+  padding-top: 1.5rem;
+}
+.float-label .form-label {
+  position: absolute;
+  top: 50%;
+  left: var(--spacing-4);
+  transform: translateY(-50%);
+  transition: all var(--transition-fast);
+  pointer-events: none;
+  color: var(--neutral-400);
+  margin: 0;
+}
+.float-label .form-control:focus ~ .form-label,
+.float-label .form-control:not(:placeholder-shown) ~ .form-label {
+  top: 0.5rem;
+  transform: translateY(0);
+  font-size: var(--text-xs);
+  color: var(--primary-600);
+}
+
+/* ============================================
+   Smooth Number Counter Animation
+   ============================================ */
+.count-up {
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+/* ============================================
+   Page Transitions
+   ============================================ */
+.page-enter {
+  animation: pageEnter 0.3s ease-out;
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+main {
+  animation: pageEnter 0.3s ease-out;
+}
+
+/* ============================================
+   Subtle Parallax for Hero Sections
+   ============================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .page-header {
+    background-attachment: fixed;
+  }
+  .hero-landing {
+    background-attachment: fixed;
+  }
+}
+
+/* ============================================
+   Badge Pill Styles
+   ============================================ */
+.badge-pill {
+  padding: var(--spacing-1) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge-outline {
+  background: transparent;
+  border: 1.5px solid currentColor;
+}
+
+/* ============================================
    Print Styles
    ============================================ */
 @media print {

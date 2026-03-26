@@ -118,7 +118,19 @@
                                 <th style="text-align: right;">Total</th>
                                 <th style="text-align: right;">Compliant</th>
                                 <th style="text-align: right;">Non-Compliant</th>
-                                <th style="min-width: 200px;">Compliance Rate</th>
+                                <th style="min-width: 200px;">
+                                    Compliance Rate
+                                    <div style="display: flex; gap: var(--spacing-3); margin-top: 4px; font-weight: 400; text-transform: none; letter-spacing: 0;">
+                                        <span style="display: flex; align-items: center; gap: 4px;">
+                                            <span style="width: 10px; height: 10px; border-radius: 2px; background: var(--success); display: inline-block;"></span>
+                                            Compliant
+                                        </span>
+                                        <span style="display: flex; align-items: center; gap: 4px;">
+                                            <span style="width: 10px; height: 10px; border-radius: 2px; background: var(--error); opacity: 0.7; display: inline-block;"></span>
+                                            Non-Compliant
+                                        </span>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -131,10 +143,11 @@
                                 <td style="text-align: right; color: var(--error);">{{ "{:,}".format(data.total - data.compliant) }}</td>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: var(--spacing-2);">
-                                        <div style="flex: 1; height: 12px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
-                                            <div style="height: 100%; width: {{ rate }}%; background: {% if rate >= 75 %}var(--success){% elif rate >= 50 %}var(--warning){% else %}var(--error){% endif %};"></div>
+                                        <div style="flex: 1; height: 14px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden; display: flex;" title="Compliant: {{ "{:.0f}".format(rate) }}% | Non-Compliant: {{ "{:.0f}".format(100 - rate) }}%">
+                                            <div style="height: 100%; width: {{ rate }}%; background: var(--success);"></div>
+                                            <div style="height: 100%; width: {{ 100 - rate }}%; background: var(--error); opacity: 0.7;"></div>
                                         </div>
-                                        <span class="badge {% if rate >= 75 %}badge-success{% elif rate >= 50 %}badge-warning{% else %}badge-error{% endif %}" style="min-width: 50px;">
+                                        <span class="badge badge-success" style="min-width: 50px;">
                                             {{ "{:.0f}".format(rate) }}%
                                         </span>
                                     </div>

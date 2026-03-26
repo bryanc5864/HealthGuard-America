@@ -21,6 +21,10 @@ _nova_service = None
 _additive_service = None
 logger = logging.getLogger(__name__)
 
+# Cache for ML enrichment results (key: barcode, value: ml fields dict)
+_ml_enrichment_cache = {}
+_ML_ENRICHMENT_CACHE_MAX = 200
+
 
 def get_nova_service():
     """Lazy load NOVA classification service."""
@@ -53,6 +57,12 @@ def get_additive_service():
 def enrich_product_with_ml(product):
     """Add ML inference results to a product dict."""
     if not product:
+        return product
+
+    # Check cache by barcode
+    barcode = str(product.get('code', ''))
+    if barcode and barcode in _ml_enrichment_cache:
+        product.update(_ml_enrichment_cache[barcode])
         return product
 
     # NOVA classification
@@ -132,6 +142,17 @@ def enrich_product_with_ml(product):
                 product['ml_additive_high_risk_count'] = len(analysis['high_risk_additives'])
         except Exception as e:
             logger.error(f"Additive scoring failed for product: {e}")
+
+    # Cache ML results for this product
+    if barcode:
+        ml_fields = {k: v for k, v in product.items() if k.startswith('ml_')}
+        if ml_fields:
+            if len(_ml_enrichment_cache) >= _ML_ENRICHMENT_CACHE_MAX:
+                # Simple eviction: clear oldest half
+                keys = list(_ml_enrichment_cache.keys())
+                for k in keys[:len(keys)//2]:
+                    del _ml_enrichment_cache[k]
+            _ml_enrichment_cache[barcode] = ml_fields
 
     return product
 
