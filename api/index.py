@@ -1,91 +1,96 @@
 """
-Vercel serverless function entry point for HealthGuard Flask app.
-Runs with minimal dependencies (Flask only) - no pandas/numpy/pyarrow.
+Vercel serverless entry point.
+Lives at project root api/index.py so Vercel doesn't treat frontend/ as a separate project.
 """
 import sys
+import os
+import types
 from pathlib import Path
 
-# Add project paths
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
-sys.path.insert(0, str(PROJECT_ROOT / 'frontend'))
+# This file is at api/index.py (project root)
+PROJECT_ROOT = str(Path(__file__).parent.parent)
+FRONTEND_DIR = os.path.join(PROJECT_ROOT, 'frontend')
 
-# Set environment to production
-import os
+sys.path.insert(0, FRONTEND_DIR)
+sys.path.insert(0, PROJECT_ROOT)
+
 os.environ['FLASK_ENV'] = 'production'
 os.environ['VERCEL'] = '1'
 
-# Stub out heavy libraries before importing app
-import types
 
-# Create lightweight pandas stub
-pd = types.ModuleType('pandas')
-pd.DataFrame = type('DataFrame', (), {
-    '__init__': lambda self, *a, **kw: None,
-    '__len__': lambda self: 0,
-    '__bool__': lambda self: False,
-    'empty': True,
-    'columns': [],
-    'head': lambda self, *a: self,
-    'to_dict': lambda self, *a: [],
-    'dropna': lambda self, **kw: self,
-    'fillna': lambda self, *a, **kw: self,
-    'sort_values': lambda self, *a, **kw: self,
-    'astype': lambda self, *a, **kw: self,
-    'value_counts': lambda self: self,
-    'unique': lambda self: [],
-    'mean': lambda self: 0,
-    'sum': lambda self: 0,
-    'get': lambda self, *a, **kw: pd.Series(),
-    '__getitem__': lambda self, *a: self,
-    '__setitem__': lambda self, *a: None,
-})
-pd.Series = type('Series', (), {
-    '__init__': lambda self, *a, **kw: None,
-    'dropna': lambda self: self,
-    'mean': lambda self: 0,
-    'sum': lambda self: 0,
-    'unique': lambda self: [],
-    'fillna': lambda self, *a, **kw: self,
-    'str': property(lambda self: self),
-    'lower': lambda self: self,
-    'contains': lambda self, *a, **kw: self,
-    'astype': lambda self, *a, **kw: self,
-    'value_counts': lambda self: {},
-    '__len__': lambda self: 0,
-})
-pd.read_csv = lambda *a, **kw: pd.DataFrame()
-pd.read_parquet = lambda *a, **kw: pd.DataFrame()
-pd.read_excel = lambda *a, **kw: pd.DataFrame()
-pd.to_numeric = lambda *a, **kw: pd.Series()
+# === Stub ALL heavy libraries that aren't installed on Vercel ===
+
+def _make_stub(name):
+    mod = types.ModuleType(name)
+    mod.__path__ = []
+    sys.modules[name] = mod
+    return mod
+
+
+# Pandas stub
+pd = _make_stub('pandas')
+
+class FakeDF:
+    empty = True
+    columns = []
+    def __init__(self, *a, **kw): pass
+    def __len__(self): return 0
+    def __bool__(self): return False
+    def head(self, *a): return self
+    def to_dict(self, *a): return []
+    def dropna(self, **kw): return self
+    def fillna(self, *a, **kw): return self
+    def sort_values(self, *a, **kw): return self
+    def astype(self, *a, **kw): return self
+    def value_counts(self): return self
+    def unique(self): return []
+    def mean(self): return 0
+    def sum(self): return 0
+    def get(self, *a, **kw): return FakeDF()
+    def __getitem__(self, *a): return self
+    def __setitem__(self, *a): pass
+    def copy(self): return self
+
+pd.DataFrame = FakeDF
+pd.Series = FakeDF
+pd.read_csv = lambda *a, **kw: FakeDF()
+pd.read_parquet = lambda *a, **kw: FakeDF()
+pd.read_excel = lambda *a, **kw: FakeDF()
+pd.to_numeric = lambda *a, **kw: FakeDF()
 pd.isna = lambda x: x is None
-sys.modules['pandas'] = pd
 
 # Numpy stub
-np = types.ModuleType('numpy')
-np.mean = lambda x, **kw: 0
-np.median = lambda x, **kw: 0
-np.std = lambda x, **kw: 0
-np.min = lambda x, **kw: 0
-np.max = lambda x, **kw: 0
-sys.modules['numpy'] = np
+np = _make_stub('numpy')
+np.mean = np.median = np.std = np.min = np.max = lambda x, **kw: 0
+np.ndarray = type('ndarray', (), {})
+np.array = lambda *a, **kw: []
+np.float32 = np.float64 = np.int32 = np.int64 = float
 
 # Pyarrow stub
-pa = types.ModuleType('pyarrow')
-pa.parquet = types.ModuleType('pyarrow.parquet')
-sys.modules['pyarrow'] = pa
-sys.modules['pyarrow.parquet'] = pa.parquet
+_make_stub('pyarrow')
+_make_stub('pyarrow.parquet')
 
-# Force frontend/ to the FRONT of sys.path so bare imports like
-# "from blueprints.public import ..." resolve from frontend/
-FRONTEND_DIR = str(PROJECT_ROOT / 'frontend')
-sys.path.insert(0, FRONTEND_DIR)
-os.chdir(FRONTEND_DIR)
+# Torch + sklearn + tensorflow stubs
+for mod_name in ['torch', 'torch.nn', 'torch.nn.functional', 'torch.optim',
+                 'torch.utils', 'torch.utils.data', 'sklearn', 'sklearn.preprocessing',
+                 'sklearn.utils', 'sklearn.utils._param_validation', 'tensorflow',
+                 'transformers', 'joblib', 'scipy', 'scipy.sparse']:
+    _make_stub(mod_name)
 
-# Use importlib to load app.py directly as a file, avoiding package resolution issues
-import importlib.util
-spec = importlib.util.spec_from_file_location("app", os.path.join(FRONTEND_DIR, "app.py"))
-app_module = importlib.util.module_from_spec(spec)
-sys.modules['app'] = app_module
-spec.loader.exec_module(app_module)
-app = app_module.app
+# Stub ML package tree
+for mod_name in ['ml', 'ml.chroniccare', 'ml.chroniccare.inference', 'ml.chroniccare.model',
+                 'ml.nova_classifier', 'ml.nova_classifier.inference',
+                 'ml.additive_scorer', 'ml.additive_scorer.inference',
+                 'ml.procedure_encoder', 'ml.procedure_encoder.inference']:
+    _make_stub(mod_name)
+
+# Dummy ML classes
+sys.modules['ml.chroniccare.inference'].ChronicCareMLService = type('ChronicCareMLService', (), {'is_loaded': False})
+sys.modules['ml.chroniccare.inference'].get_chroniccare_service = lambda: sys.modules['ml.chroniccare.inference'].ChronicCareMLService()
+sys.modules['ml.nova_classifier.inference'].NovaClassificationService = type('NovaClassificationService', (), {'load': classmethod(lambda cls: None)})
+sys.modules['ml.additive_scorer.inference'].AdditiveRiskService = type('AdditiveRiskService', (), {'load': classmethod(lambda cls: None)})
+sys.modules['ml.procedure_encoder.inference'].ProcedureMatchingService = type('ProcedureMatchingService', (), {'load': classmethod(lambda cls: None)})
+
+
+# === Load Flask app ===
+from app import app
