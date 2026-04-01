@@ -55,7 +55,7 @@ class FakeDF:
     def __or__(self, other): return self
     def __invert__(self): return self
     def __getattr__(self, name):
-        if name.startswith('_'):
+        if name.startswith('__') and name.endswith('__'):
             raise AttributeError(name)
         return self
     def __getitem__(self, *a): return self
@@ -72,7 +72,10 @@ class FakeDF:
     def items(self): return iter([])
     def iterrows(self): return iter([])
     def iteritems(self): return iter([])
+    @property
     def iloc(self): return self
+    @property
+    def loc(self): return self
 
     # Filtering
     def dropna(self, **kw): return self
