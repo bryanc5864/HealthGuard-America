@@ -128,16 +128,36 @@ ml_proc.ProcedureMatchingService = type('ProcedureMatchingService', (), {
 
 
 # === Load Flask app ===
-# Vercel's runtime poisons Python's import context via importlib.import_module
-# with dotted paths (frontend.api.index), making sys.path inserts unreliable
-# for child imports. The nuclear option: read app.py as text and exec() it
-# in a clean namespace with __file__ set correctly.
-app_path = os.path.join(FRONTEND_DIR, 'app.py')
-app_globals = {
-    '__file__': app_path,
-    '__name__': 'app',
-    '__builtins__': __builtins__,
-}
-with open(app_path) as f:
-    exec(compile(f.read(), app_path, 'exec'), app_globals)
-app = app_globals['app']
+# Verify files exist and sys.path is correct, then import directly.
+# Debug: print filesystem state (visible in Vercel function logs)
+import importlib
+
+print(f"[VERCEL DEBUG] FRONTEND_DIR = {FRONTEND_DIR}")
+print(f"[VERCEL DEBUG] sys.path[:5] = {sys.path[:5]}")
+print(f"[VERCEL DEBUG] CWD = {os.getcwd()}")
+print(f"[VERCEL DEBUG] /var/task contents = {os.listdir('/var/task/') if os.path.exists('/var/task/') else 'NOT FOUND'}")
+print(f"[VERCEL DEBUG] frontend/ exists = {os.path.exists(FRONTEND_DIR)}")
+if os.path.exists(FRONTEND_DIR):
+    print(f"[VERCEL DEBUG] frontend/ contents = {os.listdir(FRONTEND_DIR)}")
+    bp_dir = os.path.join(FRONTEND_DIR, 'blueprints')
+    print(f"[VERCEL DEBUG] blueprints/ exists = {os.path.exists(bp_dir)}")
+    if os.path.exists(bp_dir):
+        print(f"[VERCEL DEBUG] blueprints/ contents = {os.listdir(bp_dir)}")
+        bp_pub = os.path.join(bp_dir, 'public')
+        print(f"[VERCEL DEBUG] blueprints/public/ exists = {os.path.exists(bp_pub)}")
+        if os.path.exists(bp_pub):
+            print(f"[VERCEL DEBUG] blueprints/public/ contents = {os.listdir(bp_pub)}")
+
+# Force sys.path with absolute path and invalidate import caches
+sys.path.insert(0, FRONTEND_DIR)
+importlib.invalidate_caches()
+
+# Try direct import test
+try:
+    import blueprints.public
+    print(f"[VERCEL DEBUG] Direct import of blueprints.public SUCCEEDED")
+except Exception as e:
+    print(f"[VERCEL DEBUG] Direct import of blueprints.public FAILED: {e}")
+
+# Now load app.py
+from app import app
