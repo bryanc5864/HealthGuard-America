@@ -59,6 +59,13 @@ class PriceVisionService:
                 cls._cache['hospitals'] = clean_nan_records(df.to_dict('records'))
             else:
                 cls._cache['hospitals'] = []
+            # Normalize ALL CAPS text from CMS data to title case
+            for h in cls._cache['hospitals']:
+                for field in ['Facility Name', 'City/Town', 'Address']:
+                    val = h.get(field, '')
+                    if val and val == val.upper() and len(val) > 2:
+                        h[field] = val.title()
+
             # Build fast lookup index AND hospital info cache in one pass
             cls._hospital_by_id = {}
             cls._cache['hospital_info'] = {}
@@ -99,6 +106,8 @@ class PriceVisionService:
             return []  # Don't load without a filter
 
         price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+        if not price_file.exists():
+            price_file = DATA_DIR / 'processed/pricevision/prices_sample.parquet'
         if not price_file.exists():
             return []
 
@@ -189,6 +198,8 @@ class PriceVisionService:
         """Get set of hospital IDs that have MRF/pricing data (with file cache)"""
         if 'hospitals_with_mrf' not in cls._cache:
             price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+            if not price_file.exists():
+                price_file = DATA_DIR / 'processed/pricevision/prices_sample.parquet'
             # Try to load from pre-computed cache file first (instant)
             cache_file = DATA_DIR / 'processed/pricevision/hospital_npi_cache.txt'
             if cache_file.exists():
@@ -227,6 +238,8 @@ class PriceVisionService:
             return cls._cache['all_transparency']
 
         price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+        if not price_file.exists():
+            price_file = DATA_DIR / 'processed/pricevision/prices_sample.parquet'
         if not price_file.exists():
             cls._cache['all_transparency'] = {}
             return {}
@@ -357,6 +370,8 @@ class PriceVisionService:
         cache_key = f'proc_stats_{procedure_code}'
         if cache_key not in cls._cache:
             price_file = DATA_DIR / 'processed/pricevision/all_prices_normalized.parquet'
+            if not price_file.exists():
+                price_file = DATA_DIR / 'processed/pricevision/prices_sample.parquet'
             if not price_file.exists():
                 cls._cache[cache_key] = {}
                 return cls._cache[cache_key]
