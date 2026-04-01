@@ -22,10 +22,10 @@ from collections import defaultdict
 from config import Config, DevelopmentConfig
 
 app = Flask(__name__)
-if os.environ.get('VERCEL'):
+if os.environ.get('VERCEL') or os.environ.get('FLASK_ENV') == 'production':
     from config import ProductionConfig
     app.config.from_object(ProductionConfig)
-    app.config['SECRET_KEY'] = 'vercel-healthguard-secret'
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'healthguard-prod-secret')
 else:
     app.config.from_object(DevelopmentConfig)
 
