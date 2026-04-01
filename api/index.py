@@ -76,6 +76,12 @@ pa.parquet = types.ModuleType('pyarrow.parquet')
 sys.modules['pyarrow'] = pa
 sys.modules['pyarrow.parquet'] = pa.parquet
 
+# Ensure frontend dir is on path BEFORE importing app
+# On Vercel, app.py's relative path insert may not work
+FRONTEND_DIR = str(PROJECT_ROOT / 'frontend')
+if FRONTEND_DIR not in sys.path:
+    sys.path.insert(0, FRONTEND_DIR)
+
 # Import Flask app
 from frontend.app import app
 
