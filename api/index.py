@@ -181,14 +181,6 @@ sys.modules['ml.procedure_encoder.inference'].ProcedureMatchingService = type(
     'ProcedureMatchingService', (), {'load': classmethod(lambda cls: None)})
 
 
-# === Debug filesystem before loading ===
-bp_dir = os.path.join(FRONTEND_DIR, 'blueprints')
-print(f"[VERCEL] blueprints/ contents: {os.listdir(bp_dir) if os.path.exists(bp_dir) else 'MISSING'}")
-consumer_dir = os.path.join(bp_dir, 'consumer')
-print(f"[VERCEL] consumer/ exists: {os.path.exists(consumer_dir)}")
-if os.path.exists(consumer_dir):
-    print(f"[VERCEL] consumer/ contents: {os.listdir(consumer_dir)}")
-
 # === Load Flask app ===
 from app import app
 

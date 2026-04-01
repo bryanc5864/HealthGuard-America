@@ -22,7 +22,12 @@ from collections import defaultdict
 from config import Config, DevelopmentConfig
 
 app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)
+if os.environ.get('VERCEL'):
+    from config import ProductionConfig
+    app.config.from_object(ProductionConfig)
+    app.config['SECRET_KEY'] = 'vercel-healthguard-secret'
+else:
+    app.config.from_object(DevelopmentConfig)
 
 # Register blueprints
 from blueprints.consumer import public_bp
