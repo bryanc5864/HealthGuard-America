@@ -76,5 +76,12 @@ pa.parquet = types.ModuleType('pyarrow.parquet')
 sys.modules['pyarrow'] = pa
 sys.modules['pyarrow.parquet'] = pa.parquet
 
-# Now import - since FRONTEND_DIR is in sys.path, "from blueprints.public" works
-from app import app
+# Use runpy to execute app.py as a script (not as a module import).
+# This avoids Vercel's package-context contamination where importlib
+# sets __package__ to "frontend.api", breaking bare imports in app.py.
+import runpy
+app_globals = runpy.run_path(
+    os.path.join(FRONTEND_DIR, 'app.py'),
+    run_name='app'
+)
+app = app_globals['app']
