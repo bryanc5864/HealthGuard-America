@@ -127,10 +127,17 @@ ml_proc.ProcedureMatchingService = type('ProcedureMatchingService', (), {
 })
 
 
-# === Load Flask app via runpy (executes as script, no package context) ===
-import runpy
-app_globals = runpy.run_path(
-    os.path.join(FRONTEND_DIR, 'app.py'),
-    run_name='app'
-)
+# === Load Flask app ===
+# Vercel's runtime poisons Python's import context via importlib.import_module
+# with dotted paths (frontend.api.index), making sys.path inserts unreliable
+# for child imports. The nuclear option: read app.py as text and exec() it
+# in a clean namespace with __file__ set correctly.
+app_path = os.path.join(FRONTEND_DIR, 'app.py')
+app_globals = {
+    '__file__': app_path,
+    '__name__': 'app',
+    '__builtins__': __builtins__,
+}
+with open(app_path) as f:
+    exec(compile(f.read(), app_path, 'exec'), app_globals)
 app = app_globals['app']
