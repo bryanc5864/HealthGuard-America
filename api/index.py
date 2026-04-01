@@ -76,9 +76,16 @@ pa.parquet = types.ModuleType('pyarrow.parquet')
 sys.modules['pyarrow'] = pa
 sys.modules['pyarrow.parquet'] = pa.parquet
 
-# Change working directory to frontend/ so all relative imports work
-os.chdir(str(PROJECT_ROOT / 'frontend'))
-sys.path.insert(0, str(PROJECT_ROOT / 'frontend'))
+# Force frontend/ to the FRONT of sys.path so bare imports like
+# "from blueprints.public import ..." resolve from frontend/
+FRONTEND_DIR = str(PROJECT_ROOT / 'frontend')
+sys.path.insert(0, FRONTEND_DIR)
+os.chdir(FRONTEND_DIR)
 
-# Import app module directly (not as frontend.app)
-from app import app
+# Use importlib to load app.py directly as a file, avoiding package resolution issues
+import importlib.util
+spec = importlib.util.spec_from_file_location("app", os.path.join(FRONTEND_DIR, "app.py"))
+app_module = importlib.util.module_from_spec(spec)
+sys.modules['app'] = app_module
+spec.loader.exec_module(app_module)
+app = app_module.app
