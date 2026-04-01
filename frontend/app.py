@@ -25,7 +25,7 @@ app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 
 # Register blueprints
-from blueprints.public import public_bp
+from blueprints.consumer import public_bp
 from blueprints.gov import gov_bp
 
 app.register_blueprint(public_bp)
@@ -395,4 +395,4 @@ if __name__ == '__main__':
     print("")
     print("Press Ctrl+C to stop")
     print("="*60)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
