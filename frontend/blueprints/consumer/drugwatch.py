@@ -28,7 +28,7 @@ def drugwatch_home():
             'top_drugs': DrugWatchService.get_top_expensive_cached(limit=10),
         }
     data = _route_cache['home_data']
-    return render_template('public/drugwatch/home.html',
+    return render_template('consumer/drugwatch/home.html',
                           stats=data['stats'], top_drugs=data['top_drugs'])
 
 
@@ -37,7 +37,7 @@ def drugwatch_search():
     """Search for drugs"""
     query = request.args.get('q', '')
     drugs = DrugWatchService.get_us_drugs(search=query if query else None, limit=50)
-    return render_template('public/drugwatch/search.html',
+    return render_template('consumer/drugwatch/search.html',
                           query=query, drugs=drugs)
 
 
@@ -49,12 +49,12 @@ def drugwatch_compare(drug_id=None):
     if not drug_id:
         drug_id = request.args.get('drug', '')
     if not drug_id:
-        return render_template('public/drugwatch/compare.html',
+        return render_template('consumer/drugwatch/compare.html',
                               drug_id=None, drug=None, comparison=None)
     # Use cached comparison and drug detail lookups
     drug = DrugWatchService.get_drug(drug_id)
     comparison = DrugWatchService.get_cached_comparison(drug_id)
-    return render_template('public/drugwatch/compare.html',
+    return render_template('consumer/drugwatch/compare.html',
                           drug_id=drug_id, drug=drug, comparison=comparison)
 
 
@@ -63,7 +63,7 @@ def drugwatch_drug(drug_id):
     """View single drug details - cached drug and comparison"""
     drug = DrugWatchService.get_drug(drug_id)
     comparison = DrugWatchService.get_cached_comparison(drug_id)
-    return render_template('public/drugwatch/drug.html',
+    return render_template('consumer/drugwatch/drug.html',
                           drug_id=drug_id, drug=drug, comparison=comparison)
 
 

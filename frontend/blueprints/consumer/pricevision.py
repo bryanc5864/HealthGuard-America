@@ -177,7 +177,7 @@ def pricevision_home():
     stats = PriceVisionService.get_stats()
     hospitals = PriceVisionService.get_hospitals(limit=10)
     procedures = PriceVisionService.get_procedures(limit=10)
-    return render_template('public/pricevision/home.html',
+    return render_template('consumer/pricevision/home.html',
                           stats=stats, hospitals=hospitals, procedures=procedures)
 
 
@@ -262,7 +262,7 @@ def pricevision_search():
                 logger.warning(f"ML semantic matching failed: {e}")
 
     states = PriceVisionService.get_states()
-    return render_template('public/pricevision/search.html',
+    return render_template('consumer/pricevision/search.html',
                           results=results, query=query, search_type=search_type,
                           state=state, states=states,
                           ml_related_procedures=ml_related_procedures)
@@ -316,7 +316,7 @@ def pricevision_compare():
             logger.warning(f"ML price fairness analysis failed: {e}")
 
     states = PriceVisionService.get_states()
-    return render_template('public/pricevision/compare.html',
+    return render_template('consumer/pricevision/compare.html',
                           procedures=procedures, prices=prices, query=procedure,
                           state=state, states=states, fairness_data=fairness_data,
                           best_value_npi=best_value_npi)
@@ -345,7 +345,7 @@ def pricevision_hospital(npi):
         except Exception as e:
             logger.warning(f"Hospital pricing analysis failed: {e}")
 
-    return render_template('public/pricevision/hospital.html',
+    return render_template('consumer/pricevision/hospital.html',
                           hospital=hospital or {}, npi=npi, prices=prices,
                           pricing_analysis=pricing_analysis)
 
@@ -482,7 +482,7 @@ def pricevision_my_price():
                 }
 
     states = PriceVisionService.get_states()
-    return render_template('public/pricevision/my_price.html',
+    return render_template('consumer/pricevision/my_price.html',
                           procedures=procedures, prices=prices[:20],
                           query=procedure, user_price=user_price,
                           hospital_name=hospital_name,
