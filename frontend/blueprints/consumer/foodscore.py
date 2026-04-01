@@ -163,7 +163,7 @@ def foodscore_home():
     stats = FoodScoreService.get_stats()
     high_risk = FoodScoreService.get_high_risk_products(limit=10)
     categories = FoodScoreService.get_categories()
-    return render_template('public/foodscore/home.html',
+    return render_template('consumer/foodscore/home.html',
                           stats=stats, high_risk=high_risk, categories=categories)
 
 
@@ -176,7 +176,7 @@ def foodscore_search():
                                              category=category if category else None,
                                              limit=50)
     categories = FoodScoreService.get_categories()
-    return render_template('public/foodscore/search.html',
+    return render_template('consumer/foodscore/search.html',
                           query=query, products=products, categories=categories,
                           selected_category=category)
 
@@ -184,7 +184,7 @@ def foodscore_search():
 @public_bp.route('/foodscore/scan')
 def foodscore_scan():
     """Barcode scanner page"""
-    return render_template('public/foodscore/scan.html')
+    return render_template('consumer/foodscore/scan.html')
 
 
 @public_bp.route('/foodscore/product/<barcode>')
@@ -195,7 +195,7 @@ def foodscore_product(barcode):
     product = enrich_product_with_ml(product)
 
     additives = FoodScoreService.get_additives(limit=100)
-    return render_template('public/foodscore/product.html',
+    return render_template('consumer/foodscore/product.html',
                           barcode=barcode, product=product, additives=additives)
 
 
@@ -204,7 +204,7 @@ def foodscore_additives():
     """View all additives"""
     search = request.args.get('q', '')
     additives = FoodScoreService.get_additives(search=search if search else None, limit=100)
-    return render_template('public/foodscore/search.html',
+    return render_template('consumer/foodscore/search.html',
                           query=search, additives=additives, show_additives=True)
 
 
@@ -340,7 +340,7 @@ def foodscore_analyze():
             'ml_results': ml_results,
         }
 
-    return render_template('public/foodscore/analyze.html',
+    return render_template('consumer/foodscore/analyze.html',
                           ingredients=ingredients,
                           product_name=product_name,
                           serving_size=serving_size,

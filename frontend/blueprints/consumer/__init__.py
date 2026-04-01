@@ -33,7 +33,7 @@ PUBLIC_MODULES = {
 @public_bp.route('/')
 def home():
     """Public portal home page"""
-    return render_template('public/home.html', modules=PUBLIC_MODULES)
+    return render_template('consumer/home.html', modules=PUBLIC_MODULES)
 
 
 # Import module routes
