@@ -48,3 +48,8 @@ tmpclaude-*
 
 # IDE files
 .idea/
+
+# Remotion trailer
+trailer/node_modules/
+trailer/out/
+trailer/.remotion/
