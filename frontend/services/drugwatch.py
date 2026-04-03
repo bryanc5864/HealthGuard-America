@@ -111,7 +111,8 @@ class DrugWatchService:
 
     @classmethod
     def get_international_prices(cls, country=None):
-        """Get international drug prices (cached)"""
+        """Get international drug prices (cached).
+        Only loads datasets that have actual pricing columns."""
         cache_key = f'intl_{country}' if country else 'intl_all'
         if cache_key not in cls._cache:
             prices = []
@@ -123,7 +124,9 @@ class DrugWatchService:
                     df['country'] = 'Australia'
                     prices.extend(df.to_dict('records'))
 
-            if not country or country == 'canada':
+            # Canada data is a drug registry without pricing — skip for comparisons
+            # but still allow loading metadata if explicitly requested
+            if country == 'canada':
                 can_file = DATA_DIR / 'processed/drugwatch/canada_drugs.parquet'
                 if can_file.exists():
                     df = pd.read_parquet(can_file)
@@ -166,17 +169,43 @@ class DrugWatchService:
 
         drug_name_lower = drug_name.lower()
 
+        # Also match by the US drug's generic name for better coverage
+        search_terms = {drug_name_lower}
+        if us_drug:
+            generic = str(us_drug.get('generic_name', '')).strip().lower()
+            if generic and generic != 'nan':
+                search_terms.add(generic)
+
         comparisons = []
+        seen_keys = set()
         for p in intl_prices:
             drug_match = str(p.get('drug_name', p.get('name', p.get('brand_name', '')))).lower()
             generic_match = str(p.get('generic_name', '')).lower()
-            if drug_name_lower in drug_match or drug_name_lower in generic_match:
-                normalized = dict(p)
-                if 'price_per_unit_usd' in p:
-                    normalized['price'] = p['price_per_unit_usd']
-                elif 'price_usd' in p:
-                    normalized['price'] = p['price_usd']
-                comparisons.append(normalized)
+
+            matched = any(
+                term in drug_match or term in generic_match
+                for term in search_terms
+            )
+            if not matched:
+                continue
+
+            # Skip entries without any price data
+            has_price = any(p.get(col) for col in ['price_per_unit_usd', 'price_usd', 'price'])
+            if not has_price:
+                continue
+
+            # Deduplicate by country + brand
+            dedup_key = (p.get('country', ''), drug_match)
+            if dedup_key in seen_keys:
+                continue
+            seen_keys.add(dedup_key)
+
+            normalized = dict(p)
+            if 'price_per_unit_usd' in p and p['price_per_unit_usd']:
+                normalized['price'] = p['price_per_unit_usd']
+            elif 'price_usd' in p and p['price_usd']:
+                normalized['price'] = p['price_usd']
+            comparisons.append(normalized)
 
         return {
             'us': us_drug,
