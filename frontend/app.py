@@ -413,7 +413,8 @@ def preload_all():
 
 # When running under gunicorn --preload, warm caches at import time
 # so all forked workers share the pre-loaded data (copy-on-write).
-if os.environ.get('FLASK_ENV') == 'production':
+# Skip on Vercel — serverless functions should load data lazily per request.
+if os.environ.get('FLASK_ENV') == 'production' and not os.environ.get('VERCEL'):
     print("Pre-loading data for production...")
     preload_all()
 
