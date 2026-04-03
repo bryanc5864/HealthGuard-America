@@ -285,7 +285,7 @@ def pricevision_compare():
         if procedures and not procedure.isdigit():
             # User searched by name, get the actual code from first match
             first_match = procedures[0]
-            procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
+            procedure_code = first_match.get('hcpcs_code', procedure)
         prices = PriceVisionService.get_prices(procedure_code=procedure_code, state=state if state else None, limit=50)
 
         # ML price fairness analysis
@@ -387,7 +387,7 @@ def pricevision_my_price():
             if procedures and not procedure.isdigit():
                 # User searched by name, get the actual code from first match
                 first_match = procedures[0]
-                procedure_code = first_match.get('code', first_match.get('hcpcs_code', procedure))
+                procedure_code = first_match.get('hcpcs_code', procedure)
 
             # Check price fairness cache for market data
             fairness_cache_key = (str(procedure_code), str(state) if state else '')

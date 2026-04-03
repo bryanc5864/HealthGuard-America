@@ -317,6 +317,12 @@ def download_file(filepath):
     return send_from_directory(DATA_DIR, filepath)
 
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for Render"""
+    return jsonify({'status': 'ok'})
+
+
 def preload_all():
     """Pre-load data and ML models at startup for faster first requests"""
     import threading
@@ -378,11 +384,38 @@ def preload_all():
     import time
     app.config['DATA_VERSION'] = hashlib.md5(str(time.time()).encode()).hexdigest()[:8]
 
-    # Load data first (faster, more critical), then ML models
-    data_thread = threading.Thread(target=_load_data, daemon=True)
-    model_thread = threading.Thread(target=_load_models, daemon=True)
-    data_thread.start()
-    model_thread.start()
+    is_production = os.environ.get('FLASK_ENV') == 'production'
+
+    if is_production:
+        # In production (gunicorn --preload), load only critical data synchronously
+        # to warm caches before workers fork. Skip ML models to reduce startup time.
+        print("  Production mode: loading essential data only...")
+        try:
+            from services import PriceVisionService, DrugWatchService, FoodScoreService
+            PriceVisionService.get_procedures(limit=1)
+            PriceVisionService._ensure_hospital_cache()
+            PriceVisionService.get_hospitals_with_mrf()
+            DrugWatchService._get_us_drugs_df()
+            FoodScoreService._get_products_df()
+            print("  Essential data loaded!")
+        except Exception as e:
+            print(f"  Warning: Data preload failed: {e}")
+        # Load ML models in background to not block startup
+        model_thread = threading.Thread(target=_load_models, daemon=True)
+        model_thread.start()
+    else:
+        # Dev mode: load everything in background threads
+        data_thread = threading.Thread(target=_load_data, daemon=True)
+        model_thread = threading.Thread(target=_load_models, daemon=True)
+        data_thread.start()
+        model_thread.start()
+
+
+# When running under gunicorn --preload, warm caches at import time
+# so all forked workers share the pre-loaded data (copy-on-write).
+if os.environ.get('FLASK_ENV') == 'production':
+    print("Pre-loading data for production...")
+    preload_all()
 
 
 if __name__ == '__main__':

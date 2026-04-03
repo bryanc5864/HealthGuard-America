@@ -3,7 +3,7 @@ services:
     name: healthguard-america
     runtime: python
     buildCommand: pip install -r requirements-deploy.txt
-    startCommand: cd frontend && gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 2
+    startCommand: cd frontend && gunicorn app:app --bind 0.0.0.0:$PORT --timeout 180 --workers 2 --preload --worker-tmp-dir /dev/shm
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.0"
