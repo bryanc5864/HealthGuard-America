@@ -213,7 +213,9 @@ def get_mrf_urls():
 
 @app.route('/')
 def landing():
-    """Landing page with portal selector"""
+    """Landing page with portal selector (redirects to gov dashboard in DEV_MODE)"""
+    if os.environ.get('DEV_MODE', '').lower() in ('1', 'true', 'yes'):
+        return redirect(url_for('gov.home'))
     return render_template('landing.html', modules=Config.MODULES)
 
 

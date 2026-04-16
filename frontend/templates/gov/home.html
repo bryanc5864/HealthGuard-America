@@ -22,11 +22,13 @@
             </div>
             <div style="display: flex; align-items: center; gap: var(--spacing-3);">
                 <span class="badge" style="background: rgba(255,255,255,0.15); color: white; padding: var(--spacing-2) var(--spacing-4);">
-                    <i class="bi bi-person-check"></i> {{ session.get('gov_username', 'Admin') }}
+                    <i class="bi bi-person-check"></i> {{ session.get('gov_username', 'Developer') }}
                 </span>
+                {% if session.get('is_gov_user') %}
                 <a href="{{ url_for('gov.logout') }}" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-box-arrow-right"></i> Logout
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>

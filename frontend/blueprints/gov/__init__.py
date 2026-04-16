@@ -1,19 +1,24 @@
 """
 Government Portal Blueprint
 Access to: All 5 modules (PriceVision, DrugWatch, FoodScore, RuralAccess, ChronicCare)
-Authentication required
+Authentication required (unless DEV_MODE is set)
 """
+import os
 from functools import wraps
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from config import Config
 
 gov_bp = Blueprint('gov', __name__, url_prefix='/gov')
 
+_DEV_MODE = os.environ.get('DEV_MODE', '').lower() in ('1', 'true', 'yes')
+
 
 def gov_required(f):
-    """Decorator to require government authentication"""
+    """Decorator to require government authentication (bypassed in DEV_MODE)"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        if _DEV_MODE:
+            return f(*args, **kwargs)
         if not session.get('is_gov_user'):
             flash('Please log in to access the Government Portal.', 'warning')
             return redirect(url_for('gov.login', next=request.url))
