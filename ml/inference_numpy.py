@@ -320,13 +320,24 @@ class InterventionPrioritizerNumpy:
 # ============================================
 
 class ProcedureMatcherNumpy:
-    """Procedure matching using pre-computed embeddings + cosine similarity.
-    No BERT model needed — uses TF-IDF-like text matching for query encoding."""
+    """Lexical (text-based) procedure matcher used on Vercel serverless.
+
+    IMPORTANT — divergence from the PyTorch path: the Render deployment matches
+    queries with BioClinicalBERT cosine similarity over the canonical
+    embeddings. Encoding a query into that embedding space requires the BERT
+    model, which is too large for the serverless bundle, so this fallback uses
+    substring + word-overlap (Jaccard) matching instead. Results and the
+    returned "confidence" scores are therefore NOT comparable to the BERT path;
+    the scores are heuristic lexical scores, not model probabilities.
+
+    The canonical embeddings are loaded for parity of interface only and are
+    not used for scoring here (no encoder is available to embed the query).
+    """
 
     def __init__(self, embeddings_path=None):
         embeddings_path = embeddings_path or WEIGHTS_DIR / 'procedure_embeddings.npz'
         data = np.load(embeddings_path, allow_pickle=True)
-        self.embeddings = data['embeddings']  # [6405, 384]
+        self.embeddings = data['embeddings']  # [6405, 384] — unused (see class docstring)
         self.codes = data['codes'].tolist()
         self.descriptions = data['descriptions'].tolist()
 
@@ -335,8 +346,9 @@ class ProcedureMatcherNumpy:
         self._code_to_idx = {c: i for i, c in enumerate(self.codes)}
 
     def find_similar(self, query, top_k=5):
-        """Find most similar procedures by text matching.
-        Returns list of (code, description, confidence) tuples."""
+        """Find similar procedures by heuristic lexical matching.
+        Returns list of (code, description, lexical_score) tuples. The score is
+        a text-overlap heuristic, not a model confidence (see class docstring)."""
         query_lower = query.lower().strip()
         scores = []
 

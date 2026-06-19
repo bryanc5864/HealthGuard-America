@@ -39,6 +39,10 @@ if os.environ.get('VERCEL') or os.environ.get('FLASK_ENV') == 'production':
 else:
     app.config.from_object(DevelopmentConfig)
 
+# CSRF protection (must be initialized before/independent of blueprint imports)
+from extensions import csrf
+csrf.init_app(app)
+
 # Register blueprints
 from blueprints.consumer import public_bp
 from blueprints.gov import gov_bp

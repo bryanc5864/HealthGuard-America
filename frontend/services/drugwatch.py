@@ -4,6 +4,7 @@ Load drug pricing data (US and international) - OPTIMIZED
 """
 import pandas as pd
 from pathlib import Path
+from . import cache_set_bounded
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
@@ -218,9 +219,13 @@ class DrugWatchService:
         if 'stats' not in cls._cache:
             df = cls._get_us_drugs_df()
             intl = cls.get_international_prices()
+            # Report only countries we actually have comparison pricing for,
+            # derived from the loaded data (currently USA + Australia) rather
+            # than a hardcoded list that overstated coverage.
+            intl_countries = sorted({p.get('country') for p in intl if p.get('country')})
             cls._cache['stats'] = {
                 'total_us_drugs': len(df),
-                'countries': ['USA', 'Canada', 'Australia', 'UK'],
+                'countries': ['USA'] + intl_countries,
                 'total_comparisons': len(intl)
             }
         return cls._cache['stats']
@@ -242,7 +247,8 @@ class DrugWatchService:
         """Get top expensive drugs with caching to avoid re-sorting every call"""
         cache_key = f'top_expensive_{limit}'
         if cache_key not in cls._cache:
-            cls._cache[cache_key] = cls.get_top_expensive(limit=limit)
+            cache_set_bounded(cls._cache, cache_key,
+                              cls.get_top_expensive(limit=limit), 'top_expensive_', max_entries=64)
         return cls._cache[cache_key]
 
     @classmethod
@@ -253,12 +259,8 @@ class DrugWatchService:
         drug_name_lower = drug_name.strip().lower()
         cache_key = f'comparison_{drug_name_lower}'
         if cache_key not in cls._cache:
-            # Limit comparison cache to 200 entries
-            comparison_keys = [k for k in cls._cache if k.startswith('comparison_')]
-            if len(comparison_keys) >= 200:
-                oldest_key = comparison_keys[0]
-                del cls._cache[oldest_key]
-            cls._cache[cache_key] = cls.compare_prices(drug_name)
+            cache_set_bounded(cls._cache, cache_key,
+                              cls.compare_prices(drug_name), 'comparison_', max_entries=200)
         return cls._cache[cache_key]
 
     @classmethod

@@ -4,6 +4,7 @@ Food product health scoring with SNAP analysis
 """
 from flask import render_template, request, jsonify
 from . import gov_bp, gov_required
+from extensions import csrf
 import sys
 import logging
 from pathlib import Path
@@ -489,6 +490,7 @@ def foodscore_additives():
                           high_risk=high_risk_additives, medium_risk=medium_risk, low_risk=low_risk)
 
 
+@csrf.exempt
 @gov_bp.route('/api/foodscore/ocr', methods=['POST'])
 @gov_required
 def api_foodscore_ocr():

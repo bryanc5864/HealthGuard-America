@@ -2,7 +2,31 @@
 HealthGuard Frontend Configuration
 """
 import os
+import json
 from pathlib import Path
+
+
+def _load_gov_users():
+    """Government portal credentials.
+
+    Prefer secrets from the environment so they don't live in source control:
+      - GOV_USERS: a JSON object, e.g. {"admin": "..."}
+      - or per-user GOV_ADMIN_PASSWORD / GOV_ANALYST_PASSWORD
+    Falls back to dev defaults only when nothing is configured. Override these
+    in any deployed environment.
+    """
+    raw = os.environ.get('GOV_USERS')
+    if raw:
+        try:
+            users = json.loads(raw)
+            if isinstance(users, dict) and users:
+                return {str(k): str(v) for k, v in users.items()}
+        except (ValueError, TypeError):
+            pass
+    return {
+        'admin': os.environ.get('GOV_ADMIN_PASSWORD', 'healthguard2026'),
+        'analyst': os.environ.get('GOV_ANALYST_PASSWORD', 'maha2026'),
+    }
 
 class Config:
     """Base configuration"""
@@ -58,11 +82,8 @@ class Config:
         }
     }
 
-    # Government users (simple auth for MVP)
-    GOV_USERS = {
-        'admin': 'healthguard2026',
-        'analyst': 'maha2026'
-    }
+    # Government users (simple auth for MVP) — overridable via environment.
+    GOV_USERS = _load_gov_users()
 
 
 class DevelopmentConfig(Config):

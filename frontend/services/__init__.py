@@ -36,6 +36,22 @@ def clean_nan_records(records):
     return cleaned
 
 
+def cache_set_bounded(cache, key, value, prefix, max_entries=256):
+    """Store ``value`` under ``key`` in a dict ``cache``, evicting the oldest
+    entry sharing ``prefix`` (FIFO) once ``max_entries`` such keys exist.
+
+    Bounds memory growth for caches keyed by user input (e.g. procedure codes,
+    drug names), which would otherwise grow without limit in a long-running
+    process.
+    """
+    if key not in cache:
+        prefixed = [k for k in cache if isinstance(k, str) and k.startswith(prefix)]
+        if len(prefixed) >= max_entries:
+            del cache[prefixed[0]]
+    cache[key] = value
+    return value
+
+
 # Import services after VALID_US_STATES / clean_nan_records are defined
 from .pricevision import PriceVisionService
 from .drugwatch import DrugWatchService
@@ -51,4 +67,5 @@ __all__ = [
     'ChronicCareService',
     'VALID_US_STATES',
     'clean_nan_records',
+    'cache_set_bounded',
 ]

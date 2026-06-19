@@ -5,7 +5,7 @@ Load hospital and procedure pricing data - OPTIMIZED
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from . import VALID_US_STATES, clean_nan_records
+from . import VALID_US_STATES, clean_nan_records, cache_set_bounded
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
@@ -358,8 +358,7 @@ class PriceVisionService:
             if not price_file.exists():
                 price_file = DATA_DIR / 'processed/pricevision/prices_sample.parquet'
             if not price_file.exists():
-                cls._cache[cache_key] = {}
-                return cls._cache[cache_key]
+                return cache_set_bounded(cls._cache, cache_key, {}, 'proc_stats_')
 
             try:
                 filters = [('procedure_code', '==', str(procedure_code))]
@@ -408,10 +407,10 @@ class PriceVisionService:
                         'gross_count': 0,
                     })
 
-                cls._cache[cache_key] = stats
+                cache_set_bounded(cls._cache, cache_key, stats, 'proc_stats_')
             except Exception as e:
                 print(f'Error computing procedure stats for {procedure_code}: {e}')
-                cls._cache[cache_key] = {}
+                return cache_set_bounded(cls._cache, cache_key, {}, 'proc_stats_')
 
         return cls._cache[cache_key]
 

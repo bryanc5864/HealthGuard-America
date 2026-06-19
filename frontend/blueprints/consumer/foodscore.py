@@ -4,6 +4,7 @@ Food product health scoring for consumers
 """
 from flask import render_template, request, jsonify
 from . import public_bp
+from extensions import csrf
 import sys
 import logging
 from pathlib import Path
@@ -363,6 +364,7 @@ def api_stats():
     return jsonify(stats)
 
 
+@csrf.exempt
 @public_bp.route('/api/foodscore/ocr', methods=['POST'])
 def api_foodscore_ocr():
     """API: OCR nutrition label from uploaded image."""

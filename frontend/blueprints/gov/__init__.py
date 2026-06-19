@@ -4,6 +4,7 @@ Access to: All 5 modules (PriceVision, DrugWatch, FoodScore, RuralAccess, Chroni
 Authentication required (unless DEV_MODE is set)
 """
 import os
+import hmac
 from functools import wraps
 from urllib.parse import urlparse
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
@@ -50,7 +51,8 @@ def login():
         username = request.form.get('username', '')
         password = request.form.get('password', '')
 
-        if username in Config.GOV_USERS and Config.GOV_USERS[username] == password:
+        expected = Config.GOV_USERS.get(username)
+        if expected is not None and hmac.compare_digest(expected, password):
             session['is_gov_user'] = True
             session['gov_username'] = username
             flash('Welcome to the Government Portal.', 'success')
