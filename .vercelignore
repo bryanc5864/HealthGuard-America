@@ -1,0 +1,18 @@
+# Vercel runs numpy-only ML inference (see api/index.py + ml/inference_numpy.py).
+# PyTorch .pt checkpoints are never loaded here — the numpy path uses
+# ml/weights/numpy/*.npz instead. Excluding them keeps the Lambda under its size limit.
+ml/weights/*.pt
+
+# Not part of the deployed web app
+trailer/
+results/
+docs/
+backend/
+scripts/
+datadownload/
+create_sample_data.py
+test_services_comprehensive.py
+frontend/test_all_routes.py
+
+# Dev artifacts not needed at runtime
+*.ipynb
