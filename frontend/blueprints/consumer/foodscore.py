@@ -454,7 +454,7 @@ def api_foodscore_ocr():
 
     except Exception as e:
         logger.error(f"Image processing error: {e}")
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({'success': False, 'error': 'Failed to process image.'})
 
 
 def windows_ocr(image_data):

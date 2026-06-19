@@ -5,12 +5,29 @@ Authentication required (unless DEV_MODE is set)
 """
 import os
 from functools import wraps
+from urllib.parse import urlparse
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from config import Config
 
+
+def _safe_next_url(target, fallback):
+    """Only allow same-host relative redirects to prevent open-redirect attacks."""
+    if not target:
+        return fallback
+    parsed = urlparse(target)
+    # Reject absolute URLs (scheme/netloc set) — only allow local paths.
+    if parsed.scheme or parsed.netloc:
+        return fallback
+    return target
+
 gov_bp = Blueprint('gov', __name__, url_prefix='/gov')
 
-_DEV_MODE = os.environ.get('DEV_MODE', '').lower() in ('1', 'true', 'yes')
+# DEV_MODE bypasses gov authentication — never honor it in a deployed environment.
+_IS_PRODUCTION = os.environ.get('FLASK_ENV') == 'production' or os.environ.get('VERCEL')
+_DEV_MODE = (
+    not _IS_PRODUCTION
+    and os.environ.get('DEV_MODE', '').lower() in ('1', 'true', 'yes')
+)
 
 
 def gov_required(f):
@@ -37,7 +54,7 @@ def login():
             session['is_gov_user'] = True
             session['gov_username'] = username
             flash('Welcome to the Government Portal.', 'success')
-            next_url = request.args.get('next', url_for('gov.home'))
+            next_url = _safe_next_url(request.args.get('next'), url_for('gov.home'))
             return redirect(next_url)
         else:
             flash('Invalid credentials.', 'danger')

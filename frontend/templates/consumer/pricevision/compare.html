@@ -326,7 +326,7 @@ function exportToCSV() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'price_comparison_{{ query | default("export") }}.csv';
+    a.download = 'price_comparison_' + {{ (query or "export") | tojson }} + '.csv';
     a.click();
     window.URL.revokeObjectURL(url);
 }

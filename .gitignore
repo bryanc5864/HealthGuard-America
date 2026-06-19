@@ -53,3 +53,5 @@ tmpclaude-*
 trailer/node_modules/
 trailer/out/
 trailer/.remotion/
+
+.vercel

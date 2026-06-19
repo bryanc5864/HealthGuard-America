@@ -158,17 +158,20 @@ def match_procedure(procedure_name: str, top_k: int = 5) -> dict:
             "procedure_name": procedure_name,
         }
 
-    result = services.procedure.match(procedure_name, top_k=top_k)
+    result = services.procedure.match(procedure_name)
+    alternatives = []
+    if hasattr(services.procedure, "find_similar"):
+        alternatives = [
+            {"code": code, "description": desc, "score": score}
+            for code, desc, score in services.procedure.find_similar(procedure_name, top_k=top_k)
+        ]
     return {
         "input": procedure_name,
         "matched_code": result.matched_code,
         "matched_description": result.matched_description,
         "confidence": result.confidence,
-        "status": result.match_status,
-        "alternatives": [
-            {"code": m.code, "description": m.description, "score": m.score}
-            for m in result.top_matches
-        ],
+        "status": result.status,
+        "alternatives": alternatives,
     }
 
 

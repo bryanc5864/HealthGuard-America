@@ -488,7 +488,10 @@ def pricevision_analytics():
         limit = 10000  # Practical maximum
         selected_limit = 'all'
     else:
-        limit = int(limit_param)
+        try:
+            limit = int(limit_param)
+        except (ValueError, TypeError):
+            limit = 100
         selected_limit = limit
 
     stats = PriceVisionService.get_stats()

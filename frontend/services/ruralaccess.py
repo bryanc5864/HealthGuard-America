@@ -320,6 +320,9 @@ class RuralAccessService:
 
             analytics = {}
 
+            # Work on a copy so we never mutate the shared cached DataFrame
+            df = df.copy()
+
             # Shortage level distribution
             if 'hpsa_score' in df.columns:
                 def get_level(score):

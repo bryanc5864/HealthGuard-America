@@ -14,7 +14,7 @@ from pathlib import Path
 # Add frontend directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from flask import Flask, render_template, jsonify, send_from_directory, request
+from flask import Flask, render_template, jsonify, send_from_directory, request, redirect, url_for
 import csv
 import json
 import os
@@ -25,7 +25,13 @@ app = Flask(__name__)
 if os.environ.get('VERCEL') or os.environ.get('FLASK_ENV') == 'production':
     from config import ProductionConfig
     app.config.from_object(ProductionConfig)
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'healthguard-prod-secret')
+    _secret = os.environ.get('SECRET_KEY')
+    if not _secret:
+        raise RuntimeError(
+            "SECRET_KEY environment variable must be set in production "
+            "(no insecure default is used for session signing)."
+        )
+    app.config['SECRET_KEY'] = _secret
 else:
     app.config.from_object(DevelopmentConfig)
 
@@ -214,7 +220,8 @@ def get_mrf_urls():
 @app.route('/')
 def landing():
     """Landing page with portal selector (redirects to gov dashboard in DEV_MODE)"""
-    if os.environ.get('DEV_MODE', '').lower() in ('1', 'true', 'yes'):
+    _is_prod = os.environ.get('FLASK_ENV') == 'production' or os.environ.get('VERCEL')
+    if not _is_prod and os.environ.get('DEV_MODE', '').lower() in ('1', 'true', 'yes'):
         return redirect(url_for('gov.home'))
     return render_template('landing.html', modules=Config.MODULES)
 
