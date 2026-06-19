@@ -27,10 +27,14 @@ if os.environ.get('VERCEL') or os.environ.get('FLASK_ENV') == 'production':
     app.config.from_object(ProductionConfig)
     _secret = os.environ.get('SECRET_KEY')
     if not _secret:
-        raise RuntimeError(
-            "SECRET_KEY environment variable must be set in production "
-            "(no insecure default is used for session signing)."
-        )
+        # No predictable fallback — a known constant would let anyone forge
+        # signed sessions (including gov auth). Generate a strong ephemeral
+        # key so the app still boots; note that sessions won't persist across
+        # instances/cold starts until SECRET_KEY is set in the environment.
+        import secrets
+        _secret = secrets.token_hex(32)
+        print("WARNING: SECRET_KEY not set — using an ephemeral random key. "
+              "Set SECRET_KEY in the environment for stable, secure sessions.")
     app.config['SECRET_KEY'] = _secret
 else:
     app.config.from_object(DevelopmentConfig)
