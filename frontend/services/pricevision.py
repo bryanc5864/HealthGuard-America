@@ -4,26 +4,11 @@ Load hospital and procedure pricing data - OPTIMIZED
 """
 import pandas as pd
 import numpy as np
-import pyarrow.parquet as pq
 from pathlib import Path
-from . import VALID_US_STATES
+from . import VALID_US_STATES, clean_nan_records
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
-
-
-def clean_nan_records(records):
-    """Replace NaN values with None in list of dicts"""
-    cleaned = []
-    for record in records:
-        clean_record = {}
-        for key, value in record.items():
-            if pd.isna(value):
-                clean_record[key] = None
-            else:
-                clean_record[key] = value
-        cleaned.append(clean_record)
-    return cleaned
 
 
 class PriceVisionService:

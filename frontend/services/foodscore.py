@@ -3,26 +3,13 @@ FoodScore Data Service
 Load food product and additive data - OPTIMIZED
 """
 import pandas as pd
-import numpy as np
 from pathlib import Path
 import json
 
+from . import clean_nan_records
+
 BASE_DIR = Path(__file__).parent.parent.parent
 DATA_DIR = BASE_DIR / 'data'
-
-
-def clean_nan_records(records):
-    """Replace NaN values with None in list of dicts"""
-    cleaned = []
-    for record in records:
-        clean_record = {}
-        for key, value in record.items():
-            if pd.isna(value):
-                clean_record[key] = None
-            else:
-                clean_record[key] = value
-        cleaned.append(clean_record)
-    return cleaned
 
 
 class FoodScoreService:

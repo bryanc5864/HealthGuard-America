@@ -22,7 +22,21 @@ VALID_US_STATES = {
     'MP',  # Northern Mariana Islands
 }
 
-# Import services after VALID_US_STATES is defined
+import pandas as pd
+
+
+def clean_nan_records(records):
+    """Replace NaN values with None in a list of dicts (JSON-safe)."""
+    cleaned = []
+    for record in records:
+        clean_record = {}
+        for key, value in record.items():
+            clean_record[key] = None if pd.isna(value) else value
+        cleaned.append(clean_record)
+    return cleaned
+
+
+# Import services after VALID_US_STATES / clean_nan_records are defined
 from .pricevision import PriceVisionService
 from .drugwatch import DrugWatchService
 from .foodscore import FoodScoreService
@@ -35,5 +49,6 @@ __all__ = [
     'FoodScoreService',
     'RuralAccessService',
     'ChronicCareService',
-    'VALID_US_STATES'
+    'VALID_US_STATES',
+    'clean_nan_records',
 ]

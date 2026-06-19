@@ -2,7 +2,6 @@
 ChronicCare Data Service
 Load chronic disease and food environment data - OPTIMIZED
 """
-import numpy as np
 import pandas as pd
 from pathlib import Path
 from . import VALID_US_STATES
