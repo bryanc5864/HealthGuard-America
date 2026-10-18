@@ -28,12 +28,12 @@
 <div class="container container-xl">
     {% if drug %}
     <!-- Main Content -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-6);">
             <!-- Price Table -->
             <div class="card" style="overflow: hidden;">
                 <div style="background: var(--drugwatch); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-table"></i> Price by Country
                     </h3>
                 </div>
@@ -49,7 +49,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr style="background: var(--error); color: var(--paper);">
+                                <tr style="background: var(--error); color: white;">
                                     <td><strong>United States</strong></td>
                                     <td>{{ drug.get('brand_name', drug_id) }}</td>
                                     <td><strong>${{ "%.2f" | format(drug.get('avg_price_per_unit_2023', 0) | float) }}</strong></td>
@@ -104,7 +104,7 @@
                 {% set potential_savings = us_price - lowest_intl if us_price > lowest_intl else 0 %}
                 {% set savings_pct = ((us_price - lowest_intl) / us_price * 100) if us_price > 0 and us_price > lowest_intl else 0 %}
                 <div class="card" style="background: var(--success); overflow: hidden;">
-                    <div style="padding: var(--spacing-6); text-align: center; color: var(--paper);">
+                    <div style="padding: var(--spacing-6); text-align: center; color: white;">
                         <h3 style="font-size: var(--text-lg); margin-bottom: var(--spacing-2);">Potential Savings</h3>
                         <div style="font-size: var(--text-4xl); font-weight: 800; margin-bottom: var(--spacing-1);">${{ "%.2f" | format(potential_savings) }}</div>
                         <p style="margin-bottom: var(--spacing-4); opacity: 0.9;">per unit vs US price</p>
@@ -116,7 +116,7 @@
                 </div>
                 {% else %}
                 <div class="card" style="background: var(--neutral-400); overflow: hidden;">
-                    <div style="padding: var(--spacing-6); text-align: center; color: var(--paper);">
+                    <div style="padding: var(--spacing-6); text-align: center; color: white;">
                         <h3 style="font-size: var(--text-lg); margin-bottom: var(--spacing-2);">No International Data</h3>
                         <p style="margin: 0; opacity: 0.9;">International pricing comparison is not available for this drug.</p>
                     </div>
@@ -156,7 +156,7 @@
 
     {% else %}
     <!-- Drug not found -->
-    <section style="margin-top: var(--spacing-6); position: relative;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
         <div class="alert alert-warning">
             <div style="display: flex; gap: var(--spacing-3); align-items: center;">
                 <i class="bi bi-exclamation-triangle" style="font-size: var(--text-xl);"></i>

@@ -26,10 +26,10 @@
 
 <div class="container container-xl">
     <!-- Input Form -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--pricevision); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-search"></i> Enter Your Price Quote
                 </h3>
             </div>
@@ -143,7 +143,7 @@
                     <div style="margin-bottom: var(--spacing-4);">
                         <strong>{{ procedures[0].get('canonical_description', query) }}</strong>
                         <br>
-                        <span class="badge" style="background: var(--primary); color: var(--paper); margin-top: var(--spacing-1);">{{ procedures[0].get('hcpcs_code', query) }}</span>
+                        <span class="badge" style="background: var(--primary); color: white; margin-top: var(--spacing-1);">{{ procedures[0].get('hcpcs_code', query) }}</span>
                         {% if state %}<span class="badge" style="background: var(--neutral-200); color: var(--neutral-700); margin-left: var(--spacing-1);">{{ state }}</span>{% endif %}
                     </div>
                     {% endif %}
@@ -178,7 +178,7 @@
                     <div style="margin-top: var(--spacing-4);">
                         <small style="color: var(--neutral-500);">Your price is higher than {{ analysis.percentile }}% of hospitals</small>
                         <div style="height: 24px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden; margin-top: var(--spacing-2);">
-                            <div style="height: 100%; width: {{ analysis.percentile }}%; background: {% if analysis.verdict_class == 'success' %}var(--success){% elif analysis.verdict_class == 'warning' %}var(--warning){% elif analysis.verdict_class == 'danger' %}var(--error){% else %}var(--info){% endif %}; display: flex; align-items: center; justify-content: center; color: var(--paper); font-size: var(--text-sm); font-weight: 600;">
+                            <div style="height: 100%; width: {{ analysis.percentile }}%; background: {% if analysis.verdict_class == 'success' %}var(--success){% elif analysis.verdict_class == 'warning' %}var(--warning){% elif analysis.verdict_class == 'danger' %}var(--error){% else %}var(--info){% endif %}; display: flex; align-items: center; justify-content: center; color: white; font-size: var(--text-sm); font-weight: 600;">
                                 {{ analysis.percentile }}%
                             </div>
                         </div>
@@ -196,7 +196,7 @@
                 <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-hospital" style="color: var(--pricevision);"></i> Hospital Price Comparison
                 </h3>
-                <span class="badge" style="background: var(--pricevision); color: var(--paper);">{{ prices | length }} hospitals</span>
+                <span class="badge" style="background: var(--pricevision); color: white;">{{ prices | length }} hospitals</span>
             </div>
             <div style="padding: var(--spacing-5);">
                 <div class="table-container">

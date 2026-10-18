@@ -26,7 +26,7 @@
 
 <div class="container container-2xl">
     <!-- Key Metrics Row -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="stat-card stat-card--ruralaccess">
                 <div class="stat-card-value">{{ "{:,}".format(stats.total_hpsas) }}</div>
@@ -123,7 +123,7 @@
             <!-- Top States by Critical Count -->
             <div class="card" style="overflow: hidden;">
                 <div style="background: var(--error); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-geo-alt-fill"></i> Top 10 States: Critical Shortages
                     </h3>
                 </div>
@@ -241,7 +241,7 @@
                                     {% elif state.avg_score >= 15 %}
                                     <span class="badge badge-warning">High</span>
                                     {% elif state.avg_score >= 12 %}
-                                    <span class="badge" style="background: var(--info); color: var(--paper);">Moderate</span>
+                                    <span class="badge" style="background: var(--info); color: white;">Moderate</span>
                                     {% else %}
                                     <span class="badge badge-success">Low</span>
                                     {% endif %}

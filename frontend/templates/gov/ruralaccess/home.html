@@ -24,7 +24,7 @@
 
 <div class="container container-xl">
     <!-- Stats Section -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-8);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
         <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
             <div class="stat-card stat-card--ruralaccess">
                 <div class="stat-card-value">{{ "{:,}".format(stats.total_providers) if stats.total_providers else '1M+' }}</div>
@@ -104,7 +104,7 @@
     <section class="section-sm">
         <div class="card" style="border-left: 4px solid var(--ruralaccess); overflow: hidden;">
             <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-info-circle"></i> What are HPSA Designations?
                 </h3>
             </div>
@@ -152,7 +152,7 @@
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
             {% for discipline, count in stats.by_discipline.items() %}
             <div class="card" style="overflow: hidden;">
-                <div style="background: {% if 'Primary' in discipline %}var(--primary){% elif 'Dental' in discipline %}var(--ruralaccess){% else %}var(--info){% endif %}; padding: var(--spacing-3); color: var(--paper);">
+                <div style="background: {% if 'Primary' in discipline %}var(--primary){% elif 'Dental' in discipline %}var(--ruralaccess){% else %}var(--info){% endif %}; padding: var(--spacing-3); color: white;">
                     <i class="bi {% if 'Primary' in discipline %}bi-heart-pulse{% elif 'Dental' in discipline %}bi-emoji-smile{% else %}bi-brain{% endif %}"></i>
                     {{ discipline }}
                 </div>

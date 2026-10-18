@@ -27,10 +27,10 @@
 
 <div class="container container-xl">
     <!-- Search Box -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--pricevision); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-search"></i> Search
                 </h3>
             </div>
@@ -82,10 +82,10 @@
     <section>
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--pricevision); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-{% if search_type == 'hospital' %}building{% else %}clipboard2-pulse{% endif %}"></i> Results
                 </h3>
-                <span class="badge" style="background: rgba(255,255,255,0.2); color: var(--paper);">{{ results | length }} found</span>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">{{ results | length }} found</span>
             </div>
             <div style="padding: var(--spacing-5);">
                 {% if results %}
@@ -134,7 +134,7 @@
                                         <span class="badge badge-success" style="margin-left: var(--spacing-2);"><i class="bi bi-star-fill"></i> Best Match</span>
                                         {% endif %}
                                     </td>
-                                    <td><span class="badge" style="background: var(--primary); color: var(--paper); font-size: var(--text-sm);">{{ p.get('hcpcs_code', 'N/A') }}</span></td>
+                                    <td><span class="badge" style="background: var(--primary); color: white; font-size: var(--text-sm);">{{ p.get('hcpcs_code', 'N/A') }}</span></td>
                                     <td>
                                         {% if p.get('ml_match_confidence') %}
                                         <div style="display: flex; align-items: center; gap: var(--spacing-2);">
@@ -179,8 +179,8 @@
     {% if ml_related_procedures and search_type != 'hospital' %}
     <section class="section-sm">
         <div class="card" style="overflow: hidden;">
-            <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: var(--spacing-4);">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-robot"></i> AI-Suggested Related Procedures
                 </h3>
             </div>
@@ -192,7 +192,7 @@
                        class="card" style="padding: var(--spacing-4); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <strong style="color: var(--neutral-900);">{{ related.description[:50] }}{% if related.description|length > 50 %}...{% endif %}</strong>
-                            <br><span class="badge" style="background: var(--primary); color: var(--paper); margin-top: var(--spacing-1);">{{ related.code }}</span>
+                            <br><span class="badge" style="background: var(--primary); color: white; margin-top: var(--spacing-1);">{{ related.code }}</span>
                         </div>
                         <div style="text-align: right;">
                             <span class="badge {% if related.confidence >= 80 %}badge-success{% elif related.confidence >= 60 %}badge-warning{% else %}{% endif %}" style="{% if related.confidence < 60 %}background: var(--neutral-200); color: var(--neutral-700);{% endif %} font-size: var(--text-base);">

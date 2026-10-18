@@ -27,12 +27,12 @@
 <div class="container container-xl">
     {% if drug %}
     <!-- Drug Info Cards -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
             <!-- Drug Information -->
             <div class="card" style="overflow: hidden;">
                 <div style="background: var(--drugwatch); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-info-circle"></i> Drug Information
                     </h3>
                 </div>
@@ -93,7 +93,7 @@
     <section class="section-sm">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--primary); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-globe"></i> International Price Comparison
                 </h3>
             </div>
@@ -189,7 +189,7 @@
 
     {% else %}
     <!-- Drug not found -->
-    <section style="margin-top: var(--spacing-6); position: relative;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
         <div class="alert alert-warning">
             <div style="display: flex; gap: var(--spacing-3); align-items: center;">
                 <i class="bi bi-exclamation-triangle" style="font-size: var(--text-xl);"></i>

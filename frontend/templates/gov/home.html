@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="page-header">
+<div class="page-header" style="background: linear-gradient(135deg, rgba(15, 30, 60, 0.9) 0%, rgba(20, 40, 75, 0.85) 50%, rgba(30, 58, 95, 0.9) 100%), url('{{ url_for('static', filename='images/gov/trump-healthcare-cabinet.webp') }}'); background-size: cover; background-position: center;">
     <div class="page-header-content">
         <div class="breadcrumb">
             <a href="{{ url_for('landing') }}">Home</a>
@@ -21,7 +21,7 @@
                 </p>
             </div>
             <div style="display: flex; align-items: center; gap: var(--spacing-3);">
-                <span class="badge" style="background: rgba(255,255,255,0.15); color: var(--paper); padding: var(--spacing-2) var(--spacing-4);">
+                <span class="badge" style="background: rgba(255,255,255,0.15); color: white; padding: var(--spacing-2) var(--spacing-4);">
                     <i class="bi bi-person-check"></i> {{ session.get('gov_username', 'Developer') }}
                 </span>
                 {% if session.get('is_gov_user') %}
@@ -36,7 +36,7 @@
 
 <div class="container container-xl">
     <!-- Quick Stats -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
             <div class="stat-card stat-card--pricevision">
                 <div class="stat-card-value">30M</div>

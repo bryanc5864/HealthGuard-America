@@ -24,7 +24,7 @@
 
 <div class="container container-xl">
     <!-- Stats Section -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-8);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
         <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="stat-card stat-card--foodscore">
                 <div class="stat-card-value">50K+</div>
@@ -57,7 +57,7 @@
 
             <a href="{{ url_for('gov.foodscore_analyze') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none; border: 2px solid var(--foodscore);">
                 <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--foodscore); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
-                    <i class="bi bi-camera" style="font-size: var(--text-lg); color: var(--paper);"></i>
+                    <i class="bi bi-camera" style="font-size: var(--text-lg); color: white;"></i>
                 </div>
                 <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Analyze Label</h3>
                 <span class="badge badge-success" style="font-size: 10px; margin-top: var(--spacing-1);">New</span>
@@ -68,7 +68,7 @@
                     <i class="bi bi-credit-card" style="font-size: var(--text-lg); color: var(--foodscore);"></i>
                 </div>
                 <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">SNAP</h3>
-                <span class="badge" style="background: var(--primary); color: var(--paper); font-size: 10px; margin-top: var(--spacing-1);">Gov</span>
+                <span class="badge" style="background: var(--primary); color: white; font-size: 10px; margin-top: var(--spacing-1);">Gov</span>
             </a>
 
             <a href="{{ url_for('gov.foodscore_additives') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none;">
@@ -76,7 +76,7 @@
                     <i class="bi bi-exclamation-triangle" style="font-size: var(--text-lg); color: var(--foodscore);"></i>
                 </div>
                 <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Additives</h3>
-                <span class="badge" style="background: var(--primary); color: var(--paper); font-size: 10px; margin-top: var(--spacing-1);">Gov</span>
+                <span class="badge" style="background: var(--primary); color: white; font-size: 10px; margin-top: var(--spacing-1);">Gov</span>
             </a>
 
             <div class="card" style="padding: var(--spacing-4); text-align: center;">
@@ -92,10 +92,10 @@
     <section class="section-sm">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--foodscore); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-cpu"></i> ML Model Performance
                 </h3>
-                <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: var(--paper); border: none;" onclick="document.getElementById('modelHelp').classList.toggle('hidden');">
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none;" onclick="document.getElementById('modelHelp').classList.toggle('hidden');">
                     <i class="bi bi-question-circle"></i> What do these numbers mean?
                 </button>
             </div>

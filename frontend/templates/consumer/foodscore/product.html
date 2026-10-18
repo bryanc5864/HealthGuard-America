@@ -30,7 +30,7 @@
     {% set nova = product.get('nova_group', '0') | string %}
 
     <!-- Main Content -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: var(--spacing-6);">
             <!-- Left Column -->
             <div style="display: flex; flex-direction: column; gap: var(--spacing-4);">
@@ -60,7 +60,7 @@
                         {% elif nova == '3' or 'en:3' in nova %}
                         <span class="badge badge-warning">NOVA Group 3 - Processed</span>
                         {% elif nova == '2' or 'en:2' in nova %}
-                        <span class="badge" style="background: var(--info); color: var(--paper);">NOVA Group 2 - Culinary Ingredients</span>
+                        <span class="badge" style="background: var(--info); color: white;">NOVA Group 2 - Culinary Ingredients</span>
                         {% elif nova == '1' or 'en:1' in nova %}
                         <span class="badge badge-success">NOVA Group 1 - Unprocessed</span>
                         {% else %}
@@ -73,7 +73,7 @@
                             <small style="color: var(--neutral-500); display: block; margin-bottom: var(--spacing-2);">ML Classification</small>
                             {% set ml_nova = product.get('ml_nova_group') %}
                             {% set ml_conf = product.get('ml_nova_confidence', 0) %}
-                            <span class="badge {% if ml_nova == 4 %}badge-error{% elif ml_nova == 3 %}badge-warning{% elif ml_nova == 2 %}{% else %}badge-success{% endif %}" style="{% if ml_nova == 2 %}background: var(--info); color: var(--paper);{% endif %}">
+                            <span class="badge {% if ml_nova == 4 %}badge-error{% elif ml_nova == 3 %}badge-warning{% elif ml_nova == 2 %}{% else %}badge-success{% endif %}" style="{% if ml_nova == 2 %}background: var(--info); color: white;{% endif %}">
                                 ML: NOVA {{ ml_nova }}
                             </span>
                             <span class="badge {% if ml_conf >= 80 %}badge-success{% elif ml_conf >= 60 %}badge-warning{% else %}{% endif %}" style="{% if ml_conf < 60 %}background: var(--neutral-200); color: var(--neutral-700);{% endif %} margin-left: var(--spacing-1);">
@@ -115,7 +115,7 @@
                 <!-- Product Information -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--foodscore); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                             <i class="bi bi-info-circle"></i> Product Information
                         </h3>
                     </div>
@@ -183,7 +183,7 @@
                 {% if product.get('ml_additive_risks') %}
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--primary); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                             <i class="bi bi-cpu"></i> Additive Risk Analysis
                         </h3>
                         {% if product.get('ml_additive_high_risk_count', 0) > 0 %}
@@ -300,7 +300,7 @@
                 <!-- Health Insights -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--info); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                             <i class="bi bi-lightbulb"></i> Health Insights
                         </h3>
                     </div>
@@ -344,7 +344,7 @@
 
     {% else %}
     <!-- Product not found -->
-    <section style="margin-top: var(--spacing-6); position: relative;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
         <div class="alert alert-warning">
             <div style="display: flex; gap: var(--spacing-3); align-items: center;">
                 <i class="bi bi-exclamation-triangle" style="font-size: var(--text-xl);"></i>

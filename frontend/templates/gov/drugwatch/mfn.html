@@ -26,7 +26,7 @@
 
 <div class="container container-xl">
     <!-- Summary Stats -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="stat-card" style="border-left-color: var(--error);">
                 <div class="stat-card-value" style="color: var(--error);">$275.9B</div>
@@ -51,7 +51,7 @@
     <section style="margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--drugwatch); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-search"></i> Search MFN Analysis
                 </h3>
             </div>
@@ -100,7 +100,7 @@
     <section class="section-sm">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--info); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-question-circle"></i> What is MFN Pricing?
                 </h3>
             </div>
@@ -122,10 +122,10 @@
     <section class="section-sm">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--drugwatch); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-graph-up"></i> MFN Savings by Drug
                 </h3>
-                <span class="badge" style="background: rgba(255,255,255,0.2); color: var(--paper);">{{ mfn_analysis | length }} drugs shown</span>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">{{ mfn_analysis | length }} drugs shown</span>
             </div>
             <div class="table-container" style="max-height: 500px; overflow-y: auto;">
                 <table class="table" style="margin: 0;">
@@ -172,7 +172,7 @@
     <section class="section-sm">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--primary); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-globe2"></i> International Price References
                 </h3>
             </div>
@@ -196,7 +196,7 @@
                                 <td>{{ p.get('drug_name', p.get('name', p.get('brand_name', 'N/A'))) }}</td>
                                 <td>
                                     {% if p.get('country') == 'Canada' %}
-                                    <span class="badge" style="background: var(--error); color: var(--paper);">Canada</span>
+                                    <span class="badge" style="background: var(--error); color: white;">Canada</span>
                                     {% elif p.get('country') == 'Australia' %}
                                     <span class="badge" style="background: var(--warning); color: var(--neutral-900);">Australia</span>
                                     {% else %}
@@ -221,7 +221,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
             <div class="card" style="overflow: hidden;">
                 <div style="background: var(--success); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-check-circle"></i> Benefits of MFN
                     </h3>
                 </div>

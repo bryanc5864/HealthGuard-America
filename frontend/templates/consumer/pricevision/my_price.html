@@ -26,10 +26,10 @@
 
 <div class="container container-xl">
     <!-- Input Form -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--pricevision); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-search"></i> Enter Your Price
                 </h3>
             </div>
@@ -45,7 +45,7 @@
                         <div>
                             <label style="font-size: var(--text-sm); color: var(--neutral-600); display: block; margin-bottom: var(--spacing-1);">Your Quoted Price <span style="color: var(--error);">*</span></label>
                             <div style="display: flex;">
-                                <span style="background: var(--success); color: var(--paper); padding: var(--spacing-2) var(--spacing-3); border-radius: var(--radius-md) 0 0 var(--radius-md); display: flex; align-items: center;">$</span>
+                                <span style="background: var(--success); color: white; padding: var(--spacing-2) var(--spacing-3); border-radius: var(--radius-md) 0 0 var(--radius-md); display: flex; align-items: center;">$</span>
                                 <input type="text" class="form-control" name="price" value="{{ user_price }}"
                                        placeholder="e.g., 1500" required id="priceInput" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
                             </div>
@@ -139,7 +139,7 @@
                     <div class="alert alert-info" style="margin-bottom: var(--spacing-4);">
                         <strong>{{ procedures[0].get('canonical_description', query)[:60] }}{% if procedures[0].get('canonical_description', '')|length > 60 %}...{% endif %}</strong>
                         <br>
-                        <span class="badge" style="background: var(--primary); color: var(--paper); margin-top: var(--spacing-1);">{{ procedures[0].get('hcpcs_code', query) }}</span>
+                        <span class="badge" style="background: var(--primary); color: white; margin-top: var(--spacing-1);">{{ procedures[0].get('hcpcs_code', query) }}</span>
                         {% if state %}<span class="badge" style="background: var(--neutral-200); color: var(--neutral-700); margin-left: var(--spacing-1);">{{ state }}</span>{% endif %}
                     </div>
                     {% endif %}
@@ -177,7 +177,7 @@
                     <div style="padding-top: var(--spacing-4); border-top: 1px solid var(--neutral-200);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-2);">
                             <small style="color: var(--neutral-500);">Your price rank</small>
-                            <span class="badge {% if analysis.verdict_class == 'success' %}badge-success{% elif analysis.verdict_class == 'warning' %}badge-warning{% elif analysis.verdict_class == 'danger' %}badge-error{% else %}{% endif %}" style="{% if analysis.verdict_class not in ['success', 'warning', 'danger'] %}background: var(--info); color: var(--paper);{% endif %}">{{ analysis.percentile }}th percentile</span>
+                            <span class="badge {% if analysis.verdict_class == 'success' %}badge-success{% elif analysis.verdict_class == 'warning' %}badge-warning{% elif analysis.verdict_class == 'danger' %}badge-error{% else %}{% endif %}" style="{% if analysis.verdict_class not in ['success', 'warning', 'danger'] %}background: var(--info); color: white;{% endif %}">{{ analysis.percentile }}th percentile</span>
                         </div>
                         <div style="height: 12px; background: var(--neutral-200); border-radius: var(--radius-full); overflow: hidden;">
                             <div style="height: 100%; width: {{ analysis.percentile }}%; background: {% if analysis.verdict_class == 'success' %}var(--success){% elif analysis.verdict_class == 'warning' %}var(--warning){% elif analysis.verdict_class == 'danger' %}var(--error){% else %}var(--info){% endif %};"></div>

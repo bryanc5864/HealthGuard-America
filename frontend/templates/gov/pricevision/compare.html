@@ -26,7 +26,7 @@
 
 <div class="container container-xl">
     <!-- Search Card -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="card" style="padding: var(--spacing-6);">
             <form action="{{ url_for('gov.pricevision_compare') }}" method="get">
                 <div style="display: grid; grid-template-columns: 1fr 200px 150px; gap: var(--spacing-4); align-items: end;">
@@ -70,13 +70,13 @@
     {% if procedures %}
     {% set proc = procedures[0] %}
     <section class="section-sm">
-        <div class="card" style="background: var(--pricevision-light); border-left: 4px solid var(--pricevision);">
+        <div class="card" style="background: linear-gradient(135deg, var(--pricevision-light), white); border-left: 4px solid var(--pricevision);">
             <div style="padding: var(--spacing-5); display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h2 style="font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--spacing-1);">
                         {{ proc.get('canonical_description', 'Procedure') }}
                     </h2>
-                    <span class="badge" style="background: var(--pricevision); color: var(--paper);">HCPCS: {{ proc.get('hcpcs_code', query) }}</span>
+                    <span class="badge" style="background: var(--pricevision); color: white;">HCPCS: {{ proc.get('hcpcs_code', query) }}</span>
                 </div>
                 <div style="text-align: right;">
                     <span style="color: var(--neutral-500); font-size: var(--text-sm);">Comparing prices across hospitals</span>
@@ -95,7 +95,7 @@
     <section class="section-sm">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--info); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-robot"></i> ML Price Analysis
                 </h3>
             </div>
@@ -193,7 +193,7 @@
                                         {% if p.get('ml_price_cluster') == 'Fair' %}
                                         <span class="badge badge-success"><i class="bi bi-check-circle"></i> Fair</span>
                                         {% elif p.get('ml_price_cluster') == 'Discount' %}
-                                        <span class="badge" style="background: var(--info); color: var(--paper);"><i class="bi bi-tag"></i> Discount</span>
+                                        <span class="badge" style="background: var(--info); color: white;"><i class="bi bi-tag"></i> Discount</span>
                                         {% elif p.get('ml_price_cluster') == 'Overpriced' %}
                                         <span class="badge badge-error"><i class="bi bi-exclamation-triangle"></i> High</span>
                                         {% endif %}
@@ -208,7 +208,7 @@
                                     {% if p.get('hospital_npi') == best_value_npi and cash %}
                                     <span class="badge badge-success"><i class="bi bi-star-fill"></i> Best Value</span>
                                     {% elif loop.first and cash %}
-                                    <span class="badge" style="background: var(--pricevision); color: var(--paper);"><i class="bi bi-trophy"></i> Best Price</span>
+                                    <span class="badge" style="background: var(--pricevision); color: white;"><i class="bi bi-trophy"></i> Best Price</span>
                                     {% endif %}
                                 </td>
                             </tr>

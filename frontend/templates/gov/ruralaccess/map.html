@@ -29,13 +29,13 @@
 </div>
 
 <div class="container container-2xl">
-    <div style="display: grid; grid-template-columns: 320px 1fr; gap: var(--spacing-6); margin-top: var(--spacing-6); position: relative;">
+    <div style="display: grid; grid-template-columns: 320px 1fr; gap: var(--spacing-6); margin-top: -3rem; position: relative; z-index: 10;">
         <!-- Filters Sidebar -->
         <div style="display: flex; flex-direction: column; gap: var(--spacing-4);">
             <!-- Filter Card -->
             <div class="card" style="overflow: hidden;">
                 <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-funnel"></i> Filter Options
                     </h3>
                 </div>
@@ -217,7 +217,7 @@
                 '<b>State:</b> ' + (hpsa.state || 'N/A') + '<br>' +
                 '<b>HPSA Score:</b> <span style="color: ' + color + '; font-weight: bold;">' + (hpsa.hpsa_score || 'N/A') + '</span><br>' +
                 '<b>Status:</b> ' + (hpsa.status || 'N/A') + '<br>' +
-                '<a href="{{ url_for("gov.ruralaccess_hpsa", hpsa_id="__ID__") }}'.replace('__ID__', hpsa.hpsa_id) + '" style="display: inline-block; margin-top: 8px; padding: 4px 12px; background: #6f42c1; color: var(--paper); border-radius: 4px; text-decoration: none; font-size: 12px;">View Details →</a>' +
+                '<a href="{{ url_for("gov.ruralaccess_hpsa", hpsa_id="__ID__") }}'.replace('__ID__', hpsa.hpsa_id) + '" style="display: inline-block; margin-top: 8px; padding: 4px 12px; background: #6f42c1; color: white; border-radius: 4px; text-decoration: none; font-size: 12px;">View Details →</a>' +
                 '</div>'
             );
         }

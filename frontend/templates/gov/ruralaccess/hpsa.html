@@ -30,7 +30,7 @@
 
 <div class="container container-xl">
     {% if not hpsa %}
-    <section style="margin-top: var(--spacing-6); position: relative;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
         <div class="alert alert-warning">
             <i class="bi bi-exclamation-triangle"></i>
             HPSA data for ID {{ hpsa_id }} not found.
@@ -38,12 +38,12 @@
     </section>
     {% else %}
     <!-- Main Info Cards -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
             <!-- Designation Details -->
             <div class="card" style="overflow: hidden;">
                 <div style="background: var(--ruralaccess); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-file-earmark-text"></i> Designation Details
                     </h3>
                 </div>

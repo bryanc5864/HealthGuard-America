@@ -26,7 +26,7 @@
 
 <div class="container container-2xl">
     <!-- MAHA Thesis Alert -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="alert alert-info" style="margin: 0;">
             <div style="display: flex; gap: var(--spacing-4); align-items: center;">
                 <i class="bi bi-lightbulb" style="font-size: var(--text-2xl);"></i>
@@ -43,7 +43,7 @@
     <section style="margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--chroniccare); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-funnel"></i> Filter Options
                 </h3>
             </div>
@@ -105,23 +105,23 @@
                         <tbody>
                             <tr>
                                 <th style="text-align: left;">Obesity</th>
-                                <td style="background: var(--chroniccare); color: var(--paper);">1.00</td>
-                                <td style="background: var(--error); color: var(--paper);">0.82</td>
-                                <td style="background: var(--error); color: var(--paper);">0.71</td>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
+                                <td style="background: var(--error); color: white;">0.82</td>
+                                <td style="background: var(--error); color: white;">0.71</td>
                                 <td style="background: var(--warning);">0.45</td>
                             </tr>
                             <tr>
                                 <th style="text-align: left;">Diabetes</th>
-                                <td style="background: var(--error); color: var(--paper);">0.82</td>
-                                <td style="background: var(--chroniccare); color: var(--paper);">1.00</td>
-                                <td style="background: var(--error); color: var(--paper);">0.68</td>
+                                <td style="background: var(--error); color: white;">0.82</td>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
+                                <td style="background: var(--error); color: white;">0.68</td>
                                 <td style="background: var(--warning);">0.38</td>
                             </tr>
                             <tr>
                                 <th style="text-align: left;">Heart Disease</th>
-                                <td style="background: var(--error); color: var(--paper);">0.71</td>
-                                <td style="background: var(--error); color: var(--paper);">0.68</td>
-                                <td style="background: var(--chroniccare); color: var(--paper);">1.00</td>
+                                <td style="background: var(--error); color: white;">0.71</td>
+                                <td style="background: var(--error); color: white;">0.68</td>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
                                 <td style="background: var(--warning);">0.33</td>
                             </tr>
                             <tr>
@@ -129,7 +129,7 @@
                                 <td style="background: var(--warning);">0.45</td>
                                 <td style="background: var(--warning);">0.38</td>
                                 <td style="background: var(--warning);">0.33</td>
-                                <td style="background: var(--chroniccare); color: var(--paper);">1.00</td>
+                                <td style="background: var(--chroniccare); color: white;">1.00</td>
                             </tr>
                         </tbody>
                     </table>
@@ -249,10 +249,10 @@
     <section style="margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--chroniccare); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-table"></i> County-Level Correlation Data
                 </h3>
-                <span class="badge" style="background: rgba(255,255,255,0.2); color: var(--paper);">
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
                     {{ correlations | length }} counties analyzed
                 </span>
             </div>
@@ -289,7 +289,7 @@
     <section>
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--success); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-clipboard-check"></i> Policy Implications & Recommendations
                 </h3>
             </div>
@@ -297,7 +297,7 @@
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-4);">
                     <div class="card" style="border: 2px solid var(--success);">
                         <div style="background: var(--success); padding: var(--spacing-3);">
-                            <h4 style="color: var(--paper); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
                                 <i class="bi bi-check-circle"></i> High Impact Interventions
                             </h4>
                         </div>
@@ -312,7 +312,7 @@
                     </div>
                     <div class="card" style="border: 2px solid var(--primary);">
                         <div style="background: var(--primary); padding: var(--spacing-3);">
-                            <h4 style="color: var(--paper); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
                                 <i class="bi bi-bullseye"></i> Target Counties
                             </h4>
                         </div>
@@ -327,7 +327,7 @@
                     </div>
                     <div class="card" style="border: 2px solid var(--info);">
                         <div style="background: var(--info); padding: var(--spacing-3);">
-                            <h4 style="color: var(--paper); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                            <h4 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
                                 <i class="bi bi-graph-down"></i> Projected Savings
                             </h4>
                         </div>

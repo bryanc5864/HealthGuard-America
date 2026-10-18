@@ -33,7 +33,7 @@
 <div class="container container-xl">
     {% if county %}
     <!-- Health Metrics Stats -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-6);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-6);">
         <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="stat-card" style="border-left-color: var(--error);">
                 <div class="stat-card-value" style="color: var(--error);">{{ county.obesity_prevalence|default(0)|round(1) }}%</div>
@@ -135,7 +135,7 @@
     <section style="margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden;">
             <div style="background: var(--chroniccare); padding: var(--spacing-4);">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-bullseye"></i> MAHA Intervention Status
                 </h3>
             </div>
@@ -148,7 +148,7 @@
                         {% elif county.maha_intervention_tier == 'high' %}
                         <span class="badge badge-warning" style="font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">High</span>
                         {% elif county.maha_intervention_tier == 'medium' %}
-                        <span class="badge" style="background: var(--info); color: var(--paper); font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">Medium</span>
+                        <span class="badge" style="background: var(--info); color: white; font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">Medium</span>
                         {% else %}
                         <span class="badge badge-success" style="font-size: var(--text-base); padding: var(--spacing-2) var(--spacing-4);">Low</span>
                         {% endif %}
@@ -171,10 +171,10 @@
     <section style="margin-bottom: var(--spacing-6);">
         <div class="card" style="overflow: hidden; border: 2px solid var(--chroniccare);">
             <div style="background: var(--chroniccare); padding: var(--spacing-4); display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                     <i class="bi bi-cpu"></i> ML Risk Factor Breakdown
                 </h3>
-                <span class="badge" style="background: rgba(255,255,255,0.2); color: var(--paper);">ML Model Active</span>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">ML Model Active</span>
             </div>
             <div style="padding: var(--spacing-5);">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
@@ -221,7 +221,7 @@
                             {% elif ml_tier == 'High' or ml_tier == 'high' %}
                             <span class="badge badge-warning">High</span>
                             {% elif ml_tier == 'Medium' or ml_tier == 'medium' %}
-                            <span class="badge" style="background: var(--info); color: var(--paper);">Medium</span>
+                            <span class="badge" style="background: var(--info); color: white;">Medium</span>
                             {% else %}
                             <span class="badge badge-success">Low</span>
                             {% endif %}
@@ -229,7 +229,7 @@
                         <div>
                             <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-1);">ML Confidence</div>
                             {% set conf = (ml_priority.get('confidence', 0) * 100)|round(1) %}
-                            <span class="badge {% if conf >= 90 %}badge-success{% elif conf >= 70 %}{% else %}badge-warning{% endif %}" style="{% if conf >= 70 and conf < 90 %}background: var(--info); color: var(--paper);{% endif %}">{{ conf }}%</span>
+                            <span class="badge {% if conf >= 90 %}badge-success{% elif conf >= 70 %}{% else %}badge-warning{% endif %}" style="{% if conf >= 70 and conf < 90 %}background: var(--info); color: white;{% endif %}">{{ conf }}%</span>
                         </div>
                         <div>
                             <div style="font-size: var(--text-sm); color: var(--neutral-500); margin-bottom: var(--spacing-1);">MAHA Index</div>
@@ -281,7 +281,7 @@
                                     {% if rec.impact == 'High' %}
                                     <span class="badge badge-success">High Impact</span>
                                     {% elif rec.impact == 'Medium' %}
-                                    <span class="badge" style="background: var(--info); color: var(--paper);">Medium Impact</span>
+                                    <span class="badge" style="background: var(--info); color: white;">Medium Impact</span>
                                     {% else %}
                                     <span class="badge" style="background: var(--neutral-200); color: var(--neutral-700);">Low Impact</span>
                                     {% endif %}
@@ -356,7 +356,7 @@
     {% endif %}
 
     {% else %}
-    <section style="margin-top: var(--spacing-6); position: relative;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
         <div class="alert alert-warning">
             <i class="bi bi-exclamation-triangle"></i>
             No data found for FIPS code: {{ fips }}

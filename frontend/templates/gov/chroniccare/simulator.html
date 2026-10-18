@@ -26,7 +26,7 @@
 </div>
 
 <div class="container container-2xl">
-    <form action="{{ url_for('gov.chroniccare_simulator') }}" method="get" style="margin-top: var(--spacing-6); position: relative;">
+    <form action="{{ url_for('gov.chroniccare_simulator') }}" method="get" style="margin-top: -2rem; position: relative; z-index: 10;">
         <input type="hidden" name="submitted" value="1">
 
         <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--spacing-6);">
@@ -35,7 +35,7 @@
                 <!-- Food Environment Features -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--success); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
                             <i class="bi bi-basket"></i> Food Environment (5 features)
                         </h3>
                     </div>
@@ -80,7 +80,7 @@
                 <!-- Healthcare Access Features -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--primary); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
                             <i class="bi bi-hospital"></i> Healthcare Access (4 features)
                         </h3>
                     </div>
@@ -162,7 +162,7 @@
                 <!-- Behavioral Features -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--error); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
                             <i class="bi bi-person-walking"></i> Behavioral Factors (4 features)
                         </h3>
                     </div>
@@ -199,7 +199,7 @@
                 <!-- Demographics & Disease Burden -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--neutral-600); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-sm); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-sm); font-weight: 600; margin: 0;">
                             <i class="bi bi-people"></i> Demographics & Scores (3 features)
                         </h3>
                     </div>
@@ -238,7 +238,7 @@
                 <!-- Prediction Results -->
                 <div class="card" style="overflow: hidden; border: 2px solid var(--chroniccare); position: sticky; top: var(--spacing-4);">
                     <div style="background: var(--chroniccare); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                             <i class="bi bi-robot"></i> ML Predictions
                         </h3>
                     </div>

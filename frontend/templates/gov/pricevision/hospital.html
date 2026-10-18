@@ -25,13 +25,13 @@
 </div>
 
 <div class="container container-xl">
-    <div style="display: grid; grid-template-columns: 350px 1fr; gap: var(--spacing-6); margin-top: var(--spacing-6); position: relative;">
+    <div style="display: grid; grid-template-columns: 350px 1fr; gap: var(--spacing-6); margin-top: -3rem; position: relative; z-index: 10;">
         <!-- Left Column -->
         <div>
             <!-- Hospital Information -->
             <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
                 <div style="background: var(--pricevision); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-building"></i> Hospital Information
                     </h3>
                 </div>
@@ -84,7 +84,7 @@
             {% if pricing_analysis %}
             <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
                 <div style="background: var(--info); padding: var(--spacing-4);">
-                    <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                    <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-robot"></i> ML Pricing Analysis
                     </h3>
                 </div>
@@ -168,7 +168,7 @@
                     <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
                         <i class="bi bi-currency-dollar" style="color: var(--pricevision);"></i> Procedure Prices
                     </h3>
-                    <span class="badge" style="background: var(--pricevision); color: var(--paper);">{{ prices | length }} procedures</span>
+                    <span class="badge" style="background: var(--pricevision); color: white;">{{ prices | length }} procedures</span>
                 </div>
                 <div style="padding: var(--spacing-4);">
                     {% if prices %}
@@ -191,7 +191,7 @@
                                             {{ p.get('description', 'N/A')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}
                                         </span>
                                     </td>
-                                    <td><span class="badge" style="background: var(--primary); color: var(--paper);">{{ p.get('procedure_code', 'N/A') }}</span></td>
+                                    <td><span class="badge" style="background: var(--primary); color: white;">{{ p.get('procedure_code', 'N/A') }}</span></td>
                                     <td style="font-size: var(--text-sm); color: var(--neutral-500);">{{ p.get('payer_name', 'N/A') }}</td>
                                     <td>${{ "{:,.0f}".format(p.get('gross_charge', 0) | float) if p.get('gross_charge') else 'N/A' }}</td>
                                     <td style="color: var(--success); font-weight: 600;">${{ "{:,.0f}".format(p.get('cash_price', 0) | float) if p.get('cash_price') else 'N/A' }}</td>

@@ -26,14 +26,14 @@
 
 <div class="container container-xl">
     <!-- Main Content -->
-    <section style="margin-top: var(--spacing-6); position: relative;">
+    <section style="margin-top: -3rem; position: relative; z-index: 10;">
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: var(--spacing-6);">
             <!-- Left Column -->
             <div style="display: flex; flex-direction: column; gap: var(--spacing-4);">
                 <!-- Hospital Information -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--pricevision); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                             <i class="bi bi-info-circle"></i> Hospital Information
                         </h3>
                     </div>
@@ -67,7 +67,7 @@
                 {% if pricing_analysis %}
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--info); padding: var(--spacing-4);">
-                        <h3 style="color: var(--paper); font-size: var(--text-base); font-weight: 600; margin: 0;">
+                        <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
                             <i class="bi bi-robot"></i> AI Pricing Insights
                         </h3>
                     </div>
@@ -146,7 +146,7 @@
                                 {% for p in prices %}
                                 <tr>
                                     <td style="max-width: 200px;">{{ p.get('description', 'N/A')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}</td>
-                                    <td><span class="badge" style="background: var(--primary); color: var(--paper);">{{ p.get('procedure_code', 'N/A') }}</span></td>
+                                    <td><span class="badge" style="background: var(--primary); color: white;">{{ p.get('procedure_code', 'N/A') }}</span></td>
                                     <td style="font-size: var(--text-sm); color: var(--neutral-500);">{{ p.get('payer_name', 'N/A') }}</td>
                                     <td>${{ "{:,.0f}".format(p.get('gross_charge', 0) | float) if p.get('gross_charge') else 'N/A' }}</td>
                                     <td style="color: var(--success); font-weight: 600;">${{ "{:,.0f}".format(p.get('cash_price', 0) | float) if p.get('cash_price') else 'N/A' }}</td>

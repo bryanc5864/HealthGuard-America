@@ -24,7 +24,7 @@
 
 <div class="container container-xl">
     <!-- Stats Section -->
-    <section style="margin-top: var(--spacing-6); position: relative; margin-bottom: var(--spacing-8);">
+    <section style="margin-top: -3rem; position: relative; z-index: 10; margin-bottom: var(--spacing-8);">
         <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="stat-card stat-card--pricevision">
                 <div class="stat-card-value">{{ "{:,}".format(stats.total_hospitals | default(5400)) }}</div>
@@ -64,7 +64,7 @@
 
             <a href="{{ url_for('gov.pricevision_my_price') }}" class="card" style="padding: var(--spacing-4); text-align: center; text-decoration: none; border: 2px solid var(--pricevision);">
                 <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--pricevision); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-2);">
-                    <i class="bi bi-calculator" style="font-size: var(--text-lg); color: var(--paper);"></i>
+                    <i class="bi bi-calculator" style="font-size: var(--text-lg); color: white;"></i>
                 </div>
                 <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Check My Price</h3>
                 <span class="text-muted" style="font-size: var(--text-xs);">Is your quote fair?</span>
@@ -75,7 +75,7 @@
                     <i class="bi bi-graph-up" style="font-size: var(--text-lg); color: var(--pricevision);"></i>
                 </div>
                 <h3 style="font-size: var(--text-sm); font-weight: 600; color: var(--neutral-900); margin: 0;">Analytics</h3>
-                <span class="badge" style="background: var(--primary); color: var(--paper); font-size: 10px; margin-top: var(--spacing-1);">Gov Only</span>
+                <span class="badge" style="background: var(--primary); color: white; font-size: 10px; margin-top: var(--spacing-1);">Gov Only</span>
             </a>
 
             <div class="card" style="padding: var(--spacing-4); text-align: center;">

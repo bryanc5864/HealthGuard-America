@@ -2,128 +2,120 @@
 
 {% block title %}HealthGuard America - Healthcare Transparency Platform{% endblock %}
 
-{% block navbar %}
-<header class="masthead">
-    <div class="masthead-inner">
-        <a href="{{ url_for('landing') }}" class="masthead-brand">
-            <i class="bi bi-shield-plus"></i> HealthGuard America
-        </a>
-        <ul class="masthead-links">
-            <li><a href="{{ url_for('public.home') }}">Public portal</a></li>
-            <li><a href="{{ url_for('gov.home') }}">Government portal</a></li>
-            <li><a href="/dashboard">Data dashboard</a></li>
-            <li><a href="/hospitals">Hospital files</a></li>
-        </ul>
-    </div>
-</header>
-{% endblock %}
+{% block navbar %}{% endblock %}
 
 {% block footer %}{% endblock %}
 
 {% block content %}
 <div class="hero hero-landing page-enter">
     <div class="hero-content hero-content--centered">
+        <!-- Logo and Title -->
         <div class="hero-logo-wrap">
-            <p class="hero-kicker">
-                <span>Healthcare transparency and analytics</span>
-                <span>Public data from CMS, CDC, HRSA, FDA and Open Food Facts</span>
-            </p>
+            <div class="hero-logo-icon">
+                <i class="bi bi-shield-plus"></i>
+            </div>
             <h1 class="hero-title">
-                What American health care costs, and who it reaches.
+                HealthGuard <span>America</span>
             </h1>
             <p class="hero-subtitle hero-subtitle--centered">
-                HealthGuard America collects hospital price files, drug prices, food
-                composition data and provider-shortage designations into one place,
-                so that consumers and policy makers can compare them directly.
+                Healthcare transparency and analytics platform for informed health decisions.
             </p>
-            <div class="hero-actions">
-                <a href="{{ url_for('public.home') }}" class="btn btn-primary btn-lg">
-                    Open the public portal <i class="bi bi-arrow-right"></i>
-                </a>
-                <a href="{{ url_for('gov.login') }}" class="btn btn-lg">
-                    Government sign-in <i class="bi bi-lock"></i>
-                </a>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="hero-stats hero-stats--centered">
+            <div class="hero-stat">
+                <div class="hero-stat-value">30M</div>
+                <div class="hero-stat-label">Price Records</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">5,400</div>
+                <div class="hero-stat-label">Hospitals</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">50K+</div>
+                <div class="hero-stat-label">Food Products</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">3,142</div>
+                <div class="hero-stat-label">Counties</div>
             </div>
         </div>
 
-        <div>
-            <div class="hero-stats hero-stats--centered">
-                <div class="hero-stat">
-                    <div class="hero-stat-value">30M</div>
-                    <div class="hero-stat-label">Price records</div>
+        <!-- Portal Selection Cards -->
+        <div class="portal-cards">
+            <!-- Public Portal -->
+            <a href="{{ url_for('public.home') }}" class="portal-card">
+                <div class="portal-card-icon">
+                    <i class="bi bi-people-fill"></i>
                 </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">5,400</div>
-                    <div class="hero-stat-label">Hospitals</div>
+                <h2 class="portal-card-title">Public Portal</h2>
+                <p class="portal-card-description">
+                    Free access to healthcare transparency tools. Compare hospital prices,
+                    find affordable medications, and check food health scores.
+                </p>
+                <div class="portal-card-modules">
+                    <span class="portal-card-badge">
+                        <i class="bi bi-currency-dollar"></i> PriceVision
+                    </span>
+                    <span class="portal-card-badge">
+                        <i class="bi bi-capsule"></i> DrugWatch
+                    </span>
+                    <span class="portal-card-badge">
+                        <i class="bi bi-basket"></i> FoodScore
+                    </span>
                 </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">50K+</div>
-                    <div class="hero-stat-label">Food products</div>
+                <div class="btn btn-white btn-sm portal-card-btn">
+                    Enter Public Portal <i class="bi bi-arrow-right"></i>
                 </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">3,142</div>
-                    <div class="hero-stat-label">Counties</div>
+            </a>
+
+            <!-- Government Portal -->
+            <a href="{{ url_for('gov.home') }}" class="portal-card">
+                <div class="portal-card-icon">
+                    <i class="bi bi-building-fill"></i>
                 </div>
+                <h2 class="portal-card-title">Government Portal</h2>
+                <p class="portal-card-description">
+                    Full access to all analytics modules including healthcare access mapping
+                    and chronic disease data. Authentication required.
+                </p>
+                <div class="portal-card-modules">
+                    <span class="portal-card-badge">All Public Tools</span>
+                    <span class="portal-card-badge">
+                        <i class="bi bi-geo-alt"></i> RuralAccess
+                    </span>
+                    <span class="portal-card-badge">
+                        <i class="bi bi-activity"></i> ChronicCare
+                    </span>
+                </div>
+                <div class="btn btn-white btn-sm portal-card-btn">
+                    Enter Gov Portal <i class="bi bi-lock"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- Data Sources -->
+        <div class="data-sources">
+            <p class="data-sources-label">POWERED BY OFFICIAL DATA SOURCES</p>
+            <div class="data-sources-list">
+                <span>CMS</span>
+                <span>CDC PLACES</span>
+                <span>HRSA</span>
+                <span>FDA</span>
+                <span>Open Food Facts</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Two portals -->
-<div class="portal-cards">
-    <a href="{{ url_for('public.home') }}" class="portal-card">
-        <p class="portal-card-kicker">Open to everyone. No sign-in.</p>
-        <h2 class="portal-card-title">Public Portal</h2>
-        <p class="portal-card-description">
-            Compare hospital prices, find affordable medications and check food
-            health scores.
-        </p>
-        <div class="portal-card-modules">
-            <div class="portal-card-badge"><strong>PriceVision</strong> <span>Hospital procedure prices</span></div>
-            <div class="portal-card-badge"><strong>DrugWatch</strong> <span>US and international drug prices</span></div>
-            <div class="portal-card-badge"><strong>FoodScore</strong> <span>NOVA and additive scores for food products</span></div>
-        </div>
-        <span class="btn btn-primary portal-card-btn">
-            Enter Public Portal <i class="bi bi-arrow-right"></i>
-        </span>
-    </a>
-
-    <a href="{{ url_for('gov.home') }}" class="portal-card">
-        <p class="portal-card-kicker">Authentication required.</p>
-        <h2 class="portal-card-title">Government Portal</h2>
-        <p class="portal-card-description">
-            All public tools plus healthcare access mapping and chronic disease
-            analytics for agencies and policy staff.
-        </p>
-        <div class="portal-card-modules">
-            <div class="portal-card-badge"><strong>All public tools</strong> <span>PriceVision, DrugWatch, FoodScore</span></div>
-            <div class="portal-card-badge"><strong>RuralAccess</strong> <span>HPSA shortage areas by county</span></div>
-            <div class="portal-card-badge"><strong>ChronicCare</strong> <span>Chronic disease patterns and interventions</span></div>
-        </div>
-        <span class="btn portal-card-btn">
-            Enter Gov Portal <i class="bi bi-lock"></i>
-        </span>
-    </a>
-</div>
-
-<div class="data-sources">
-    <p class="data-sources-label">Data sources</p>
-    <div class="data-sources-list">
-        <a href="https://data.cms.gov/" target="_blank" rel="noopener">CMS</a>
-        <a href="https://www.cdc.gov/places/" target="_blank" rel="noopener">CDC PLACES</a>
-        <a href="https://data.hrsa.gov/" target="_blank" rel="noopener">HRSA</a>
-        <span>FDA</span>
-        <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>
-    </div>
-</div>
-
-<!-- Modules -->
+<!-- Features Section -->
 <section class="section section--white">
-    <div class="container container-2xl">
+    <div class="container container-xl">
         <div class="section-header">
-            <h2 class="section-title">The five modules</h2>
+            <h2 class="section-title">Five Powerful Modules</h2>
             <p class="section-subtitle">
-                Three are open to the public; RuralAccess and ChronicCare are limited to the government portal.
+                Comprehensive healthcare transparency tools for consumers and policy makers
             </p>
         </div>
 
@@ -133,7 +125,9 @@
                 <div class="module-card-image">
                     <img width="800" height="568" loading="lazy" src="{{ url_for('static', filename='images/pricevision/UF-Health-Shands-Hospital-North-Tower.webp') }}" alt="Hospital">
                     <div class="module-card-overlay"></div>
-                    <div class="module-card-icon"><i class="bi bi-currency-dollar"></i></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
                 </div>
                 <div class="module-card-body">
                     <h3 class="module-card-title">PriceVision</h3>
@@ -142,12 +136,12 @@
                         See cash prices, insurance rates, and price variations.
                     </p>
                     <ul class="module-card-features">
-                        <li>30M price records</li>
-                        <li>All 50 states covered</li>
-                        <li>Cash and negotiated rates side by side</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 30M price records</li>
+                        <li><i class="bi bi-check-circle-fill"></i> All 50 states coverage</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Real-time price comparison</li>
                     </ul>
                     <a href="{{ url_for('public.pricevision_home') }}" class="btn btn-pricevision">
-                        Explore prices <i class="bi bi-arrow-right"></i>
+                        Explore Prices <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
@@ -157,21 +151,23 @@
                 <div class="module-card-image">
                     <img width="750" height="504" loading="lazy" src="{{ url_for('static', filename='images/drugwatch/Pill-Bottles.webp') }}" alt="Medications">
                     <div class="module-card-overlay"></div>
-                    <div class="module-card-icon"><i class="bi bi-capsule"></i></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-capsule"></i>
+                    </div>
                 </div>
                 <div class="module-card-body">
                     <h3 class="module-card-title">DrugWatch</h3>
                     <p class="module-card-description">
-                        Track drug prices across the US, Australia, and Canada.
+                        Track drug prices across US, Australia, and Canada.
                         See Medicare spending and international price comparisons.
                     </p>
                     <ul class="module-card-features">
-                        <li>500+ high-spending drugs</li>
-                        <li>International comparisons</li>
-                        <li>$276B Medicare spending data</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 500+ high-spending drugs</li>
+                        <li><i class="bi bi-check-circle-fill"></i> International comparisons</li>
+                        <li><i class="bi bi-check-circle-fill"></i> $276B Medicare spending data</li>
                     </ul>
                     <a href="{{ url_for('public.drugwatch_home') }}" class="btn btn-drugwatch">
-                        Compare drugs <i class="bi bi-arrow-right"></i>
+                        Compare Drugs <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
@@ -181,7 +177,9 @@
                 <div class="module-card-image">
                     <img width="800" height="517" loading="lazy" src="{{ url_for('static', filename='images/foodscore/The-Top-6-Healthy-Foods-to-Put-In-Your-Shopping-Cart_142142188.webp') }}" alt="Healthy Food">
                     <div class="module-card-overlay"></div>
-                    <div class="module-card-icon"><i class="bi bi-basket"></i></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-basket"></i>
+                    </div>
                 </div>
                 <div class="module-card-body">
                     <h3 class="module-card-title">FoodScore</h3>
@@ -190,22 +188,27 @@
                         NOVA classification, additive risks, and MAHA scores.
                     </p>
                     <ul class="module-card-features">
-                        <li>50,000+ products analyzed</li>
-                        <li>ML-assisted NOVA classification</li>
-                        <li>Additive risk scoring</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 50,000+ products analyzed</li>
+                        <li><i class="bi bi-check-circle-fill"></i> ML-powered NOVA classification</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Additive risk scoring</li>
                     </ul>
                     <a href="{{ url_for('public.foodscore_home') }}" class="btn btn-foodscore">
-                        Check foods <i class="bi bi-arrow-right"></i>
+                        Check Foods <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
+        </div>
 
+        <!-- Bottom row - centered -->
+        <div class="module-grid-bottom">
             <!-- RuralAccess -->
             <div class="module-card module-card--ruralaccess">
                 <div class="module-card-image">
                     <img width="800" height="533" loading="lazy" src="{{ url_for('static', filename='images/ruralaccess/rural-hospitals.webp') }}" alt="Rural Healthcare">
                     <div class="module-card-overlay"></div>
-                    <div class="module-card-icon"><i class="bi bi-geo-alt"></i></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
                 </div>
                 <div class="module-card-body">
                     <h3 class="module-card-title">RuralAccess</h3>
@@ -214,12 +217,12 @@
                         Identify underserved communities and access gaps.
                     </p>
                     <ul class="module-card-features">
-                        <li>1M+ healthcare providers</li>
-                        <li>14,631 shortage designations</li>
-                        <li>2,956 counties analyzed</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 1M+ healthcare providers</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 14,631 shortage designations</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 2,956 counties analyzed</li>
                     </ul>
                     <a href="{{ url_for('gov.ruralaccess_home') }}" class="btn btn-ruralaccess">
-                        View map <i class="bi bi-lock"></i>
+                        View Map <i class="bi bi-lock"></i>
                     </a>
                 </div>
             </div>
@@ -229,40 +232,23 @@
                 <div class="module-card-image">
                     <img width="800" height="386" loading="lazy" src="{{ url_for('static', filename='images/chroniccare/healthcare.webp') }}" alt="Healthcare Analytics">
                     <div class="module-card-overlay"></div>
-                    <div class="module-card-icon"><i class="bi bi-activity"></i></div>
+                    <div class="module-card-icon">
+                        <i class="bi bi-activity"></i>
+                    </div>
                 </div>
                 <div class="module-card-body">
                     <h3 class="module-card-title">ChronicCare</h3>
                     <p class="module-card-description">
                         Analyze chronic disease patterns by county.
-                        ML-assisted intervention prioritization and MAHA index.
+                        ML-powered intervention prioritization and MAHA index.
                     </p>
                     <ul class="module-card-features">
-                        <li>1.2M CDC records</li>
-                        <li>3,142 counties analyzed</li>
-                        <li>Intervention recommendations</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 1.2M CDC records</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 3,142 counties analyzed</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Intervention recommendations</li>
                     </ul>
                     <a href="{{ url_for('gov.chroniccare_home') }}" class="btn btn-chroniccare">
-                        Analyze data <i class="bi bi-lock"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Data access -->
-            <div class="module-card">
-                <div class="module-card-body">
-                    <h3 class="module-card-title">Raw data</h3>
-                    <p class="module-card-description">
-                        Every file behind the modules is listed in the data dashboard,
-                        with hospital machine-readable files and MRF URLs available for download.
-                    </p>
-                    <ul class="module-card-features">
-                        <li>Inventory by module</li>
-                        <li>Hospital MRF downloads</li>
-                        <li>JSON API endpoints</li>
-                    </ul>
-                    <a href="/dashboard" class="btn">
-                        Open data dashboard <i class="bi bi-arrow-right"></i>
+                        Analyze Data <i class="bi bi-lock"></i>
                     </a>
                 </div>
             </div>
@@ -272,20 +258,18 @@
 
 <!-- CTA Section -->
 <section class="cta-section">
-    <div class="container container-2xl cta-content">
-        <div>
-            <h2 class="cta-title">Make America Healthy Again</h2>
-            <p class="cta-text">
-                Transparency is the first step toward a healthier nation.
-                Start exploring healthcare data today.
-            </p>
-        </div>
+    <div class="container container-lg cta-content">
+        <h2 class="cta-title">Make America Healthy Again</h2>
+        <p class="cta-text">
+            Transparency is the first step toward a healthier nation.
+            Start exploring healthcare data today.
+        </p>
         <div class="cta-buttons">
             <a href="{{ url_for('public.home') }}" class="btn btn-white btn-lg">
-                Get started free <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-right-circle"></i> Get Started Free
             </a>
             <a href="{{ url_for('gov.login') }}" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-building"></i> Government access
+                <i class="bi bi-building"></i> Government Access
             </a>
         </div>
     </div>
@@ -300,36 +284,37 @@
                     <i class="bi bi-shield-check"></i> HealthGuard America
                 </div>
                 <p class="footer-description">
-                    Transparent healthcare data for Americans: hospital prices, drug costs,
-                    food safety scores, and access to care across the nation.
+                    Empowering Americans with transparent healthcare data.
+                    Compare hospital prices, drug costs, food safety scores,
+                    and access to care across the nation.
                 </p>
             </div>
 
             <div>
                 <h4 class="footer-title">Public Tools</h4>
                 <ul class="footer-links">
-                    <li><a href="{{ url_for('public.pricevision_home') }}">PriceVision</a></li>
-                    <li><a href="{{ url_for('public.drugwatch_home') }}">DrugWatch</a></li>
-                    <li><a href="{{ url_for('public.foodscore_home') }}">FoodScore</a></li>
+                    <li><a href="{{ url_for('public.pricevision_home') }}"><i class="bi bi-currency-dollar"></i> PriceVision</a></li>
+                    <li><a href="{{ url_for('public.drugwatch_home') }}"><i class="bi bi-capsule"></i> DrugWatch</a></li>
+                    <li><a href="{{ url_for('public.foodscore_home') }}"><i class="bi bi-basket"></i> FoodScore</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="footer-title">Government Portal</h4>
                 <ul class="footer-links">
-                    <li><a href="{{ url_for('gov.home') }}">Gov Dashboard</a></li>
-                    <li><a href="{{ url_for('gov.ruralaccess_home') }}">RuralAccess</a></li>
-                    <li><a href="{{ url_for('gov.chroniccare_home') }}">ChronicCare</a></li>
+                    <li><a href="{{ url_for('gov.home') }}"><i class="bi bi-building"></i> Gov Dashboard</a></li>
+                    <li><a href="{{ url_for('gov.ruralaccess_home') }}"><i class="bi bi-geo-alt"></i> RuralAccess</a></li>
+                    <li><a href="{{ url_for('gov.chroniccare_home') }}"><i class="bi bi-activity"></i> ChronicCare</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="footer-title">Data Sources</h4>
                 <ul class="footer-links">
-                    <li><a href="https://data.cms.gov/" target="_blank" rel="noopener">CMS Hospital Data</a></li>
-                    <li><a href="https://www.cdc.gov/places/" target="_blank" rel="noopener">CDC PLACES</a></li>
-                    <li><a href="https://data.hrsa.gov/" target="_blank" rel="noopener">HRSA HPSA</a></li>
-                    <li><a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a></li>
+                    <li><a href="https://data.cms.gov/" target="_blank">CMS Hospital Data</a></li>
+                    <li><a href="https://www.cdc.gov/places/" target="_blank">CDC PLACES</a></li>
+                    <li><a href="https://data.hrsa.gov/" target="_blank">HRSA HPSA</a></li>
+                    <li><a href="https://world.openfoodfacts.org/" target="_blank">Open Food Facts</a></li>
                 </ul>
             </div>
         </div>
