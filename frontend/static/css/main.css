@@ -348,8 +348,7 @@ a:hover { color: var(--primary-800); }
 
 .hero-landing {
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(15, 29, 47, 0.96) 0%, rgba(22, 43, 69, 0.94) 55%, rgba(107, 21, 32, 0.92) 100%),
-              url('/static/images/trump-healthcare.webp');
+  background: linear-gradient(135deg, rgba(15, 29, 47, 0.96) 0%, rgba(22, 43, 69, 0.94) 55%, rgba(107, 21, 32, 0.92) 100%);
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
