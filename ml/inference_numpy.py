@@ -47,16 +47,14 @@ def conv1d(x, weight, bias, padding='same'):
 
 
 def conv1d_batch(x, weight, bias):
-    """Optimized 1D convolution for batch processing."""
+    """1D convolution (PyTorch cross-correlation, 'same' padding) for a batch."""
     batch, c_in, length = x.shape
     c_out, _, kernel = weight.shape
     pad = kernel // 2
     x_pad = np.pad(x, ((0, 0), (0, 0), (pad, pad)))
-    out = np.zeros((batch, c_out, length))
-    for b in range(batch):
-        for co in range(c_out):
-            for ci in range(c_in):
-                out[b, co] += np.correlate(x_pad[b, ci], weight[co, ci], mode='valid')
+    out = np.zeros((batch, c_out, length), dtype=np.result_type(x, weight))
+    for k in range(kernel):
+        out += np.einsum('bcl,oc->bol', x_pad[:, :, k:k + length], weight[:, :, k], optimize=True)
     return out + bias.reshape(1, -1, 1)
 
 
@@ -141,6 +139,9 @@ class NovaClassifierNumpy:
         logits = self.forward(input_ids)
         logits = logits / self.temperature
         probs = softmax(logits, axis=1)[0]
+        return self._to_result(ingredients_text, probs)
+
+    def _to_result(self, ingredients_text, probs):
         nova_group = int(np.argmax(probs)) + 1
         confidence = float(probs[nova_group - 1])
 
@@ -159,6 +160,16 @@ class NovaClassifierNumpy:
             'probabilities': probs.tolist(),
             'is_confident': confidence >= 0.6,
         })()
+
+    def classify_batch(self, ingredients_list, chunk_size=128):
+        """Classify several products; mirrors the PyTorch NovaClassifier API."""
+        results = []
+        for start in range(0, len(ingredients_list), chunk_size):
+            chunk = ingredients_list[start:start + chunk_size]
+            input_ids = np.stack([self.tokenizer.encode(text) for text in chunk])
+            probs = softmax(self.forward(input_ids) / self.temperature, axis=1)
+            results.extend(self._to_result(text, p) for text, p in zip(chunk, probs))
+        return results
 
 
 # ============================================
