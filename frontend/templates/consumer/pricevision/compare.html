@@ -148,7 +148,7 @@
                                 <a href="{{ url_for('public.pricevision_hospital', npi=p.get('hospital_npi', '')) }}" class="text-decoration-none">
                                     <strong>{{ p.get('hospital_name', p.get('hospital_npi', 'Unknown')) }}</strong>
                                 </a>
-                                <br><small class="text-muted">{{ p.get('description', '')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}</small>
+                                <br><small class="text-muted">{{ (p.get('description') or '')[:40] }}{% if (p.get('description') or '')|length > 40 %}...{% endif %}</small>
                                 <div class="d-md-none mt-1">
                                     <small class="text-muted">{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</small>
                                 </div>

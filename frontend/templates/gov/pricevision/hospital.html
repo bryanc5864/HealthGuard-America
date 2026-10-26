@@ -188,7 +188,7 @@
                                 <tr>
                                     <td>
                                         <span title="{{ p.get('description', 'N/A') }}">
-                                            {{ p.get('description', 'N/A')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}
+                                            {{ (p.get('description') or 'N/A')[:40] }}{% if (p.get('description') or '')|length > 40 %}...{% endif %}
                                         </span>
                                     </td>
                                     <td><span class="badge" style="background: var(--primary); color: white;">{{ p.get('procedure_code', 'N/A') }}</span></td>

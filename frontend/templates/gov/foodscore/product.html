@@ -1,6 +1,6 @@
 {% extends "gov/base_gov.html" %}
 
-{% block title %}{{ product.get('product_name', 'Product Details')[:30] if product else 'Product Not Found' }} - FoodScore{% endblock %}
+{% block title %}{{ (product.get('product_name') or 'Product Details')[:30] if product else 'Product Not Found' }} - FoodScore{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
@@ -17,7 +17,7 @@
         </div>
         <h1 class="page-title">
             <i class="bi bi-box-seam"></i>
-            {% if product %}{{ product.get('product_name', 'Unknown Product')[:50] }}{% if (product.get('product_name') or '')|length > 50 %}...{% endif %}{% else %}Product Not Found{% endif %}
+            {% if product %}{{ (product.get('product_name') or 'Unknown Product')[:50] }}{% if (product.get('product_name') or '')|length > 50 %}...{% endif %}{% else %}Product Not Found{% endif %}
         </h1>
         <p class="page-subtitle">
             {% if product %}Barcode: {{ barcode }}{% else %}No product data available{% endif %}
@@ -35,7 +35,7 @@
         <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="stat-card" style="border-left-color: {% if score >= 70 %}var(--success){% elif score >= 40 %}var(--warning){% else %}var(--error){% endif %};">
                 <div class="stat-card-value" style="color: {% if score >= 70 %}var(--success){% elif score >= 40 %}var(--warning){% else %}var(--error){% endif %};">{{ score }}</div>
-                <div class="stat-card-label">MAHA Health Score</div>
+                <div class="stat-card-label">Health Index Score</div>
             </div>
             <div class="stat-card" style="border-left-color: {% if nova == '4' or 'en:4' in nova %}var(--error){% elif nova == '3' or 'en:3' in nova %}var(--warning){% elif nova == '2' or 'en:2' in nova %}var(--info){% elif nova == '1' or 'en:1' in nova %}var(--success){% else %}var(--neutral-400){% endif %};">
                 <div class="stat-card-value" style="color: {% if nova == '4' or 'en:4' in nova %}var(--error){% elif nova == '3' or 'en:3' in nova %}var(--warning){% elif nova == '2' or 'en:2' in nova %}var(--info){% elif nova == '1' or 'en:1' in nova %}var(--success){% else %}var(--neutral-500){% endif %};">
@@ -63,7 +63,7 @@
             <div class="card" style="overflow: hidden; margin-bottom: var(--spacing-4);">
                 <div style="background: {% if score >= 70 %}var(--success){% elif score >= 40 %}var(--warning){% else %}var(--error){% endif %}; padding: var(--spacing-4);">
                     <h3 style="color: white; font-size: var(--text-base); font-weight: 600; margin: 0;">
-                        <i class="bi bi-heart-pulse"></i> MAHA Health Score
+                        <i class="bi bi-heart-pulse"></i> Health Index Score
                     </h3>
                 </div>
                 <div style="padding: var(--spacing-5); text-align: center;">

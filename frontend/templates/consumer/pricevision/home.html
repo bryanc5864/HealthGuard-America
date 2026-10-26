@@ -142,7 +142,7 @@
                         {% for p in procedures[:5] %}
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-3); background: var(--neutral-50); border-radius: var(--radius-lg);">
                             <div>
-                                <div style="font-weight: 600;">{{ p.get('canonical_description', 'Unknown')[:40] }}...</div>
+                                <div style="font-weight: 600;">{{ (p.get('canonical_description') or 'Unknown')[:40] }}...</div>
                                 <div style="font-size: var(--text-sm); color: var(--neutral-500);">Code: {{ p.get('hcpcs_code', 'N/A') }}</div>
                             </div>
                             <a href="{{ url_for('public.pricevision_compare', procedure=p.get('hcpcs_code', '')) }}" class="btn btn-sm btn-primary">

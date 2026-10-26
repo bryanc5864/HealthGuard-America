@@ -145,7 +145,7 @@
                             <tbody>
                                 {% for p in prices %}
                                 <tr>
-                                    <td style="max-width: 200px;">{{ p.get('description', 'N/A')[:40] }}{% if p.get('description', '')|length > 40 %}...{% endif %}</td>
+                                    <td style="max-width: 200px;">{{ (p.get('description') or 'N/A')[:40] }}{% if (p.get('description') or '')|length > 40 %}...{% endif %}</td>
                                     <td><span class="badge" style="background: var(--primary); color: white;">{{ p.get('procedure_code', 'N/A') }}</span></td>
                                     <td style="font-size: var(--text-sm); color: var(--neutral-500);">{{ p.get('payer_name', 'N/A') }}</td>
                                     <td>${{ "{:,.0f}".format(p.get('gross_charge', 0) | float) if p.get('gross_charge') else 'N/A' }}</td>

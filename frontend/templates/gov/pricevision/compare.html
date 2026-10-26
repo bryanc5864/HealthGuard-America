@@ -181,7 +181,7 @@
                                     <a href="{{ url_for('gov.pricevision_hospital', npi=p.get('hospital_npi', '')) }}" style="font-weight: 600; color: var(--neutral-900);">
                                         {{ p.get('hospital_name', p.get('hospital_npi', 'Unknown')) }}
                                     </a>
-                                    <br><small style="color: var(--neutral-500);">{{ p.get('description', '')[:35] }}{% if p.get('description', '')|length > 35 %}...{% endif %}</small>
+                                    <br><small style="color: var(--neutral-500);">{{ (p.get('description') or '')[:35] }}{% if (p.get('description') or '')|length > 35 %}...{% endif %}</small>
                                 </td>
                                 <td>{{ p.get('hospital_city', '') }}{% if p.get('hospital_state') %}, {{ p.get('hospital_state') }}{% endif %}</td>
                                 <td style="color: var(--neutral-500);">${{ "{:,.0f}".format(gross) if gross else 'N/A' }}</td>

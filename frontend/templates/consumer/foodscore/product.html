@@ -16,7 +16,7 @@
             <span>Product Details</span>
         </div>
         <h1 class="page-title">
-            <i class="bi bi-box-seam"></i> {{ product.get('product_name', 'Product Details')[:50] if product else 'Product Not Found' }}
+            <i class="bi bi-box-seam"></i> {{ (product.get('product_name') or 'Product Details')[:50] if product else 'Product Not Found' }}
         </h1>
         <p class="page-subtitle">
             Barcode: {{ barcode }}
@@ -37,14 +37,14 @@
                 <!-- Product Image Placeholder -->
                 <div class="card" style="padding: var(--spacing-6); text-align: center;">
                     <i class="bi bi-box-seam" style="font-size: 5rem; color: var(--neutral-400);"></i>
-                    <p style="margin-top: var(--spacing-2); color: var(--neutral-500); font-size: var(--text-sm);">{{ product.get('product_name', 'Product')[:30] }}</p>
+                    <p style="margin-top: var(--spacing-2); color: var(--neutral-500); font-size: var(--text-sm);">{{ (product.get('product_name') or 'Product')[:30] }}</p>
                 </div>
 
                 <!-- Health Score -->
                 <div class="card" style="overflow: hidden;">
                     <div style="background: var(--neutral-100); padding: var(--spacing-4); border-bottom: 1px solid var(--neutral-200);">
                         <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">
-                            <i class="bi bi-heart-pulse" style="color: var(--foodscore);"></i> MAHA Health Score
+                            <i class="bi bi-heart-pulse" style="color: var(--foodscore);"></i> Health Index Score
                         </h3>
                     </div>
                     <div style="padding: var(--spacing-5); text-align: center;">
